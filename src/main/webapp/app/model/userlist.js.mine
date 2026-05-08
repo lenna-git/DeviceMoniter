@@ -1,0 +1,18 @@
+
+
+Ext.define('AM.model.userlist',{
+    extend:'Ext.data.Model',
+    fields:[
+        {name:'id',type:'Long'},
+        {name:'username',type:'String'},
+        {name:'email',type:'String'},
+        {name:'sn',type:'String'},
+        {name:'contactway',type:'String'},
+        {name:'operation',type:'String'},
+
+
+
+
+
+    ]
+})

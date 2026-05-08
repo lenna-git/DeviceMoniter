@@ -1,0 +1,11 @@
+
+
+Ext.define('AM.model.userlist',{
+    extend:'Ext.data.Model',
+    fields:[
+
+        {name:'sysusername',type:'String'},
+        {name:'sysuserrole',type:'Long'},
+
+    ]
+})
