@@ -12,7 +12,8 @@ Ext.define('AM.view.Center',{
         'AM.view.user.testlist1',
         'AM.view.device.devicelist',
         'AM.view.user.DeviceRecordView',
-        'AM.view.user.xinjianyonghujiluwindow'
+        'AM.view.user.xinjianyonghujiluwindow',
+        // 'AM.view.user.userwindow'
         //右側有哪些頁面，都要放在這裏
     ],
     items:[

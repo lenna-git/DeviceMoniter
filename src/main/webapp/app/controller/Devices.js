@@ -78,7 +78,7 @@ Ext.define('AM.controller.Devices', {
         ref: 'deviceoptextfield'
     }],
     onPanelRendered: function() {
-        console.log('The panel was rrrrendered');
+        // console.log('The panel was rrrrendered');
     },
     ondevcxbuttonclick: function (){
         var searchxh = this.getDevicequeryxhtextfield().getValue();

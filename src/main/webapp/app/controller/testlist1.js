@@ -33,6 +33,7 @@ Ext.define('AM.controller.testlist1', {
         selector: 'viewport > userlist1 > testlistgrid',
         ref:'testgrid'
     }],
+
     onPanelRendered: function() {
         console.log('testlist1 panel was rendered11112222');
     },

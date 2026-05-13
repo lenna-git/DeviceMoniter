@@ -10,13 +10,14 @@ Ext.application({
     controllers: [
 
 
-        'Users','testlist1','LoginController','mainpageltbarController','mainpageltbarController1','Devices','DeviceRecordController',
-        'xinjianyonghujilucontroller','Devicewindow'
+        'Users','testlist1','LoginController','mainpageltbarController',
+        'mainpageltbarController1','Devices','DeviceRecordController',
+        'xinjianyonghujilucontroller','Devicewindow','UserwindowController'
 
 
     ],
 
     launch: function() {
-        console.log('launch app');
+        // console.log('launch app');
     }
 });

@@ -9,7 +9,9 @@ Ext.define('AM.controller.Users', {
             'viewport > panel > centerpage > userlist1 > testlistgrid':{
                 cellclick:this.onsysusergridcellclick,
             },
-
+            'viewport > panel > centerpage > userlist1 > button[action=xj]': {
+                click: this.onxjbuttioncick
+            },
         });
     },
     models:['userlist'],
@@ -24,13 +26,20 @@ Ext.define('AM.controller.Users', {
 
 
     onPanelRendered: function() {
-        console.log('The panel was rendered');
+        // console.log('The userlistpanel was rendered');
     },
-
+    onxjbuttioncick:function (){
+        console.log('userlistpanel onxjbuttioncick ');
+        var userwindow = Ext.widget({
+            xtype: 'userwindow'
+        });
+        console.log('userwindow created:', userwindow);
+        userwindow.show();
+    },
     onsysusergridcellclick: function (view, cell, colIdx, record, row, rowIdx, e){
-        console.log('11111');
+        console.log('onsysusergridcellclick');
         // var role = SYS_USER.sysuserrole;
-                var role = record.get('sysuserrole');//获取点击对应行的用户角色
+        var role = record.get('sysuserrole');//获取点击对应行的用户角色
         console.log(role);
         if(role===1){
             //管理员
@@ -50,7 +59,6 @@ Ext.define('AM.controller.Users', {
             if(colIdx===2){
                 sysuserrecordwindow.show();
             }
-
 
 
         }
