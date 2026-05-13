@@ -85,6 +85,20 @@ public class SysUserController {
         return responseObj;
     }
 
+    @PostMapping("/createuser")
+    public Map<String, Object> createUser(@RequestBody SysUser sysUser) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            sysUserRepository.save(sysUser);
+            responseObj.put("success", true);
+            responseObj.put("message", "用户创建成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "用户创建失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
     public boolean isSuccess() {
         return success;
     }
