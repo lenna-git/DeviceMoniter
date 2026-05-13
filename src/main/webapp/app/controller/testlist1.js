@@ -74,7 +74,7 @@ Ext.define('AM.controller.testlist1', {
     },
 
     onscbuttioncick:function (){
-        //删除id为120的记录
+
         Ext.Ajax.request({
             url:'useraction/delusers/'+"120",
             method:'DELETE',

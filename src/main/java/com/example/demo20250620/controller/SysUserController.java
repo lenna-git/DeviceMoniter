@@ -105,6 +105,25 @@ public class SysUserController {
         return responseObj;
     }
 
+    @DeleteMapping("/deleteuser")
+    public Map<String, Object> deleteUser(@RequestParam Long id) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            if (!sysUserRepository.existsById(id)) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户不存在");
+                return responseObj;
+            }
+            sysUserRepository.deleteById(id);
+            responseObj.put("success", true);
+            responseObj.put("message", "用户删除成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "用户删除失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
     public boolean isSuccess() {
         return success;
     }
