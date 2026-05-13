@@ -9,7 +9,7 @@ Ext.define('AM.view.Center',{
     renderTo: Ext.getBody(),
 
     requires:[
-        'AM.view.user.testlist1',
+        'AM.view.user.userlist',
         'AM.view.device.devicelist',
         'AM.view.user.DeviceRecordView',
         'AM.view.user.xinjianyonghujiluwindow',

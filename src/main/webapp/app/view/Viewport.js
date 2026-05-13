@@ -2,7 +2,7 @@ Ext.define('AM.view.Viewport',{
     extend:'Ext.container.Viewport',
 
     requires:[
-        'AM.view.user.testlist1',
+        'AM.view.user.userlist',
         'AM.view.device.devicelist',
         'AM.view.device.devicexzwindow',
         'AM.view.user.sysuserrecordwindow',
