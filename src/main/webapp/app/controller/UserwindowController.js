@@ -57,19 +57,22 @@ Ext.define('AM.controller.UserwindowController', {
                 'Content-Type': 'application/json'
             },
             success: function(response, opts) {
-                Ext.Msg.alert('提示', '保存成功');
+                var result = Ext.decode(response.responseText);
+                if (result.success) {
+                    Ext.Msg.alert('提示', result.message);
+                    win.close();
+                    var grid = Ext.ComponentQuery.query('viewport centerpage userlist1 testlistgrid')[0];
+                    if (grid) {
+                        grid.getStore().reload();
+                    }
+                } else {
+                    Ext.Msg.alert('提示', result.message);
+                }
             },
             failure: function(response, opts) {
                 Ext.Msg.alert('提示', '保存失败');
             }
         });
-
-        win.close();
-
-        var grid = Ext.ComponentQuery.query('viewport centerpage userlist1 testlistgrid')[0];
-        if (grid) {
-            grid.getStore().reload();
-        }
     }
 
 });

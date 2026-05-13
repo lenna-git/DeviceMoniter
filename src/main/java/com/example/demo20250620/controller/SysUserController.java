@@ -89,6 +89,12 @@ public class SysUserController {
     public Map<String, Object> createUser(@RequestBody SysUser sysUser) {
         Map<String, Object> responseObj = new HashMap<>();
         try {
+            Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
+            if (existingUser.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户名已存在");
+                return responseObj;
+            }
             sysUserRepository.save(sysUser);
             responseObj.put("success", true);
             responseObj.put("message", "用户创建成功");
