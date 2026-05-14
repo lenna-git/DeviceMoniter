@@ -10,8 +10,8 @@ Ext.application({
     controllers: [
 
 
-        'Users','LoginController','mainpageltbarController',
-        'mainpageltbarController1','Devices','DeviceRecordController',
+        'Users','LoginController','mainpageltbarController1',
+        'Devices','DeviceRecordController',
         'xinjianyonghujilucontroller','Devicewindow','UserwindowController'
 
 

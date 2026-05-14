@@ -23,6 +23,6 @@ Ext.define('AM.controller.mainpageltbarController1', {
         // console.log('onViewready');
         var selModel = ltbar.getSelectionModel();
         var rootNode = ltbar.getRootNode();
-        selModel.select(rootNode.findChild('id', 'main-user', true));
+        selModel.select(rootNode.findChild('id', 'main-device', true));
     }
 });
