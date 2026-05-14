@@ -15,13 +15,18 @@ Ext.define('AM.view.device.devicexzwindow',{
         hidden:true,
         name:'deviceid',
     },{
-        xtype: 'textfield',
+        xtype: 'combo',
         fieldLabel:'芯片',
-        name:'devicexp',
-        allowBlank:false,//不允许为空
+        name:'devcpu_id',
+        allowBlank:false,
         width:300,
         labelWidth: 80,
         margin: '10 0 10 60',
+        store: Ext.create('AM.store.devcpustore'),
+        displayField: 'cpuname',
+        valueField: 'id',
+        queryMode: 'local',
+        emptyText: '请选择芯片型号'
     },{
         xtype: 'combo',
         fieldLabel:'类型',
@@ -30,9 +35,7 @@ Ext.define('AM.view.device.devicexzwindow',{
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
-        store: {
-            type: 'devtypestore'
-        },
+        store: Ext.create('AM.store.devtypestore'),
         displayField: 'typename',
         valueField: 'id',
         queryMode: 'local',

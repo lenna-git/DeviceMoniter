@@ -22,8 +22,8 @@ Ext.define('AM.controller.Devicewindow', {
         selector: 'devicexzwindow > textfield[name=deviceid]',
         ref: 'deviceidtextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=devicexp]',
-        ref: 'devicexptextfield'
+        selector: 'devicexzwindow > combo[name=devcpu_id]',
+        ref: 'devcpuselector'
     },{
         selector: 'devicexzwindow > combo[name=devtype_id]',
         ref: 'devtypeselector'
@@ -67,8 +67,8 @@ Ext.define('AM.controller.Devicewindow', {
         var deviceidtextfield =this.getDeviceidtextfield();
         var deviceid = deviceidtextfield.getValue();
 
-        var devicexptextfield =this.getDevicexptextfield();
-        var devicexp = devicexptextfield.getValue();
+        var devcpuselector = this.getDevcpuselector();
+        var devcpuId = devcpuselector.getValue();
 
         var devtypeselector = this.getDevtypeselector();
         var devtypeId = devtypeselector.getValue();
@@ -115,7 +115,7 @@ Ext.define('AM.controller.Devicewindow', {
                 url:'deviceaction/updatedevicebyid/'+ida,
                 method:'PUT',
                 jsonData: {
-                    devicexp:devicexp,
+                    devCpu: { id: devcpuId },
                     devType: { id: devtypeId },
                     devicexh:devicexh,
                     devicecs:devicecs,
@@ -150,7 +150,7 @@ Ext.define('AM.controller.Devicewindow', {
                 url:'deviceaction/createdevice',
                 method:'post',
                 jsonData: {
-                    devicexp:devicexp,
+                    devCpu: { id: devcpuId },
                     devType: { id: devtypeId },
                     devicexh:devicexh,
                     devicecs:devicecs,

@@ -3,7 +3,7 @@
 Ext.define('AM.model.devicelist',{
     extend:'Ext.data.Model',
     fields:[
-        {name:'devicexp',type:'String'},//芯片
+        {name:'devCpu.cpuname',type:'String'},//芯片
         {name:'devType.typename',type:'String'},//类型
         {name:'devicexh',type:'String'},//型号
         {name:'devicecs',type:'String'},//厂商

@@ -85,7 +85,7 @@ public class DeviceController {
     public void updateDevice(@PathVariable Long id, @RequestBody Device device){
         Optional<Device> device1 = deviceRepository.findById(id);
         Device device2 =device1.orElseGet(() -> new Device());
-        device2.setDevicexp(device.getDevicexp());
+        device2.setDevCpu(device.getDevCpu());
         device2.setDevType(device.getDevType());
         device2.setDevicexh(device.getDevicexh());
         device2.setDevicecs(device.getDevicecs());

@@ -13,9 +13,11 @@ public class Device {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String devicexp;//设备芯片
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "devcpu_id")
+    private DevCpu devCpu;//设备芯片
     
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "devtype_id")
     private DevType devType;//设备类型
     
@@ -41,12 +43,12 @@ public class Device {
 
 
 
-    public String getDevicexp() {
-        return devicexp;
+    public DevCpu getDevCpu() {
+        return devCpu;
     }
 
-    public void setDevicexp(String devicexp) {
-        this.devicexp = devicexp;
+    public void setDevCpu(DevCpu devCpu) {
+        this.devCpu = devCpu;
     }
 
     public DevType getDevType() {

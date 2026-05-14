@@ -94,16 +94,13 @@ Ext.define('AM.view.device.devicelistgrid',{
     columns:[{
         text:'芯片',
         align:'center',
-        dataIndex:'devicexp',
+        dataIndex:'devCpu.cpuname',
         flex:1,
     },{
         text:'类型',
         align:'center',
         dataIndex:'devType.typename',
         flex:1,
-        // renderer: function(value) {
-        //     return value ? value.typename : '';
-        // }
     },{
         text:'型号',
         align:'center',
