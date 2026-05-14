@@ -124,6 +124,31 @@ public class SysUserController {
         return responseObj;
     }
 
+    @PutMapping("/updateuser")
+    public Map<String, Object> updateUser(@RequestBody SysUser sysUser) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            if (!sysUserRepository.existsById(sysUser.getId())) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户不存在");
+                return responseObj;
+            }
+            Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
+            if (existingUser.isPresent() && !existingUser.get().getId().equals(sysUser.getId())) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户名已存在");
+                return responseObj;
+            }
+            sysUserRepository.save(sysUser);
+            responseObj.put("success", true);
+            responseObj.put("message", "用户更新成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "用户更新失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
     public boolean isSuccess() {
         return success;
     }

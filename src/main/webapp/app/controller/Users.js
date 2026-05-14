@@ -15,6 +15,9 @@ Ext.define('AM.controller.Users', {
             'viewport > panel > centerpage > userlist1 > button[action=sc]': {
                 click: this.onscbuttioncick
             },
+            'viewport > panel > centerpage > userlist1 > button[action=update]': {
+                click: this.onupdatebuttioncick
+            },
         });
     },
     models:['userlist'],
@@ -102,6 +105,31 @@ Ext.define('AM.controller.Users', {
                 });
             }
         });
+    },
+    onupdatebuttioncick: function() {
+        console.log('userlistpanel onupdatebuttioncick');
+        var grid = this.getTestgrid();
+        var selection = grid.getSelectionModel().getSelection();
+        
+        if (selection.length === 0) {
+            Ext.Msg.alert('提示', '请先选择要修改的用户');
+            return;
+        }
+        
+        var record = selection[0];
+        
+        var userwindow = Ext.widget({
+            xtype: 'userwindow',
+            title: '修改用户'
+        });
+        
+        var form = userwindow.down('form') || userwindow;
+        form.down('textfield[name=id]').setValue(record.get('id'));
+        form.down('textfield[name=sysusername]').setValue(record.get('sysusername'));
+        form.down('textfield[name=sysuserpassword]').setValue(record.get('sysuserpassword'));
+        form.down('combo[name=sysuserrole]').setValue(record.get('sysuserrole'));
+        
+        userwindow.show();
     }
 
 });

@@ -25,6 +25,7 @@ Ext.define('AM.controller.UserwindowController', {
         console.log('save button clicked');
         var win = button.up('window');
         
+        var idField = win.down('textfield[name=id]');
         var sysusernameField = win.down('textfield[name=sysusername]');
         var sysuserpasswordField = win.down('textfield[name=sysuserpassword]');
         var sysuserroleField = win.down('combo[name=sysuserrole]');
@@ -34,6 +35,7 @@ Ext.define('AM.controller.UserwindowController', {
             return;
         }
 
+        var idVal = idField ? idField.getValue() : null;
         var sysusernameVal = sysusernameField.getValue();
         var sysuserpasswordVal = sysuserpasswordField.getValue();
         var sysuserroleVal = sysuserroleField.getValue();
@@ -49,9 +51,18 @@ Ext.define('AM.controller.UserwindowController', {
             sysuserrole: sysuserroleVal
         };
 
+        var url = 'sysuseraction/createuser';
+        var method = 'post';
+
+        if (idVal) {
+            url = 'sysuseraction/updateuser';
+            method = 'put';
+            rec.id = idVal;
+        }
+
         Ext.Ajax.request({
-            url: 'sysuseraction/createuser',
-            method: 'post',
+            url: url,
+            method: method,
             jsonData: rec,
             headers: {
                 'Content-Type': 'application/json'
