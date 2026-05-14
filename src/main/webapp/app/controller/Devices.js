@@ -132,7 +132,8 @@ Ext.define('AM.controller.Devices', {
         // var devicecs = record.get('devicecs');
         var deviceid = record.get('id');
         devicexzwindow.down('textfield[name=devicexp]').setValue(devicexp);
-        devicexzwindow.down('textfield[name=devicetype]').setValue(devicetype);
+        var devType = record.get('devType');
+        devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
         devicexzwindow.down('textfield[name=devicexh]').setValue(devicexh);
         devicexzwindow.down('textfield[name=devicecs]').setValue(devicecs);
         devicexzwindow.down('textfield[name=devicesn]').setValue(devicesn);
@@ -218,7 +219,8 @@ Ext.define('AM.controller.Devices', {
         
         devicexzwindow.down('textfield[name=deviceid]').setValue(record.get('id'));
         devicexzwindow.down('textfield[name=devicexp]').setValue(record.get('devicexp'));
-        devicexzwindow.down('textfield[name=devicetype]').setValue(record.get('devicetype'));
+        var devType = record.get('devType');
+        devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
         devicexzwindow.down('textfield[name=devicexh]').setValue(record.get('devicexh'));
         devicexzwindow.down('textfield[name=devicecs]').setValue(record.get('devicecs'));
         devicexzwindow.down('textfield[name=devicesn]').setValue(record.get('devicesn'));

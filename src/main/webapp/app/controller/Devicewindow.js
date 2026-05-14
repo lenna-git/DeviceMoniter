@@ -25,8 +25,8 @@ Ext.define('AM.controller.Devicewindow', {
         selector: 'devicexzwindow > textfield[name=devicexp]',
         ref: 'devicexptextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=devicetype]',
-        ref: 'devicetypetextfield'
+        selector: 'devicexzwindow > combo[name=devtype_id]',
+        ref: 'devtypeselector'
     },{
         selector: 'devicexzwindow > textfield[name=devicexh]',
         ref: 'devicexhtextfield'
@@ -70,8 +70,8 @@ Ext.define('AM.controller.Devicewindow', {
         var devicexptextfield =this.getDevicexptextfield();
         var devicexp = devicexptextfield.getValue();
 
-        var devicetypetextfield =this.getDevicetypetextfield();
-        var devicetype = devicetypetextfield.getValue();
+        var devtypeselector = this.getDevtypeselector();
+        var devtypeId = devtypeselector.getValue();
 
         var devicexhtextfield =this.getDevicexhtextfield();
         var devicexh = devicexhtextfield.getValue();
@@ -116,7 +116,7 @@ Ext.define('AM.controller.Devicewindow', {
                 method:'PUT',
                 jsonData: {
                     devicexp:devicexp,
-                    devicetype:devicetype,
+                    devType: { id: devtypeId },
                     devicexh:devicexh,
                     devicecs:devicecs,
                     devicesn:devicesn,
@@ -131,15 +131,16 @@ Ext.define('AM.controller.Devicewindow', {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                sucess:function(response,opts){
+                success:function(response,opts){
                     var obj = Ext.decode(response.responseText);
-                    if(obj.sucess){
+                    if(obj.success){
                         Ext.Msg.alert('结果显示',obj.message);
+                    } else {
+                        Ext.Msg.alert('提示', obj.message);
                     }
-                                    },
+                },
                 failure:function(response,opts){
-                    var obj = Ext.decode(response.responseText);
-                    Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
+                    Ext.Msg.alert('保存错误', '保存失败');
                 }
             })
             this.getDevicexzwindow().close();
@@ -150,7 +151,7 @@ Ext.define('AM.controller.Devicewindow', {
                 method:'post',
                 jsonData: {
                     devicexp:devicexp,
-                    devicetype:devicetype,
+                    devType: { id: devtypeId },
                     devicexh:devicexh,
                     devicecs:devicecs,
                     devicesn:devicesn,

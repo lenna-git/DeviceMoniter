@@ -14,7 +14,11 @@ public class Device {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String devicexp;//设备芯片
-    private String devicetype;//设备类型
+    
+    @ManyToOne
+    @JoinColumn(name = "devtype_id")
+    private DevType devType;//设备类型
+    
     private String devicexh;//设备型号
 
     private String devicecs;//设备厂商
@@ -37,11 +41,6 @@ public class Device {
 
 
 
-
-
-
-
-
     public String getDevicexp() {
         return devicexp;
     }
@@ -50,12 +49,12 @@ public class Device {
         this.devicexp = devicexp;
     }
 
-    public String getDevicetype() {
-        return devicetype;
+    public DevType getDevType() {
+        return devType;
     }
 
-    public void setDevicetype(String devicetype) {
-        this.devicetype = devicetype;
+    public void setDevType(DevType devType) {
+        this.devType = devType;
     }
 
     public String getDevicexh() {
@@ -146,6 +145,11 @@ public class Device {
     public void setDeviceid(Long id) {
         this.id = id;
     }
+
+//     public DevType getDevType(){
+//         return devType;
+//     }
+
 
 
 //    public List<DeviceRecord> getDeviceRecordLists() {

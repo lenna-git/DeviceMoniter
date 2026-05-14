@@ -99,8 +99,11 @@ Ext.define('AM.view.device.devicelistgrid',{
     },{
         text:'类型',
         align:'center',
-        dataIndex:'devicetype',
+        dataIndex:'devType.typename',
         flex:1,
+        // renderer: function(value) {
+        //     return value ? value.typename : '';
+        // }
     },{
         text:'型号',
         align:'center',

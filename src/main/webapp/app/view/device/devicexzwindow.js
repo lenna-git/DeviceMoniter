@@ -23,13 +23,20 @@ Ext.define('AM.view.device.devicexzwindow',{
         labelWidth: 80,
         margin: '10 0 10 60',
     },{
-        xtype: 'textfield',
+        xtype: 'combo',
         fieldLabel:'类型',
-        name:'devicetype',
-        allowBlank:false,//不允许为空
+        name:'devtype_id',
+        allowBlank:false,
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
+        store: {
+            type: 'devtypestore'
+        },
+        displayField: 'typename',
+        valueField: 'id',
+        queryMode: 'local',
+        emptyText: '请选择设备类型'
     },{
         xtype: 'textfield',
         fieldLabel:'型号',

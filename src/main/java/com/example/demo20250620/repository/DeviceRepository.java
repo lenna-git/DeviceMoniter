@@ -14,6 +14,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 public interface DeviceRepository extends JpaRepository<Device, Long> {
+    
+    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType")
+    Page<Device> findAllWithDevType(Pageable pageable);
+    
     List<Device> findDeviceByDevicexh(String devicexh);
 
     List<Device> findDeviceByDevicecs(String devicecs);
@@ -26,9 +30,9 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     Page<Device> findDeviceByDevicexhAndDevicecs(String devicexh, String devicecs, Pageable pageable);
 
-    @Query("SELECT d FROM Device d WHERE " +
+    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType dt WHERE " +
            "(:devicexp IS NULL OR :devicexp = '' OR d.devicexp LIKE %:devicexp%) AND " +
-           "(:devicetype IS NULL OR :devicetype = '' OR d.devicetype LIKE %:devicetype%) AND " +
+           "(:devicetype IS NULL OR :devicetype = '' OR dt.typename LIKE %:devicetype%) AND " +
            "(:devicexh IS NULL OR :devicexh = '' OR d.devicexh LIKE %:devicexh%) AND " +
            "(:devicecs IS NULL OR :devicecs = '' OR d.devicecs LIKE %:devicecs%)")
     Page<Device> findByMultipleConditions(

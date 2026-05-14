@@ -59,7 +59,7 @@ public class DeviceController {
             boolean hasCs = !EmptyorNot(devicecs);
             
             if (!hasXp && !hasType && !hasXh && !hasCs) {
-                devicePage = deviceRepository.findAll(PageRequest.of(pageIndex, limit));
+                devicePage = deviceRepository.findAllWithDevType(PageRequest.of(pageIndex, limit));
             } else {
                 devicePage = deviceRepository.findByMultipleConditions(
                     devicexp, devicetype, devicexh, devicecs, PageRequest.of(pageIndex, limit));
@@ -86,7 +86,7 @@ public class DeviceController {
         Optional<Device> device1 = deviceRepository.findById(id);
         Device device2 =device1.orElseGet(() -> new Device());
         device2.setDevicexp(device.getDevicexp());
-        device2.setDevicetype(device.getDevicetype());
+        device2.setDevType(device.getDevType());
         device2.setDevicexh(device.getDevicexh());
         device2.setDevicecs(device.getDevicecs());
         device2.setDevicesn(device.getDevicesn());
