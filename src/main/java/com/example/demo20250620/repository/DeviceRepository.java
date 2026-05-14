@@ -25,4 +25,16 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     Page<Device> findDeviceByDevicecs(String devicecs, Pageable pageable);
 
     Page<Device> findDeviceByDevicexhAndDevicecs(String devicexh, String devicecs, Pageable pageable);
+
+    @Query("SELECT d FROM Device d WHERE " +
+           "(:devicexp IS NULL OR :devicexp = '' OR d.devicexp LIKE %:devicexp%) AND " +
+           "(:devicetype IS NULL OR :devicetype = '' OR d.devicetype LIKE %:devicetype%) AND " +
+           "(:devicexh IS NULL OR :devicexh = '' OR d.devicexh LIKE %:devicexh%) AND " +
+           "(:devicecs IS NULL OR :devicecs = '' OR d.devicecs LIKE %:devicecs%)")
+    Page<Device> findByMultipleConditions(
+            @Param("devicexp") String devicexp,
+            @Param("devicetype") String devicetype,
+            @Param("devicexh") String devicexh,
+            @Param("devicecs") String devicecs,
+            Pageable pageable);
 }

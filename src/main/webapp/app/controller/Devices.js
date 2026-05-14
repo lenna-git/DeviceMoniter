@@ -32,6 +32,12 @@ Ext.define('AM.controller.Devices', {
         selector: 'viewport > panel > centerpage > devicelist > devicelistgrid',
         ref:'testgrid'
     },{
+        selector: 'viewport > panel > centerpage > devicelist toolbar textfield[name=queryxp]',
+        ref: 'devicequeryxptextfield'
+    },{
+        selector: 'viewport > panel > centerpage > devicelist toolbar textfield[name=querylx]',
+        ref: 'devicequerylxtextfield'
+    },{
         selector: 'viewport > panel > centerpage > devicelist toolbar textfield[name=queryxh]',
         ref: 'devicequeryxhtextfield'
     },{
@@ -78,16 +84,31 @@ Ext.define('AM.controller.Devices', {
         // console.log('The panel was rrrrendered');
     },
     ondevcxbuttonclick: function (){
-        var searchxh = this.getDevicequeryxhtextfield().getValue();
-        var searchcs = this.getDevicequerycstextfield().getValue();
-        console.log(searchxh);
-        console.log(searchcs);
-        var store  = this.getTestgrid().getStore();
-        store.getProxy().extraParams.devicexh = searchxh;
-        store.getProxy().extraParams.devicecs = searchcs;
-        //store.getProxy().extraParams.devicexh='1';
-        store.reload();
-
+        var searchxp = this.getDevicequeryxptextfield() ? this.getDevicequeryxptextfield().getValue() : '';
+        var searchlx = this.getDevicequerylxtextfield() ? this.getDevicequerylxtextfield().getValue() : '';
+        var searchxh = this.getDevicequeryxhtextfield() ? this.getDevicequeryxhtextfield().getValue() : '';
+        var searchcs = this.getDevicequerycstextfield() ? this.getDevicequerycstextfield().getValue() : '';
+        
+        console.log('查询条件 - 芯片:', searchxp, '类型:', searchlx, '型号:', searchxh, '厂商:', searchcs);
+        
+        var store = this.getTestgrid().getStore();
+        var proxy = store.getProxy();
+        
+        proxy.extraParams = {};
+        if (searchxp) {
+            proxy.extraParams.devicexp = searchxp;
+        }
+        if (searchlx) {
+            proxy.extraParams.devicetype = searchlx;
+        }
+        if (searchxh) {
+            proxy.extraParams.devicexh = searchxh;
+        }
+        if (searchcs) {
+            proxy.extraParams.devicecs = searchcs;
+        }
+        
+        store.loadPage(1);
     },
 
     onDblClick: function(grid,record){

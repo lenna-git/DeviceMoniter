@@ -42,6 +42,8 @@ public class DeviceController {
 
     @GetMapping("/alldevices")
     public Map<String, Object> getAllDevices(
+            @RequestParam(required = false) String devicexp,
+            @RequestParam(required = false) String devicetype,
             @RequestParam(required = false) String devicexh,
             @RequestParam(required = false) String devicecs,
             @RequestParam(defaultValue = "1") int page,
@@ -51,14 +53,16 @@ public class DeviceController {
             int pageIndex = Math.max(0, page - 1);
             Page<Device> devicePage;
             
-            if (EmptyorNot(devicexh) && EmptyorNot(devicecs)) {
+            boolean hasXp = !EmptyorNot(devicexp);
+            boolean hasType = !EmptyorNot(devicetype);
+            boolean hasXh = !EmptyorNot(devicexh);
+            boolean hasCs = !EmptyorNot(devicecs);
+            
+            if (!hasXp && !hasType && !hasXh && !hasCs) {
                 devicePage = deviceRepository.findAll(PageRequest.of(pageIndex, limit));
-            } else if (!EmptyorNot(devicexh) && EmptyorNot(devicecs)) {
-                devicePage = deviceRepository.findDeviceByDevicexh(devicexh, PageRequest.of(pageIndex, limit));
-            } else if (EmptyorNot(devicexh) && !EmptyorNot(devicecs)) {
-                devicePage = deviceRepository.findDeviceByDevicecs(devicecs, PageRequest.of(pageIndex, limit));
             } else {
-                devicePage = deviceRepository.findDeviceByDevicexhAndDevicecs(devicexh, devicecs, PageRequest.of(pageIndex, limit));
+                devicePage = deviceRepository.findByMultipleConditions(
+                    devicexp, devicetype, devicexh, devicecs, PageRequest.of(pageIndex, limit));
             }
             
             responseObj.put("data", devicePage.getContent());
