@@ -115,10 +115,7 @@ Ext.define('AM.controller.Devices', {
         var devicexzwindow = Ext.widget({
             xtype: 'devicexzwindow'
         });
-        var devicexp = record.get('devicexp');
-        var devicetype = record.get('devicetype');
         var devicexh = record.get('devicexh');
-        var devicecs = record.get('devicecs');
         var devicesn = record.get('devicesn');
         var deviceno = record.get('deviceno');
         var devicescdata = record.get('devicescdata');
@@ -127,17 +124,9 @@ Ext.define('AM.controller.Devices', {
         var deviceyh = record.get('deviceyh');
         var devicestate = record.get('devicestate');
         var deviceop = record.get('deviceop');
-        // var devicename = record.get('devicename');
-        // var devicesn = record.get('devicesn');
-        // var devicecs = record.get('devicecs');
         var deviceid = record.get('id');
-        var devCpu = record.get('devCpu');
-        devicexzwindow.down('combo[name=devcpu_id]').setValue(devCpu ? devCpu.id : null);
-        var devType = record.get('devType');
-        devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
+        
         devicexzwindow.down('textfield[name=devicexh]').setValue(devicexh);
-        var devManufacturer = record.get('devManufacturer');
-        devicexzwindow.down('combo[name=devmanufacturer_id]').setValue(devManufacturer ? devManufacturer.id : null);
         devicexzwindow.down('textfield[name=devicesn]').setValue(devicesn);
         devicexzwindow.down('textfield[name=deviceno]').setValue(deviceno);
         devicexzwindow.down('textfield[name=devicescdata]').setValue(devicescdata);
@@ -147,6 +136,55 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('textfield[name=devicestate]').setValue(devicestate);
         devicexzwindow.down('textfield[name=deviceop]').setValue(deviceop);
         devicexzwindow.down('textfield[name=deviceid]').setValue(deviceid);
+        
+        var devCpu = record.get('devCpu');
+        var devType = record.get('devType');
+        var devManufacturer = record.get('devManufacturer');
+        
+        var cpuCombo = devicexzwindow.down('combo[name=devcpu_id]');
+        var typeCombo = devicexzwindow.down('combo[name=devtype_id]');
+        var manufacturerCombo = devicexzwindow.down('combo[name=devmanufacturer_id]');
+        
+        var cpuStore = cpuCombo.getStore();
+        var typeStore = typeCombo.getStore();
+        var manufacturerStore = manufacturerCombo.getStore();
+        
+        var setComboValues = function() {
+            cpuCombo.setValue(devCpu ? devCpu.id : null);
+            typeCombo.setValue(devType ? devType.id : null);
+            manufacturerCombo.setValue(devManufacturer ? devManufacturer.id : null);
+        };
+        
+        var pendingLoads = 3;
+        var onStoreLoad = function() {
+            pendingLoads--;
+            if (pendingLoads === 0) {
+                setComboValues();
+            }
+        };
+        
+        if (cpuStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            cpuStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (typeStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            typeStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (manufacturerStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            manufacturerStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (pendingLoads === 0) {
+            setComboValues();
+        }
+        
         devicexzwindow.show();
     },
 
@@ -220,13 +258,7 @@ Ext.define('AM.controller.Devices', {
         });
         
         devicexzwindow.down('textfield[name=deviceid]').setValue(record.get('id'));
-        var devCpu = record.get('devCpu');
-        devicexzwindow.down('combo[name=devcpu_id]').setValue(devCpu ? devCpu.id : null);
-        var devType = record.get('devType');
-        devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
         devicexzwindow.down('textfield[name=devicexh]').setValue(record.get('devicexh'));
-        var devManufacturer = record.get('devManufacturer');
-        devicexzwindow.down('combo[name=devmanufacturer_id]').setValue(devManufacturer ? devManufacturer.id : null);
         devicexzwindow.down('textfield[name=devicesn]').setValue(record.get('devicesn'));
         devicexzwindow.down('textfield[name=deviceno]').setValue(record.get('deviceno'));
         devicexzwindow.down('textfield[name=devicescdata]').setValue(record.get('devicescdata'));
@@ -235,6 +267,54 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('textfield[name=deviceyh]').setValue(record.get('deviceyh'));
         devicexzwindow.down('textfield[name=devicestate]').setValue(record.get('devicestate'));
         devicexzwindow.down('textfield[name=deviceop]').setValue(record.get('deviceop'));
+        
+        var devCpu = record.get('devCpu');
+        var devType = record.get('devType');
+        var devManufacturer = record.get('devManufacturer');
+        
+        var cpuCombo = devicexzwindow.down('combo[name=devcpu_id]');
+        var typeCombo = devicexzwindow.down('combo[name=devtype_id]');
+        var manufacturerCombo = devicexzwindow.down('combo[name=devmanufacturer_id]');
+        
+        var cpuStore = cpuCombo.getStore();
+        var typeStore = typeCombo.getStore();
+        var manufacturerStore = manufacturerCombo.getStore();
+        
+        var setComboValues = function() {
+            cpuCombo.setValue(devCpu ? devCpu.id : null);
+            typeCombo.setValue(devType ? devType.id : null);
+            manufacturerCombo.setValue(devManufacturer ? devManufacturer.id : null);
+        };
+        
+        var pendingLoads = 3;
+        var onStoreLoad = function() {
+            pendingLoads--;
+            if (pendingLoads === 0) {
+                setComboValues();
+            }
+        };
+        
+        if (cpuStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            cpuStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (typeStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            typeStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (manufacturerStore.getCount() > 0) {
+            pendingLoads--;
+        } else {
+            manufacturerStore.on('load', onStoreLoad, null, { single: true });
+        }
+        
+        if (pendingLoads === 0) {
+            setComboValues();
+        }
         
         devicexzwindow.show();
     },

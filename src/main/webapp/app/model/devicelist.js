@@ -17,5 +17,9 @@ Ext.define('AM.model.devicelist',{
         {name:'deviceop',type:'String'},//操作
         {name:'deviceop1',type:'String',convert: function(v, record){ return 'borrow'; }},//操作
 
+        {name:'devCpu', type: 'auto'},
+        {name:'devType', type: 'auto'},
+        {name:'devManufacturer', type: 'auto'},
+
     ]
 })
