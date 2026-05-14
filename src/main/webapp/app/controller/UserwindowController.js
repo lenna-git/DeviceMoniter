@@ -25,10 +25,18 @@ Ext.define('AM.controller.UserwindowController', {
         console.log('save button clicked');
         var win = button.up('window');
         
-        var idField = win.down('textfield[name=id]');
-        var sysusernameField = win.down('textfield[name=sysusername]');
-        var sysuserpasswordField = win.down('textfield[name=sysuserpassword]');
-        var sysuserroleField = win.down('combo[name=sysuserrole]');
+        var form = win.down('form');
+        console.log('form:', form);
+        
+        var idField = form ? form.down('textfield[name=id]') : win.down('textfield[name=id]');
+        var sysusernameField = form ? form.down('textfield[name=sysusername]') : win.down('textfield[name=sysusername]');
+        var sysuserpasswordField = form ? form.down('textfield[name=sysuserpassword]') : win.down('textfield[name=sysuserpassword]');
+        var sysuserroleField = form ? form.down('combo[name=sysuserrole]') : win.down('combo[name=sysuserrole]');
+
+        console.log('idField:', idField);
+        console.log('sysusernameField:', sysusernameField);
+        console.log('sysuserpasswordField:', sysuserpasswordField);
+        console.log('sysuserroleField:', sysuserroleField);
 
         if (!sysusernameField || !sysuserpasswordField || !sysuserroleField) {
             Ext.Msg.alert('错误', '无法找到表单字段');
@@ -39,6 +47,11 @@ Ext.define('AM.controller.UserwindowController', {
         var sysusernameVal = sysusernameField.getValue();
         var sysuserpasswordVal = sysuserpasswordField.getValue();
         var sysuserroleVal = sysuserroleField.getValue();
+
+        console.log('idVal:', idVal);
+        console.log('sysusernameVal:', sysusernameVal);
+        console.log('sysuserpasswordVal:', sysuserpasswordVal);
+        console.log('sysuserroleVal:', sysuserroleVal);
 
         if (!sysusernameVal || !sysuserpasswordVal) {
             Ext.Msg.alert('提示', '用户名和密码不能为空');
@@ -55,11 +68,16 @@ Ext.define('AM.controller.UserwindowController', {
         var method = 'post';
 
         if (idVal) {
+            console.log('Updating user with id:', idVal);
             url = 'sysuseraction/updateuser';
             method = 'put';
             rec.id = idVal;
         }
 
+        console.log('Sending request to:', url);
+        console.log('Method:', method);
+        console.log('Data:', rec);
+        
         Ext.Ajax.request({
             url: url,
             method: method,
@@ -68,7 +86,9 @@ Ext.define('AM.controller.UserwindowController', {
                 'Content-Type': 'application/json'
             },
             success: function(response, opts) {
+                console.log('Response received:', response.responseText);
                 var result = Ext.decode(response.responseText);
+                console.log('Result:', result);
                 if (result.success) {
                     Ext.Msg.alert('提示', result.message);
                     win.close();
@@ -81,7 +101,8 @@ Ext.define('AM.controller.UserwindowController', {
                 }
             },
             failure: function(response, opts) {
-                Ext.Msg.alert('提示', '保存失败');
+                console.log('Request failed:', response.status, response.statusText);
+                Ext.Msg.alert('提示', '保存失败: ' + response.statusText);
             }
         });
     }

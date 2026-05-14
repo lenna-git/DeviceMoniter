@@ -144,6 +144,15 @@ public class SysUserController {
     public Map<String, Object> updateUser(@RequestBody SysUser sysUser) {
         Map<String, Object> responseObj = new HashMap<>();
         try {
+            logger.info("updateUser called with id: " + sysUser.getId());
+            logger.info("updateUser called with username: " + sysUser.getSysusername());
+            
+            if (sysUser.getId() == null) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户ID不能为空");
+                return responseObj;
+            }
+            
             if (!sysUserRepository.existsById(sysUser.getId())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
@@ -159,6 +168,7 @@ public class SysUserController {
             responseObj.put("success", true);
             responseObj.put("message", "用户更新成功");
         } catch (Exception e) {
+            logger.error("updateUser error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "用户更新失败: " + e.getMessage());
         }

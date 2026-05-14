@@ -179,42 +179,37 @@ Ext.define('AM.controller.Devices', {
 
     },
     onupdatebuttonclick:function (){
-        console.log('update successful');
-        var rec ={
-            devicexp:'updatename22221111',
-            devicetype:'updatesn22221111',
-            devicexh:'updatecs22221111',
-            devicecs:'updatename22221111',
-            devicesn:'updatesn22221111',
-            deviceno:'updatecs22221111',
-            devicescdata:'updatename22221111',
-            deviceajdata:'updatesn22221111',
-            deviceghdata:'updatecs22221111',
-            deviceyh:'updatename22221111',
-            devicestate:'updatesn22221111',
-            deviceop:'updatecs22221111',
+        console.log('onupdatebuttonclick');
+        var grid = this.getTestgrid();
+        var selection = grid.getSelectionModel().getSelection();
+        
+        if (selection.length === 0) {
+            Ext.Msg.alert('提示', '请先选择要修改的设备');
+            return;
         }
-        //将id为2的记录修改为上面rec指定的值
-        Ext.Ajax.request({
-            url:'deviceaction/updatedevicebyid/'+"3",
-            method:'PUT',
-            jsonData: rec,
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            sucess:function(response,opts){
-                var obj = Ext.decode(response.responseText);
-                if(obj.sucess){
-                    Ext.Msg.alert('结果显示',obj.message);
-
-                }
-            },
-            failure:function(response,opts){
-                var obj = Ext.decode(response.responseText);
-                Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-            }
-        })
-
+        
+        var record = selection[0];
+        
+        var devicexzwindow = Ext.widget({
+            xtype: 'devicexzwindow',
+            title: '修改设备'
+        });
+        
+        devicexzwindow.down('textfield[name=deviceid]').setValue(record.get('id'));
+        devicexzwindow.down('textfield[name=devicexp]').setValue(record.get('devicexp'));
+        devicexzwindow.down('textfield[name=devicetype]').setValue(record.get('devicetype'));
+        devicexzwindow.down('textfield[name=devicexh]').setValue(record.get('devicexh'));
+        devicexzwindow.down('textfield[name=devicecs]').setValue(record.get('devicecs'));
+        devicexzwindow.down('textfield[name=devicesn]').setValue(record.get('devicesn'));
+        devicexzwindow.down('textfield[name=deviceno]').setValue(record.get('deviceno'));
+        devicexzwindow.down('textfield[name=devicescdata]').setValue(record.get('devicescdata'));
+        devicexzwindow.down('textfield[name=deviceajdata]').setValue(record.get('deviceajdata'));
+        devicexzwindow.down('textfield[name=deviceghdata]').setValue(record.get('deviceghdata'));
+        devicexzwindow.down('textfield[name=deviceyh]').setValue(record.get('deviceyh'));
+        devicexzwindow.down('textfield[name=devicestate]').setValue(record.get('devicestate'));
+        devicexzwindow.down('textfield[name=deviceop]').setValue(record.get('deviceop'));
+        
+        devicexzwindow.show();
     },
     ontestbuttonclick:function (){
         console.log('test successful');
