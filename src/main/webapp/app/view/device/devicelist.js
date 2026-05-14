@@ -109,7 +109,7 @@ Ext.define('AM.view.device.devicelistgrid',{
     },{
         text:'厂商',
         align:'center',
-        dataIndex:'devicecs',
+        dataIndex:'devManufacturer.manufacturername',
         flex:1,
     },{
         text:'序列号',

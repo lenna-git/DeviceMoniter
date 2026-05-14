@@ -31,8 +31,8 @@ Ext.define('AM.controller.Devicewindow', {
         selector: 'devicexzwindow > textfield[name=devicexh]',
         ref: 'devicexhtextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=devicecs]',
-        ref: 'devicecstextfield'
+        selector: 'devicexzwindow > combo[name=devmanufacturer_id]',
+        ref: 'devmanufacturerselector'
     },{
         selector: 'devicexzwindow > textfield[name=devicesn]',
         ref: 'devicesntextfield'
@@ -76,8 +76,8 @@ Ext.define('AM.controller.Devicewindow', {
         var devicexhtextfield =this.getDevicexhtextfield();
         var devicexh = devicexhtextfield.getValue();
 
-        var devicecstextfield =this.getDevicecstextfield();
-        var devicecs = devicecstextfield.getValue();
+        var devmanufacturerselector = this.getDevmanufacturerselector();
+        var devmanufacturerId = devmanufacturerselector.getValue();
 
         var devicesntextfield =this.getDevicesntextfield();
         var devicesn = devicesntextfield.getValue();
@@ -117,8 +117,8 @@ Ext.define('AM.controller.Devicewindow', {
                 jsonData: {
                     devCpu: { id: devcpuId },
                     devType: { id: devtypeId },
+                    devManufacturer: { id: devmanufacturerId },
                     devicexh:devicexh,
-                    devicecs:devicecs,
                     devicesn:devicesn,
                     deviceno:deviceno,
                     devicescdata:devicescdata,
@@ -152,8 +152,8 @@ Ext.define('AM.controller.Devicewindow', {
                 jsonData: {
                     devCpu: { id: devcpuId },
                     devType: { id: devtypeId },
+                    devManufacturer: { id: devmanufacturerId },
                     devicexh:devicexh,
-                    devicecs:devicecs,
                     devicesn:devicesn,
                     deviceno:deviceno,
                     devicescdata:devicescdata,

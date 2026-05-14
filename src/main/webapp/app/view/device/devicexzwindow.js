@@ -49,13 +49,18 @@ Ext.define('AM.view.device.devicexzwindow',{
         labelWidth: 80,
         margin: '0 0 10 60',
     },{
-        xtype: 'textfield',
+        xtype: 'combo',
         fieldLabel:'厂商',
-        name:'devicecs',
-        allowBlank:false,//不允许为空
+        name:'devmanufacturer_id',
+        allowBlank:false,
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
+        store: Ext.create('AM.store.devmanufacturerstore'),
+        displayField: 'manufacturername',
+        valueField: 'id',
+        queryMode: 'local',
+        emptyText: '请选择厂商'
     },{
         xtype: 'textfield',
         fieldLabel:'序列号',

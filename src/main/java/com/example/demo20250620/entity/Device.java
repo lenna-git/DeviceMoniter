@@ -23,7 +23,10 @@ public class Device {
     
     private String devicexh;//设备型号
 
-    private String devicecs;//设备厂商
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "devmanufacturer_id")
+    private DevManufacturer devManufacturer;//设备厂商
+    
     private String devicesn;//设备序列号
     private String deviceno;//设备编号
 
@@ -67,12 +70,12 @@ public class Device {
         this.devicexh = devicexh;
     }
 
-    public String getDevicecs() {
-        return devicecs;
+    public DevManufacturer getDevManufacturer() {
+        return devManufacturer;
     }
 
-    public void setDevicecs(String devicecs) {
-        this.devicecs = devicecs;
+    public void setDevManufacturer(DevManufacturer devManufacturer) {
+        this.devManufacturer = devManufacturer;
     }
 
     public String getDevicesn() {

@@ -53,8 +53,8 @@ Ext.define('AM.controller.Devices', {
         selector: 'devicexzwindow > textfield[name=devicexh]',
         ref: 'devicexhtextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=devicecs]',
-        ref: 'devicecstextfield'
+        selector: 'devicexzwindow > combo[name=devmanufacturer_id]',
+        ref: 'devmanufacturerselector'
     },{
         selector: 'devicexzwindow > textfield[name=devicesn]',
         ref: 'devicesntextfield'
@@ -136,7 +136,8 @@ Ext.define('AM.controller.Devices', {
         var devType = record.get('devType');
         devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
         devicexzwindow.down('textfield[name=devicexh]').setValue(devicexh);
-        devicexzwindow.down('textfield[name=devicecs]').setValue(devicecs);
+        var devManufacturer = record.get('devManufacturer');
+        devicexzwindow.down('combo[name=devmanufacturer_id]').setValue(devManufacturer ? devManufacturer.id : null);
         devicexzwindow.down('textfield[name=devicesn]').setValue(devicesn);
         devicexzwindow.down('textfield[name=deviceno]').setValue(deviceno);
         devicexzwindow.down('textfield[name=devicescdata]').setValue(devicescdata);
@@ -224,7 +225,8 @@ Ext.define('AM.controller.Devices', {
         var devType = record.get('devType');
         devicexzwindow.down('combo[name=devtype_id]').setValue(devType ? devType.id : null);
         devicexzwindow.down('textfield[name=devicexh]').setValue(record.get('devicexh'));
-        devicexzwindow.down('textfield[name=devicecs]').setValue(record.get('devicecs'));
+        var devManufacturer = record.get('devManufacturer');
+        devicexzwindow.down('combo[name=devmanufacturer_id]').setValue(devManufacturer ? devManufacturer.id : null);
         devicexzwindow.down('textfield[name=devicesn]').setValue(record.get('devicesn'));
         devicexzwindow.down('textfield[name=deviceno]').setValue(record.get('deviceno'));
         devicexzwindow.down('textfield[name=devicescdata]').setValue(record.get('devicescdata'));

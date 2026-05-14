@@ -15,26 +15,18 @@ import java.util.List;
 
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     
-    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devCpu")
+    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devManufacturer")
     Page<Device> findAllWithDevType(Pageable pageable);
     
     List<Device> findDeviceByDevicexh(String devicexh);
 
-    List<Device> findDeviceByDevicecs(String devicecs);
-
-    List<Device> findDeviceByDevicexhAndDevicecs(String devicexh, String devicecs);
-
     Page<Device> findDeviceByDevicexh(String devicexh, Pageable pageable);
 
-    Page<Device> findDeviceByDevicecs(String devicecs, Pageable pageable);
-
-    Page<Device> findDeviceByDevicexhAndDevicecs(String devicexh, String devicecs, Pageable pageable);
-
-    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType dt LEFT JOIN FETCH d.devCpu dc WHERE " +
+    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType dt LEFT JOIN FETCH d.devCpu dc LEFT JOIN FETCH d.devManufacturer dm WHERE " +
            "(:devicexp IS NULL OR :devicexp = '' OR dc.cpuname LIKE %:devicexp%) AND " +
            "(:devicetype IS NULL OR :devicetype = '' OR dt.typename LIKE %:devicetype%) AND " +
            "(:devicexh IS NULL OR :devicexh = '' OR d.devicexh LIKE %:devicexh%) AND " +
-           "(:devicecs IS NULL OR :devicecs = '' OR d.devicecs LIKE %:devicecs%)")
+           "(:devicecs IS NULL OR :devicecs = '' OR dm.manufacturername LIKE %:devicecs%)")
     Page<Device> findByMultipleConditions(
             @Param("devicexp") String devicexp,
             @Param("devicetype") String devicetype,

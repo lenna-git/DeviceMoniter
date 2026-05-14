@@ -6,7 +6,7 @@ Ext.define('AM.model.devicelist',{
         {name:'devCpu.cpuname',type:'String'},//芯片
         {name:'devType.typename',type:'String'},//类型
         {name:'devicexh',type:'String'},//型号
-        {name:'devicecs',type:'String'},//厂商
+        {name:'devManufacturer.manufacturername',type:'String'},//厂商
         {name:'devicesn',type:'String'},//序列号
         {name:'deviceno',type:'String'},//编号
         {name:'devicescdata',type:'String'},//送测日期

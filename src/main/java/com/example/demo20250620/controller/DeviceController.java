@@ -88,7 +88,7 @@ public class DeviceController {
         device2.setDevCpu(device.getDevCpu());
         device2.setDevType(device.getDevType());
         device2.setDevicexh(device.getDevicexh());
-        device2.setDevicecs(device.getDevicecs());
+        device2.setDevManufacturer(device.getDevManufacturer());
         device2.setDevicesn(device.getDevicesn());
         device2.setDeviceno(device.getDeviceno());
         device2.setDevicescdata(device.getDevicescdata());
