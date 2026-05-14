@@ -17,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 
 @RestController
 @RequestMapping("/sysuseraction/")
@@ -44,8 +47,21 @@ public class SysUserController {
     @CrossOrigin(origins = "http://127.0.0.1:8080")
 
     @GetMapping("/allusers")
-    public List<SysUser> getAllSysUsers() {
-        return sysUserRepository.findAll();
+    public Map<String, Object> getAllSysUsers(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            int pageIndex = Math.max(0, page - 1);
+            Page<SysUser> userPage = sysUserRepository.findAll(PageRequest.of(pageIndex, limit));
+            responseObj.put("data", userPage.getContent());
+            responseObj.put("total", userPage.getTotalElements());
+            responseObj.put("success", true);
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "获取用户列表失败: " + e.getMessage());
+        }
+        return responseObj;
     }
 
     @GetMapping("/login")

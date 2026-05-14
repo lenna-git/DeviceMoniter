@@ -1,44 +1,54 @@
 Ext.define('AM.view.user.userlist', {
     extend: 'Ext.panel.Panel',
     alias: 'widget.userlist1',
-    border:true,
-    items:[
+    border: true,
+    layout: 'border',
+    items: [
         {
-            xtype:'testlistgrid',
-            width:'100%',
-            flex:1,
+            xtype: 'toolbar',
+            region: 'north',
+            items: [
+                '->',
+                {
+                    xtype: 'button',
+                    action: 'xj',
+                    text: '新增',
+                    iconCls: 'add-icon',
+                    margin: '0 5 0 0',
+                    padding: '5 15'
+                },
+                {
+                    xtype: 'button',
+                    action: 'sc',
+                    text: '删除',
+                    iconCls: 'delete-icon',
+                    margin: '0 5 0 0',
+                    padding: '5 15'
+                },
+                {
+                    xtype: 'button',
+                    action: 'update',
+                    text: '修改',
+                    iconCls: 'edit-icon',
+                    padding: '5 15'
+                }
+            ]
         },
         {
-            xtype: 'button',
-            action:'xj',
-            text:'新增',
-            height:'50',
-        },
-        {
-            xtype: 'button',
-            action:'sc',
-            text:'删除',
-            height:'50',
-        },
-        {
-            xtype: 'button',
-            action:'update',
-            text:'修改',
-            height:'50',
-        },
-        {
-            xtype: 'button',
-            action:'test',
-            text:'测试',
-            height:'50',
-        },
-    ],
-
+            xtype: 'testlistgrid',
+            region: 'center'
+        }
+    ]
 });
 Ext.define('AM.view.user.testlistgrid',{
     extend:'Ext.grid.Panel',
     alias:'widget.testlistgrid',
     store:'userliststore',
+    autoScroll:true,
+    forceFit:true,
+    viewConfig: {
+        loadMask: true
+    },
     columns:[{
         text:'姓名',
         align:'center',
@@ -63,5 +73,12 @@ Ext.define('AM.view.user.testlistgrid',{
         },
 
     }],
+    bbar: {
+        xtype: 'pagingtoolbar',
+        store: 'userliststore',
+        displayInfo: true,
+        displayMsg: '显示第 {0} - {1} 条，共 {2} 条',
+        emptyMsg: '没有数据'
+    }
 
 })

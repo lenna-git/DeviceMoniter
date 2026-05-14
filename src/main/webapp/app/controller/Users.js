@@ -9,13 +9,13 @@ Ext.define('AM.controller.Users', {
             'viewport > panel > centerpage > userlist1 > testlistgrid':{
                 cellclick:this.onsysusergridcellclick,
             },
-            'viewport > panel > centerpage > userlist1 > button[action=xj]': {
+            'viewport > panel > centerpage > userlist1 toolbar button[action=xj]': {
                 click: this.onxjbuttioncick
             },
-            'viewport > panel > centerpage > userlist1 > button[action=sc]': {
+            'viewport > panel > centerpage > userlist1 toolbar button[action=sc]': {
                 click: this.onscbuttioncick
             },
-            'viewport > panel > centerpage > userlist1 > button[action=update]': {
+            'viewport > panel > centerpage > userlist1 toolbar button[action=update]': {
                 click: this.onupdatebuttioncick
             },
         });
