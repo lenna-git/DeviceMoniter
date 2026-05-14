@@ -10,8 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 
 @RestController
 @RequestMapping("/deviceaction/")
@@ -36,17 +41,34 @@ public class DeviceController {
 
 
     @GetMapping("/alldevices")
-//    public List<Device> getAllUsers() { return deviceRepository.findAll();}//另一种用service
-    public List<Device> getAllDevices(@RequestParam(required = false) String devicexh,String devicecs){
-        if (EmptyorNot(devicexh)&&EmptyorNot(devicecs)){
-            return deviceRepository.findAll();
-        }else if(!EmptyorNot(devicexh)&&EmptyorNot(devicecs)) {
-            return deviceRepository.findDeviceByDevicexh(devicexh);
-        }else if(EmptyorNot(devicexh)&&!EmptyorNot(devicecs)){
-            return deviceRepository.findDeviceByDevicecs(devicecs);
-        }else{
-            return deviceRepository.findDeviceByDevicexhAndDevicecs(devicexh,devicecs);
+    public Map<String, Object> getAllDevices(
+            @RequestParam(required = false) String devicexh,
+            @RequestParam(required = false) String devicecs,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            int pageIndex = Math.max(0, page - 1);
+            Page<Device> devicePage;
+            
+            if (EmptyorNot(devicexh) && EmptyorNot(devicecs)) {
+                devicePage = deviceRepository.findAll(PageRequest.of(pageIndex, limit));
+            } else if (!EmptyorNot(devicexh) && EmptyorNot(devicecs)) {
+                devicePage = deviceRepository.findDeviceByDevicexh(devicexh, PageRequest.of(pageIndex, limit));
+            } else if (EmptyorNot(devicexh) && !EmptyorNot(devicecs)) {
+                devicePage = deviceRepository.findDeviceByDevicecs(devicecs, PageRequest.of(pageIndex, limit));
+            } else {
+                devicePage = deviceRepository.findDeviceByDevicexhAndDevicecs(devicexh, devicecs, PageRequest.of(pageIndex, limit));
+            }
+            
+            responseObj.put("data", devicePage.getContent());
+            responseObj.put("total", devicePage.getTotalElements());
+            responseObj.put("success", true);
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "获取设备列表失败: " + e.getMessage());
         }
+        return responseObj;
     }
 
     @PostMapping("/createdevice")

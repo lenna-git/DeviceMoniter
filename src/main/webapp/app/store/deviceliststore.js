@@ -4,16 +4,22 @@ Ext.define('AM.store.deviceliststore',{
     extend:'Ext.data.Store',
     model:'AM.model.devicelist',
     autoLoad:true,
+    pageSize: 20,
+    remoteSort: false,
+    remoteFilter: false,
 
     proxy:{
         type:'ajax',
-        api:{
-            read:'deviceaction/alldevices',
-            create:'deviceaction/createdevice'
-            // read:'useraction/allusers',//store获取数据，向后台发送下面的请求
-            // create:'useraction/createuser',
-
-        }
-    },
+        url:'deviceaction/alldevices',
+        pageParam: 'page',
+        limitParam: 'limit',
+        startParam: undefined,
+        reader:{
+            type:'json',
+            root:'data',
+            totalProperty:'total'
+        },
+        simpleSortMode: true
+    }
 
 })

@@ -11,19 +11,16 @@ Ext.define('AM.controller.Devices', {
                 itemdblclick: this.onDblClick,
                 cellclick:this.ondevicegridcellclick,
             },
-            'viewport > panel > centerpage > devicelist > panel > button[action=xz]':{
+            'viewport > panel > centerpage > devicelist toolbar button[action=xz]':{
                 click: this.onxzbuttonclick
             },
-            'viewport > panel > centerpage > devicelist > panel > button[action=sc]':{
+            'viewport > panel > centerpage > devicelist toolbar button[action=sc]':{
                 click: this.onscbuttonclick
             },
-            'viewport > panel > centerpage > devicelist > panel > button[action=update]':{
+            'viewport > panel > centerpage > devicelist toolbar button[action=update]':{
                 click: this.onupdatebuttonclick
             },
-            'viewport > panel > centerpage > devicelist > panel > button[action=test]':{
-                click: this.ontestbuttonclick
-            },
-            'viewport > panel > centerpage > devicelist > panel > button[action=devicesearch]':{
+            'viewport > panel > centerpage > devicelist toolbar button[action=devicesearch]':{
                 click: this.ondevcxbuttonclick
             },
 
@@ -35,10 +32,10 @@ Ext.define('AM.controller.Devices', {
         selector: 'viewport > panel > centerpage > devicelist > devicelistgrid',
         ref:'testgrid'
     },{
-        selector: 'viewport > panel > centerpage > devicelist > panel > textfield[name=queryxh]',
+        selector: 'viewport > panel > centerpage > devicelist toolbar textfield[name=queryxh]',
         ref: 'devicequeryxhtextfield'
     },{
-        selector: 'viewport > panel > centerpage > devicelist > panel > textfield[name=querycs]',
+        selector: 'viewport > panel > centerpage > devicelist toolbar textfield[name=querycs]',
         ref: 'devicequerycstextfield'
     },{
         selector: 'devicexzwindow > textfield[name=devicexp]',
