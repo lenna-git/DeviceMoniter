@@ -76,29 +76,54 @@ public class DeviceController {
     }
 
     @PostMapping("/createdevice")
-    public Device createDevice(@RequestBody Device device){return deviceRepository.save(device);}
+    public Map<String, Object> createDevice(@RequestBody Device device){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            deviceRepository.save(device);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备创建成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备创建失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
 
     @DeleteMapping("/deldevices/{id}")
     public void deleteDevice(@PathVariable Long id){deviceRepository.deleteById(id);}
 
     @PutMapping("updatedevicebyid/{id}")
-    public void updateDevice(@PathVariable Long id, @RequestBody Device device){
-        Optional<Device> device1 = deviceRepository.findById(id);
-        Device device2 =device1.orElseGet(() -> new Device());
-        device2.setDevCpu(device.getDevCpu());
-        device2.setDevType(device.getDevType());
-        device2.setDevicexh(device.getDevicexh());
-        device2.setDevManufacturer(device.getDevManufacturer());
-        device2.setDevicesn(device.getDevicesn());
-        device2.setDeviceno(device.getDeviceno());
-        device2.setDevicescdata(device.getDevicescdata());
-        device2.setDeviceajdata(device.getDeviceajdata());
-        device2.setDeviceghdata(device.getDeviceghdata());
-        device2.setDeviceyh(device.getDeviceyh());
-        device2.setDevicestate(device.getDevicestate());
-        device2.setDeviceop(device.getDeviceop());
+    public Map<String, Object> updateDevice(@PathVariable Long id, @RequestBody Device device){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<Device> device1 = deviceRepository.findById(id);
+            if (!device1.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            Device device2 = device1.get();
+            device2.setDevCpu(device.getDevCpu());
+            device2.setDevType(device.getDevType());
+            device2.setDevicexh(device.getDevicexh());
+            device2.setDevManufacturer(device.getDevManufacturer());
+            device2.setDevicesn(device.getDevicesn());
+            device2.setDeviceno(device.getDeviceno());
+            device2.setDevicescdata(device.getDevicescdata());
+            device2.setDeviceajdata(device.getDeviceajdata());
+            device2.setDeviceghdata(device.getDeviceghdata());
+            device2.setDeviceyh(device.getDeviceyh());
+            device2.setDevicestate(device.getDevicestate());
+            device2.setDeviceop(device.getDeviceop());
 
-        deviceRepository.save(device2);
+            deviceRepository.save(device2);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备更新成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备更新失败: " + e.getMessage());
+        }
+        return responseObj;
     }
 
 

@@ -138,13 +138,16 @@ Ext.define('AM.controller.Devicewindow', {
                     } else {
                         Ext.Msg.alert('提示', obj.message);
                     }
+                    this.getDevicexzwindow().close();
+                    store.reload();
                 },
                 failure:function(response,opts){
                     Ext.Msg.alert('保存错误', '保存失败');
-                }
+                    this.getDevicexzwindow().close();
+                    store.reload();
+                },
+                scope: this
             })
-            this.getDevicexzwindow().close();
-            store.reload();
         }else {
             Ext.Ajax.request({
                 url:'deviceaction/createdevice',
@@ -167,19 +170,24 @@ Ext.define('AM.controller.Devicewindow', {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                sucess:function(response,opts){
+                success:function(response,opts){
                     var obj = Ext.decode(response.responseText);
-                    if(obj.sucess){
+                    if(obj.success){
                         Ext.Msg.alert('结果显示',obj.message);
+                    } else {
+                        Ext.Msg.alert('提示', obj.message);
                     }
+                    this.getDevicexzwindow().close();
+                    store.reload();
                 },
                 failure:function(response,opts){
                     var obj = Ext.decode(response.responseText);
                     Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-                }
+                    this.getDevicexzwindow().close();
+                    store.reload();
+                },
+                scope: this
             })
-            this.getDevicexzwindow().close();
-            store.reload();
         }
 
 
