@@ -328,6 +328,39 @@ Ext.define('AM.controller.Devices', {
         console.log('cellindex:'+colIdx); //列号
         console.log('recid:'+record.get('id'));
         console.log('rowIndex:'+rowIdx);//行号
+        
+        var target = e.getTarget('.check-device-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认安检', '确定要对该设备进行安检吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'deviceaction/checkdevice/' + deviceId,
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('安检失败', '设备安检失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
         var role = SYS_USER.sysuserrole;
         var sm = this.getTestgrid().getSelectionModel();
         var sr = sm.getSelection();
@@ -367,6 +400,39 @@ Ext.define('AM.controller.Devices', {
                 }
             })
         }
+        }
+    },
+    
+    onDeviceGridClick: function(view, record, item, index, e, eOpts) {
+        var target = e.getTarget('.check-device-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认安检', '确定要对该设备进行安检吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'deviceaction/checkdevice/' + deviceId,
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('安检失败', '设备安检失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
         }
     },
 

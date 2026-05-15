@@ -101,6 +101,33 @@ public class DeviceController {
 
     @DeleteMapping("/deldevices/{id}")
     public void deleteDevice(@PathVariable Long id){deviceRepository.deleteById(id);}
+    
+    @PutMapping("/checkdevice/{id}")
+    public Map<String, Object> checkDevice(@PathVariable Long id){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<Device> device1 = deviceRepository.findById(id);
+            if (!device1.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            Device device2 = device1.get();
+            device2.setDeviceajdata(LocalDateTime.now());
+            
+            Devicestate state = new Devicestate();
+            state.setId(2L);
+            device2.setDevicestate(state);
+            
+            deviceRepository.save(device2);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备安检成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备安检失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
 
     @PutMapping("updatedevicebyid/{id}")
     public Map<String, Object> updateDevice(@PathVariable Long id, @RequestBody Device device){

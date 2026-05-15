@@ -151,6 +151,13 @@ Ext.define('AM.view.device.devicelistgrid',{
         align:'center',
         dataIndex:'deviceop',
         flex:1,
+        renderer: function(value, metaData, record) {
+            var stateDetail = record.get('devicestate') ? record.get('devicestate').stateDetail : '';
+            if (stateDetail === '已录入待安检') {
+                return '<a href="#" class="check-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">安检</a>';
+            }
+            return value || '-';
+        }
     }],
     bbar: {
         xtype: 'pagingtoolbar',
