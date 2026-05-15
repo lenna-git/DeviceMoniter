@@ -97,11 +97,11 @@ Ext.define('AM.controller.Devicewindow', {
         var deviceyhtextfield =this.getDeviceyhtextfield();
         var deviceyh = deviceyhtextfield.getValue();
 
-        var devicestatetextfield =this.getDevicestatetextfield();
-        var devicestate = devicestatetextfield.getValue();
-
-        var deviceoptextfield =this.getDeviceoptextfield();
-        var deviceop = deviceoptextfield.getValue();
+        // var devicestatetextfield =this.getDevicestatetextfield();
+        // var devicestate = devicestatetextfield.getValue();
+        //
+        // var deviceoptextfield =this.getDeviceoptextfield();
+        // var deviceop = deviceoptextfield.getValue();
         var store = Ext.data.StoreMgr.lookup('deviceliststore');
         if(deviceid){
             var sm = this.getTestgrid().getSelectionModel();
@@ -121,12 +121,12 @@ Ext.define('AM.controller.Devicewindow', {
                     devicexh:devicexh,
                     devicesn:devicesn,
                     deviceno:deviceno,
-                    devicescdata:devicescdata,
-                    deviceajdata:deviceajdata,
-                    deviceghdata:deviceghdata,
+                    // devicescdata:devicescdata,
+                    // deviceajdata:deviceajdata,
+                    // deviceghdata:deviceghdata,
                     deviceyh:deviceyh,
-                    devicestate:devicestate,
-                    deviceop:deviceop,
+                    // devicestate:devicestate,
+                    // deviceop:deviceop,
                 },
                 headers: {
                     'Content-Type': 'application/json'
@@ -159,12 +159,7 @@ Ext.define('AM.controller.Devicewindow', {
                     devicexh:devicexh,
                     devicesn:devicesn,
                     deviceno:deviceno,
-                    devicescdata:devicescdata,
-                    deviceajdata:deviceajdata,
-                    deviceghdata:deviceghdata,
                     deviceyh:deviceyh,
-                    devicestate:devicestate,
-                    deviceop:deviceop,
                 },//跟rec生成json字符串一样
                 // jsonData:rec,
                 headers: {

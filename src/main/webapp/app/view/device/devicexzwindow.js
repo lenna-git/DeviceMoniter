@@ -18,6 +18,10 @@ Ext.define('AM.view.device.devicexzwindow',{
             var manufacturerCombo = win.down('combo[name=devmanufacturer_id]');
             var stateCombo = win.down('#devicestateCombo');
             
+            var scDateField = win.down('datefield[name=devicescdata]');
+            var ajDateField = win.down('datefield[name=deviceajdata]');
+            var ghDateField = win.down('datefield[name=deviceghdata]');
+            
             var setDefaultValue = function(combo) {
                 var store = combo.getStore();
                 if (store.getCount() > 0) {
@@ -38,8 +42,18 @@ Ext.define('AM.view.device.devicexzwindow',{
             if (win.isEdit) {
                 stateCombo.setReadOnly(true);
                 stateCombo.setFieldStyle('background-color: #f0f0f0;');
+                
+                scDateField.setReadOnly(true);
+                scDateField.setFieldStyle('background-color: #f0f0f0;');
+                ajDateField.setReadOnly(true);
+                ajDateField.setFieldStyle('background-color: #f0f0f0;');
+                ghDateField.setReadOnly(true);
+                ghDateField.setFieldStyle('background-color: #f0f0f0;');
             } else {
                 stateCombo.hide();
+                scDateField.hide();
+                ajDateField.hide();
+                ghDateField.hide();
             }
         }
     },

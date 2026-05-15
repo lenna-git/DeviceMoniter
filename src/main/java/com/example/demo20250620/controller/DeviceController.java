@@ -1,6 +1,7 @@
 package com.example.demo20250620.controller;
 
 import com.example.demo20250620.entity.Device;
+import com.example.demo20250620.entity.Devicestate;
 import com.example.demo20250620.repository.DeviceRepository;
 import com.example.demo20250620.util.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +81,14 @@ public class DeviceController {
     public Map<String, Object> createDevice(@RequestBody Device device){
         Map<String, Object> responseObj = new HashMap<>();
         try {
+            device.setDevicescdata(LocalDateTime.now());
+            device.setDeviceajdata(null);
+            device.setDeviceghdata(null);
+            
+            Devicestate state = new Devicestate();
+            state.setId(1L);
+            device.setDevicestate(state);
+            
             deviceRepository.save(device);
             responseObj.put("success", true);
             responseObj.put("message", "设备创建成功");
