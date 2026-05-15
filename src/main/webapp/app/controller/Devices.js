@@ -361,6 +361,148 @@ Ext.define('AM.controller.Devices', {
             return;
         }
         
+        target = e.getTarget('.shelve-device-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            
+            var actionWindow = Ext.create('Ext.window.Window', {
+                title: '设备操作',
+                width: 300,
+                height: 150,
+                layout: 'hbox',
+                align: 'center',
+                items: [{
+                    xtype: 'button',
+                    text: '归还',
+                    width: 100,
+                    margin: '10 10 10 40',
+                    handler: function() {
+                        Ext.Ajax.request({
+                            url: 'deviceaction/returndevice/' + deviceId,
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            success: function(response, opts) {
+                                var obj = Ext.decode(response.responseText);
+                                if (obj.success) {
+                                    Ext.Msg.alert('结果显示', obj.message);
+                                    var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                    store.reload();
+                                } else {
+                                    Ext.Msg.alert('提示', obj.message);
+                                }
+                            },
+                            failure: function(response, opts) {
+                                Ext.Msg.alert('操作失败', '设备归还失败');
+                            }
+                        });
+                        actionWindow.close();
+                    }
+                }, {
+                    xtype: 'button',
+                    text: '维修',
+                    width: 100,
+                    margin: '10 0 10 10',
+                    handler: function() {
+                        Ext.Ajax.request({
+                            url: 'deviceaction/repairdevice/' + deviceId,
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            success: function(response, opts) {
+                                var obj = Ext.decode(response.responseText);
+                                if (obj.success) {
+                                    Ext.Msg.alert('结果显示', obj.message);
+                                    var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                    store.reload();
+                                } else {
+                                    Ext.Msg.alert('提示', obj.message);
+                                }
+                            },
+                            failure: function(response, opts) {
+                                Ext.Msg.alert('操作失败', '设备维修状态更新失败');
+                            }
+                        });
+                        actionWindow.close();
+                    }
+                }]
+            });
+            actionWindow.show();
+            return;
+        }
+        
+        target = e.getTarget('.unshelve-device-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认上架', '确定要将该设备上架吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'deviceaction/unshelvedevice/' + deviceId,
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('上架失败', '设备上架失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
+        target = e.getTarget('.borrow-device-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认借用', '确定要借用该设备吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerecord/createDeviceRecord',
+                        method: 'POST',
+                        jsonData: {
+                            device: { id: deviceId },
+                            borrowTime: new Date().toISOString(),
+                            deviceRecordState: { id: 1 }
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('借用失败', '设备借用失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
         var role = SYS_USER.sysuserrole;
         var sm = this.getTestgrid().getSelectionModel();
         var sr = sm.getSelection();

@@ -3,6 +3,7 @@ package com.example.demo20250620.controller;
 import com.example.demo20250620.entity.Device;
 import com.example.demo20250620.entity.Devicestate;
 import com.example.demo20250620.repository.DeviceRepository;
+import com.example.demo20250620.repository.DevicestateRepository;
 import com.example.demo20250620.util.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -27,6 +28,8 @@ public class DeviceController {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private DeviceRepository deviceRepository;
+    @Autowired
+    private DevicestateRepository devicestateRepository;
 
     @Autowired
     private final HttpServletRequest request;
@@ -125,6 +128,100 @@ public class DeviceController {
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "设备安检失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    @PutMapping("/returndevice/{id}")
+    public Map<String, Object> returnDevice(@PathVariable Long id){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<Device> device1 = deviceRepository.findById(id);
+            if (!device1.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            Device device2 = device1.get();
+            device2.setDeviceghdata(LocalDateTime.now());
+            
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(10L);
+            if (stateOpt.isPresent()) {
+                device2.setDevicestate(stateOpt.get());
+            } else {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备状态不存在");
+                return responseObj;
+            }
+            
+            deviceRepository.save(device2);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备归还成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备归还失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    @PutMapping("/repairdevice/{id}")
+    public Map<String, Object> repairDevice(@PathVariable Long id){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<Device> device1 = deviceRepository.findById(id);
+            if (!device1.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            Device device2 = device1.get();
+            
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(6L);
+            if (stateOpt.isPresent()) {
+                device2.setDevicestate(stateOpt.get());
+            } else {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备状态不存在");
+                return responseObj;
+            }
+            
+            deviceRepository.save(device2);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备维修状态更新成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备维修状态更新失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    @PutMapping("/unshelvedevice/{id}")
+    public Map<String, Object> unshelveDevice(@PathVariable Long id){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<Device> device1 = deviceRepository.findById(id);
+            if (!device1.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            Device device2 = device1.get();
+            
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(2L);
+            if (stateOpt.isPresent()) {
+                device2.setDevicestate(stateOpt.get());
+            } else {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备状态不存在");
+                return responseObj;
+            }
+            
+            deviceRepository.save(device2);
+            responseObj.put("success", true);
+            responseObj.put("message", "设备上架成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "设备上架失败: " + e.getMessage());
         }
         return responseObj;
     }

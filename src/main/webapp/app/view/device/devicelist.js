@@ -153,10 +153,23 @@ Ext.define('AM.view.device.devicelistgrid',{
         flex:1,
         renderer: function(value, metaData, record) {
             var stateDetail = record.get('devicestate') ? record.get('devicestate').stateDetail : '';
-            if (stateDetail === '已录入待安检') {
-                return '<a href="#" class="check-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">安检</a>';
+            var role = SYS_USER ? SYS_USER.sysuserrole : 1;
+            
+            if (role === 1) {
+                if (stateDetail === '已录入待安检') {
+                    return '<a href="#" class="check-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">安检</a>';
+                } else if (stateDetail === '已安检待借用') {
+                    return '<a href="#" class="shelve-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">下架</a>';
+                } else if (stateDetail === '修理中') {
+                    return '<a href="#" class="unshelve-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">上架</a>';
+                }
+            } else if (role === 2) {
+                if (stateDetail === '已安检待借用') {
+                    return '<a href="#" class="borrow-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">借用</a>';
+                }
             }
-            return value || '-';
+            
+            return '-';
         }
     }],
     bbar: {
