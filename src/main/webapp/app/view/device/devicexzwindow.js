@@ -22,6 +22,8 @@ Ext.define('AM.view.device.devicexzwindow',{
             var ajDateField = win.down('datefield[name=deviceajdata]');
             var ghDateField = win.down('datefield[name=deviceghdata]');
             
+            var yhField = win.down('#deviceyhField');
+            
             var setDefaultValue = function(combo) {
                 var store = combo.getStore();
                 if (store.getCount() > 0) {
@@ -49,11 +51,15 @@ Ext.define('AM.view.device.devicexzwindow',{
                 ajDateField.setFieldStyle('background-color: #f0f0f0;');
                 ghDateField.setReadOnly(true);
                 ghDateField.setFieldStyle('background-color: #f0f0f0;');
+                
+                yhField.setReadOnly(true);
+                yhField.setFieldStyle('background-color: #f0f0f0;');
             } else {
                 stateCombo.hide();
                 scDateField.hide();
                 ajDateField.hide();
                 ghDateField.hide();
+                yhField.hide();
             }
         }
     },
@@ -256,7 +262,8 @@ Ext.define('AM.view.device.devicexzwindow',{
         xtype: 'textfield',
         fieldLabel:'借用人',
         name:'deviceyh',
-        allowBlank:false,//不允许为空
+        itemId: 'deviceyhField',
+        allowBlank:true,
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
