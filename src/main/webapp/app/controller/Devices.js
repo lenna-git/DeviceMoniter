@@ -647,12 +647,11 @@ Ext.define('AM.controller.Devices', {
             Ext.Msg.confirm('确认借用', '确定要借用该设备吗？', function(btn) {
                 if (btn === 'yes') {
                     Ext.Ajax.request({
-                        url: 'devicerecord/createDeviceRecord',
+                        url: 'devicerecord/borrowDevice',
                         method: 'POST',
                         jsonData: {
-                            device: { id: deviceId },
-                            borrowTime: new Date().toISOString(),
-                            deviceRecordState: { id: 1 }
+                            deviceId: parseInt(deviceId),
+                            userId: SYS_USER.id
                         },
                         headers: {
                             'Content-Type': 'application/json'
