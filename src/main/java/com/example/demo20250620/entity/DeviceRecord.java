@@ -29,11 +29,10 @@ public class DeviceRecord {
 
 //    @Column(name = "device_id")
 //    private Long DeviceId;
-    private String borrorDate;//找获取当前日期的函数搜
-
-    private String returnDate;//空
-
-    private String detail;//详情  随便写
+    private String borrorDate;//借用日期
+    private String approvalDate;//批准时间
+    private String returnDate;//归还日期
+    private String detail;//详情
 
 //-------------------------------------------
 //    @OneToOne
@@ -70,6 +69,14 @@ public class DeviceRecord {
         this.borrorDate = borrorDate;
     }
 
+    public String getApprovalDate() {
+        return approvalDate;
+    }
+
+    public void setApprovalDate(String approvalDate) {
+        this.approvalDate = approvalDate;
+    }
+
     public String getReturnDate() {
         return returnDate;
     }
@@ -100,9 +107,8 @@ public class DeviceRecord {
     public String toString() {
         return "DeviceRecord{" +
                 "id=" + id +
-//                ", userId='" + userId + '\'' +
-//                ", DeviceId=" + DeviceId +
                 ", borrorDate='" + borrorDate + '\'' +
+                ", approvalDate='" + approvalDate + '\'' +
                 ", returnDate='" + returnDate + '\'' +
                 ", detail='" + detail + '\'' +
                 '}';
