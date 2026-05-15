@@ -177,4 +177,142 @@ public class DeviceRecordController {
         return responseObj;
     }
 
+    /**
+     * 管理员通过借用申请
+     * 1. 在devicerecord表中找到该设备的待批准记录
+     * 2. 填入管理员ID和批准时间
+     * 3. 更新设备状态为"借用中"(ID=4)
+     */
+    @PostMapping("/approveBorrow")
+    public Map<String, Object> approveBorrow(@RequestBody Map<String, Long> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = request.get("deviceId");
+            Long adminId = request.get("adminId");
+            
+            if (deviceId == null || adminId == null) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备ID和管理员ID不能为空");
+                return responseObj;
+            }
+            
+            // 查询待批准的借用记录
+            Optional<DeviceRecord> recordOpt = deviceRecordRepository.findPendingBorrowRecord(deviceId);
+            if (!recordOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "未找到待批准的借用记录");
+                return responseObj;
+            }
+            
+            // 查询设备
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            // 查询管理员用户
+            Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+            if (!adminOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "管理员用户不存在");
+                return responseObj;
+            }
+            
+            DeviceRecord record = recordOpt.get();
+            Device device = deviceOpt.get();
+            SysUser admin = adminOpt.get();
+            
+            // 更新借用记录：设置管理员ID和批准时间
+            record.setSysUser(admin);
+            record.setApprovalDate(java.time.LocalDateTime.now().toString());
+            deviceRecordRepository.save(record);
+            
+            // 更新设备状态为"借用中"(ID=4)
+            Devicestate state = new Devicestate();
+            state.setId(4L);
+            device.setDevicestate(state);
+            deviceRepository.save(device);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "借用申请已通过，设备状态已更新为借用中");
+            
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "通过借用申请失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
+    /**
+     * 管理员拒绝借用申请
+     * 1. 在devicerecord表中找到该设备的待批准记录
+     * 2. 填入管理员ID、批准时间和拒绝原因
+     * 3. 更新设备状态为"已安检待借用"(ID=2)，借用人置空
+     */
+    @PostMapping("/rejectBorrow")
+    public Map<String, Object> rejectBorrow(@RequestBody Map<String, Long> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = request.get("deviceId");
+            Long adminId = request.get("adminId");
+            
+            if (deviceId == null || adminId == null) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备ID和管理员ID不能为空");
+                return responseObj;
+            }
+            
+            // 查询待批准的借用记录
+            Optional<DeviceRecord> recordOpt = deviceRecordRepository.findPendingBorrowRecord(deviceId);
+            if (!recordOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "未找到待批准的借用记录");
+                return responseObj;
+            }
+            
+            // 查询设备
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            // 查询管理员用户
+            Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+            if (!adminOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "管理员用户不存在");
+                return responseObj;
+            }
+            
+            DeviceRecord record = recordOpt.get();
+            Device device = deviceOpt.get();
+            SysUser admin = adminOpt.get();
+            
+            // 更新借用记录：设置管理员ID、批准时间和拒绝原因
+            record.setSysUser(admin);
+            record.setApprovalDate(java.time.LocalDateTime.now().toString());
+            record.setDetail("管理员拒绝借用申请");
+            deviceRecordRepository.save(record);
+            
+            // 更新设备状态为"已安检待借用"(ID=2)，借用人置空
+            Devicestate state = new Devicestate();
+            state.setId(2L);
+            device.setDevicestate(state);
+            device.setDeviceyh(null);
+            deviceRepository.save(device);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "借用申请已拒绝，设备状态已更新为已安检待借用");
+            
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "拒绝借用申请失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
 }

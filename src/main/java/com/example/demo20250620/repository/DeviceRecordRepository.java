@@ -17,4 +17,7 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
 
 //    List<DeviceRecord> findDeviceRecordByUserIdAndDetail(Long userId,String detail);
 
+    @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NULL")
+    Optional<DeviceRecord> findPendingBorrowRecord(@Param("deviceId") Long deviceId);
+
 }

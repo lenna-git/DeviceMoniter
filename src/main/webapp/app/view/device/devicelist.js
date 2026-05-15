@@ -172,6 +172,8 @@ Ext.define('AM.view.device.devicelistgrid',{
                     return '<a href="#" class="shelve-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">下架</a>';
                 } else if (stateDetail === '修理中') {
                     return '<a href="#" class="unshelve-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">上架</a>';
+                } else if (stateDetail === '借用中待通过') {
+                    return '<a href="#" class="approve-borrow-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">通过</a> / <a href="#" class="reject-borrow-link" data-id="' + record.get('id') + '" style="color: red; text-decoration: underline;">拒绝</a>';
                 }
             } else if (role === 2) {
                 if (stateDetail === '已安检待借用') {

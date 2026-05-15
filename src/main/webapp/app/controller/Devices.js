@@ -749,6 +749,78 @@ Ext.define('AM.controller.Devices', {
                 }
             }, this);
         }
+        
+        target = e.getTarget('.approve-borrow-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认通过', '确定要通过该设备的借用申请吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerecord/approveBorrow',
+                        method: 'POST',
+                        jsonData: {
+                            deviceId: parseInt(deviceId),
+                            adminId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '通过借用申请失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
+        target = e.getTarget('.reject-borrow-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            Ext.Msg.confirm('确认拒绝', '确定要拒绝该设备的借用申请吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerecord/rejectBorrow',
+                        method: 'POST',
+                        jsonData: {
+                            deviceId: parseInt(deviceId),
+                            adminId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '拒绝借用申请失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
     },
 
 });
