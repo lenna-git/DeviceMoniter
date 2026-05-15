@@ -1,6 +1,5 @@
 package com.example.demo20250620.entity;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -32,13 +31,8 @@ public class Device {
     private String devicesn;//设备序列号
     private String deviceno;//设备编号
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private LocalDateTime devicescdata;//设备送测日期
-    
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private LocalDateTime deviceajdata;//设备安检日期
-    
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
     private LocalDateTime deviceghdata;//设备归还厂商日期
     private String deviceyh;//设备借用人
     private String devicestate;//设备状态

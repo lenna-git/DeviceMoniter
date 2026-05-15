@@ -104,38 +104,131 @@ Ext.define('AM.view.device.devicexzwindow',{
         labelWidth: 80,
         margin: '0 0 10 60',
     },{
-        xtype: 'textfield',
+        xtype: 'datefield',
         fieldLabel:'送测日期',
         name:'devicescdata',
         allowBlank:true,
         width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
-        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
-        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
+        format: 'Y-m-d H:i:s',
+        editable: true,
+        createPicker: function() {
+            var me = this,
+                format = Ext.String.format;
+            return new Ext.picker.Date({
+                pickerField: me,
+                ownerCt: me.ownerCt,
+                renderTo: document.body,
+                floating: true,
+                hidden: true,
+                focusOnShow: true,
+                minDate: me.minValue,
+                maxDate: me.maxValue,
+                disabledDatesRE: me.disabledDatesRE,
+                disabledDatesText: me.disabledDatesText,
+                disabledDays: me.disabledDays,
+                disabledDaysText: me.disabledDaysText,
+                format: me.format,
+                showToday: me.showToday,
+                startDay: me.startDay,
+                minText: format(me.minText, me.formatDate(me.minValue)),
+                maxText: format(me.maxText, me.formatDate(me.maxValue)),
+                listeners: {
+                    scope: me,
+                    select: me.onSelect
+                },
+                keyNavConfig: {
+                    esc: function() {
+                        me.collapse();
+                    }
+                }
+            });
+        }
     },{
-        xtype: 'textfield',
+        xtype: 'datefield',
         fieldLabel:'安检日期',
         name:'deviceajdata',
         allowBlank:true,
         width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
-        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
-        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
+        format: 'Y-m-d H:i:s',
+        editable: true,
+        createPicker: function() {
+            var me = this,
+                format = Ext.String.format;
+            return new Ext.picker.Date({
+                pickerField: me,
+                ownerCt: me.ownerCt,
+                renderTo: document.body,
+                floating: true,
+                hidden: true,
+                focusOnShow: true,
+                minDate: me.minValue,
+                maxDate: me.maxValue,
+                disabledDatesRE: me.disabledDatesRE,
+                disabledDatesText: me.disabledDatesText,
+                disabledDays: me.disabledDays,
+                disabledDaysText: me.disabledDaysText,
+                format: me.format,
+                showToday: me.showToday,
+                startDay: me.startDay,
+                minText: format(me.minText, me.formatDate(me.minValue)),
+                maxText: format(me.maxText, me.formatDate(me.maxValue)),
+                listeners: {
+                    scope: me,
+                    select: me.onSelect
+                },
+                keyNavConfig: {
+                    esc: function() {
+                        me.collapse();
+                    }
+                }
+            });
+        }
     },{
-        xtype: 'textfield',
+        xtype: 'datefield',
         fieldLabel:'归还厂商日期',
         name:'deviceghdata',
         allowBlank:true,
         width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
-        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
-        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
-        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
+        format: 'Y-m-d H:i:s',
+        editable: true,
+        createPicker: function() {
+            var me = this,
+                format = Ext.String.format;
+            return new Ext.picker.Date({
+                pickerField: me,
+                ownerCt: me.ownerCt,
+                renderTo: document.body,
+                floating: true,
+                hidden: true,
+                focusOnShow: true,
+                minDate: me.minValue,
+                maxDate: me.maxValue,
+                disabledDatesRE: me.disabledDatesRE,
+                disabledDatesText: me.disabledDatesText,
+                disabledDays: me.disabledDays,
+                disabledDaysText: me.disabledDaysText,
+                format: me.format,
+                showToday: me.showToday,
+                startDay: me.startDay,
+                minText: format(me.minText, me.formatDate(me.minValue)),
+                maxText: format(me.maxText, me.formatDate(me.maxValue)),
+                listeners: {
+                    scope: me,
+                    select: me.onSelect
+                },
+                keyNavConfig: {
+                    esc: function() {
+                        me.collapse();
+                    }
+                }
+            });
+        }
     },{
         xtype: 'textfield',
         fieldLabel:'借用人',

@@ -129,9 +129,9 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('textfield[name=devicexh]').setValue(devicexh);
         devicexzwindow.down('textfield[name=devicesn]').setValue(devicesn);
         devicexzwindow.down('textfield[name=deviceno]').setValue(deviceno);
-        devicexzwindow.down('textfield[name=devicescdata]').setValue(devicescdata);
-        devicexzwindow.down('textfield[name=deviceajdata]').setValue(deviceajdata);
-        devicexzwindow.down('textfield[name=deviceghdata]').setValue(deviceghdata);
+        devicexzwindow.down('datefield[name=devicescdata]').setValue(devicescdata ? new Date(devicescdata) : null);
+        devicexzwindow.down('datefield[name=deviceajdata]').setValue(deviceajdata ? new Date(deviceajdata) : null);
+        devicexzwindow.down('datefield[name=deviceghdata]').setValue(deviceghdata ? new Date(deviceghdata) : null);
         devicexzwindow.down('textfield[name=deviceyh]').setValue(deviceyh);
         devicexzwindow.down('textfield[name=devicestate]').setValue(devicestate);
         devicexzwindow.down('textfield[name=deviceop]').setValue(deviceop);
@@ -261,9 +261,9 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('textfield[name=devicexh]').setValue(record.get('devicexh'));
         devicexzwindow.down('textfield[name=devicesn]').setValue(record.get('devicesn'));
         devicexzwindow.down('textfield[name=deviceno]').setValue(record.get('deviceno'));
-        devicexzwindow.down('textfield[name=devicescdata]').setValue(record.get('devicescdata'));
-        devicexzwindow.down('textfield[name=deviceajdata]').setValue(record.get('deviceajdata'));
-        devicexzwindow.down('textfield[name=deviceghdata]').setValue(record.get('deviceghdata'));
+        devicexzwindow.down('datefield[name=devicescdata]').setValue(record.get('devicescdata') ? new Date(record.get('devicescdata')) : null);
+        devicexzwindow.down('datefield[name=deviceajdata]').setValue(record.get('deviceajdata') ? new Date(record.get('deviceajdata')) : null);
+        devicexzwindow.down('datefield[name=deviceghdata]').setValue(record.get('deviceghdata') ? new Date(record.get('deviceghdata')) : null);
         devicexzwindow.down('textfield[name=deviceyh]').setValue(record.get('deviceyh'));
         devicexzwindow.down('textfield[name=devicestate]').setValue(record.get('devicestate'));
         devicexzwindow.down('textfield[name=deviceop]').setValue(record.get('deviceop'));
