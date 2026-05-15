@@ -5,7 +5,8 @@ Ext.define('AM.view.device.devicexzwindow',{
     width:600,
     height:700,
     layout:{
-        type:'vbox'
+        type:'vbox',
+        align:'left'
     },
     title: '设备新增',
     
@@ -106,26 +107,35 @@ Ext.define('AM.view.device.devicexzwindow',{
         xtype: 'textfield',
         fieldLabel:'送测日期',
         name:'devicescdata',
-        allowBlank:false,//不允许为空
-        width:300,
+        allowBlank:true,
+        width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
+        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
+        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
     },{
         xtype: 'textfield',
         fieldLabel:'安检日期',
         name:'deviceajdata',
-        allowBlank:false,//不允许为空
-        width:300,
+        allowBlank:true,
+        width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
+        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
+        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
     },{
         xtype: 'textfield',
         fieldLabel:'归还厂商日期',
         name:'deviceghdata',
-        allowBlank:false,//不允许为空
-        width:300,
+        allowBlank:true,
+        width:400,
         labelWidth: 80,
         margin: '0 0 10 60',
+        emptyText: '请输入日期时间 (YYYY-MM-DD HH:MM:SS)',
+        regex: /^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+        regexText: '日期时间格式不正确，请输入 YYYY-MM-DD HH:MM:SS'
     },{
         xtype: 'textfield',
         fieldLabel:'借用人',

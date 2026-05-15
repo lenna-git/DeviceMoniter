@@ -1,7 +1,9 @@
 package com.example.demo20250620.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -30,9 +32,14 @@ public class Device {
     private String devicesn;//设备序列号
     private String deviceno;//设备编号
 
-    private String devicescdata;//设备送测日期
-    private String deviceajdata;//设备安检日期
-    private String deviceghdata;//设备归还厂商日期
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private LocalDateTime devicescdata;//设备送测日期
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private LocalDateTime deviceajdata;//设备安检日期
+    
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Shanghai")
+    private LocalDateTime deviceghdata;//设备归还厂商日期
     private String deviceyh;//设备借用人
     private String devicestate;//设备状态
     private String deviceop;//设备操作
@@ -94,27 +101,27 @@ public class Device {
         this.deviceno = deviceno;
     }
 
-    public String getDevicescdata() {
+    public LocalDateTime getDevicescdata() {
         return devicescdata;
     }
 
-    public void setDevicescdata(String devicescdata) {
+    public void setDevicescdata(LocalDateTime devicescdata) {
         this.devicescdata = devicescdata;
     }
 
-    public String getDeviceajdata() {
+    public LocalDateTime getDeviceajdata() {
         return deviceajdata;
     }
 
-    public void setDeviceajdata(String deviceajdata) {
+    public void setDeviceajdata(LocalDateTime deviceajdata) {
         this.deviceajdata = deviceajdata;
     }
 
-    public String getDeviceghdata() {
+    public LocalDateTime getDeviceghdata() {
         return deviceghdata;
     }
 
-    public void setDeviceghdata(String deviceghdata) {
+    public void setDeviceghdata(LocalDateTime deviceghdata) {
         this.deviceghdata = deviceghdata;
     }
 
