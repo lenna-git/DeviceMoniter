@@ -49,8 +49,8 @@ Ext.define('AM.controller.Devicewindow', {
         selector: 'devicexzwindow > textfield[name=deviceghdata]',
         ref: 'deviceghdatatextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=deviceyh]',
-        ref: 'deviceyhtextfield'
+        selector: 'devicexzwindow > combo[name=deviceyh.id]',
+        ref: 'deviceyhcombo'
     },{
         selector: 'devicexzwindow > textfield[name=devicestate]',
         ref: 'devicestatetextfield'
@@ -91,8 +91,8 @@ Ext.define('AM.controller.Devicewindow', {
         var deviceghdatatextfield =this.getDeviceghdatatextfield();
         var deviceghdata = deviceghdatatextfield.getValue();
 
-        var deviceyhtextfield =this.getDeviceyhtextfield();
-        var deviceyh = deviceyhtextfield.getValue();
+        var deviceyhcombo = this.getDeviceyhcombo();
+        var deviceyhId = deviceyhcombo.getValue();
 
         // var devicestatetextfield =this.getDevicestatetextfield();
         // var devicestate = devicestatetextfield.getValue();
@@ -121,7 +121,7 @@ Ext.define('AM.controller.Devicewindow', {
                     // devicescdata:devicescdata,
                     // deviceajdata:deviceajdata,
                     // deviceghdata:deviceghdata,
-                    deviceyh:deviceyh,
+                    deviceyh: deviceyhId ? { id: deviceyhId } : null,
                     // devicestate:devicestate,
                     // deviceop:deviceop,
                 },
@@ -156,7 +156,7 @@ Ext.define('AM.controller.Devicewindow', {
                     devicexh:devicexh,
                     devicesn:devicesn,
                     deviceno:deviceno,
-                    deviceyh:deviceyh,
+                    deviceyh: deviceyhId ? { id: deviceyhId } : null,
                 },//跟rec生成json字符串一样
                 // jsonData:rec,
                 headers: {

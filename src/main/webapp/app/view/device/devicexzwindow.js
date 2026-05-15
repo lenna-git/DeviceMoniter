@@ -259,14 +259,19 @@ Ext.define('AM.view.device.devicexzwindow',{
             });
         }
     },{
-        xtype: 'textfield',
+        xtype: 'combo',
         fieldLabel:'借用人',
-        name:'deviceyh',
+        name:'deviceyh.id',
         itemId: 'deviceyhField',
         allowBlank:true,
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
+        store: Ext.create('AM.store.userliststore'),
+        displayField: 'sysusername',
+        valueField: 'id',
+        queryMode: 'local',
+        emptyText: '请选择借用人'
     },{
         xtype: 'combo',
         fieldLabel:'状态',

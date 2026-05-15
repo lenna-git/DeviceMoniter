@@ -71,8 +71,8 @@ Ext.define('AM.controller.Devices', {
         selector: 'devicexzwindow > textfield[name=deviceghdata]',
         ref: 'deviceghdatatextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=deviceyh]',
-        ref: 'deviceyhtextfield'
+        selector: 'devicexzwindow > combo[name=deviceyh.id]',
+        ref: 'deviceyhcombo'
     },{
         selector: 'devicexzwindow > combo[name=devicestate.id]',
         ref: 'devicestatecombo'
@@ -120,7 +120,7 @@ Ext.define('AM.controller.Devices', {
         var devicescdata = record.get('devicescdata');
         var deviceajdata = record.get('deviceajdata');
         var deviceghdata = record.get('deviceghdata');
-        var deviceyh = record.get('deviceyh');
+        var deviceyh = record.get('deviceyh') ? record.get('deviceyh').sysusername : '';
         var devicestate = record.get('devicestate');
         var deviceid = record.get('id');
         
@@ -130,7 +130,8 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('datefield[name=devicescdata]').setValue(devicescdata ? new Date(devicescdata) : null);
         devicexzwindow.down('datefield[name=deviceajdata]').setValue(deviceajdata ? new Date(deviceajdata) : null);
         devicexzwindow.down('datefield[name=deviceghdata]').setValue(deviceghdata ? new Date(deviceghdata) : null);
-        devicexzwindow.down('textfield[name=deviceyh]').setValue(deviceyh);
+        var deviceyhId = record.get('deviceyh') ? record.get('deviceyh').id : null;
+        devicexzwindow.down('combo[name=deviceyh.id]').setValue(deviceyhId);
         devicexzwindow.down('combo[name=devicestate.id]').setValue(devicestate ? devicestate.id : null);
         devicexzwindow.down('textfield[name=deviceid]').setValue(deviceid);
         
@@ -262,7 +263,8 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('datefield[name=devicescdata]').setValue(record.get('devicescdata') ? new Date(record.get('devicescdata')) : null);
         devicexzwindow.down('datefield[name=deviceajdata]').setValue(record.get('deviceajdata') ? new Date(record.get('deviceajdata')) : null);
         devicexzwindow.down('datefield[name=deviceghdata]').setValue(record.get('deviceghdata') ? new Date(record.get('deviceghdata')) : null);
-        devicexzwindow.down('textfield[name=deviceyh]').setValue(record.get('deviceyh'));
+        var yhRecord = record.get('deviceyh');
+        devicexzwindow.down('combo[name=deviceyh.id]').setValue(yhRecord ? yhRecord.id : null);
         var devicestate = record.get('devicestate');
         devicexzwindow.down('combo[name=devicestate.id]').setValue(devicestate ? devicestate.id : null);
         

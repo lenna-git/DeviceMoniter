@@ -139,7 +139,7 @@ Ext.define('AM.view.device.devicelistgrid',{
     },{
         text:'借用人',
         align:'center',
-        dataIndex:'deviceyh',
+        dataIndex:'deviceyh.sysusername',
         flex:1,
     },{
         text:'状态',
