@@ -74,11 +74,8 @@ Ext.define('AM.controller.Devices', {
         selector: 'devicexzwindow > textfield[name=deviceyh]',
         ref: 'deviceyhtextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=devicestate]',
-        ref: 'devicestatetextfield'
-    },{
-        selector: 'devicexzwindow > textfield[name=deviceop]',
-        ref: 'deviceoptextfield'
+        selector: 'devicexzwindow > combo[name=devicestate.id]',
+        ref: 'devicestatecombo'
     }],
     onPanelRendered: function() {
         // console.log('The panel was rrrrendered');
@@ -113,7 +110,9 @@ Ext.define('AM.controller.Devices', {
 
     onDblClick: function(grid,record){
         var devicexzwindow = Ext.widget({
-            xtype: 'devicexzwindow'
+            xtype: 'devicexzwindow',
+            isEdit: true,
+            title: '修改设备'
         });
         var devicexh = record.get('devicexh');
         var devicesn = record.get('devicesn');
@@ -123,7 +122,6 @@ Ext.define('AM.controller.Devices', {
         var deviceghdata = record.get('deviceghdata');
         var deviceyh = record.get('deviceyh');
         var devicestate = record.get('devicestate');
-        var deviceop = record.get('deviceop');
         var deviceid = record.get('id');
         
         devicexzwindow.down('textfield[name=devicexh]').setValue(devicexh);
@@ -133,8 +131,7 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('datefield[name=deviceajdata]').setValue(deviceajdata ? new Date(deviceajdata) : null);
         devicexzwindow.down('datefield[name=deviceghdata]').setValue(deviceghdata ? new Date(deviceghdata) : null);
         devicexzwindow.down('textfield[name=deviceyh]').setValue(deviceyh);
-        devicexzwindow.down('textfield[name=devicestate]').setValue(devicestate);
-        devicexzwindow.down('textfield[name=deviceop]').setValue(deviceop);
+        devicexzwindow.down('combo[name=devicestate.id]').setValue(devicestate ? devicestate.id : null);
         devicexzwindow.down('textfield[name=deviceid]').setValue(deviceid);
         
         var devCpu = record.get('devCpu');
@@ -254,7 +251,8 @@ Ext.define('AM.controller.Devices', {
         
         var devicexzwindow = Ext.widget({
             xtype: 'devicexzwindow',
-            title: '修改设备'
+            title: '修改设备',
+            isEdit: true
         });
         
         devicexzwindow.down('textfield[name=deviceid]').setValue(record.get('id'));
@@ -265,8 +263,8 @@ Ext.define('AM.controller.Devices', {
         devicexzwindow.down('datefield[name=deviceajdata]').setValue(record.get('deviceajdata') ? new Date(record.get('deviceajdata')) : null);
         devicexzwindow.down('datefield[name=deviceghdata]').setValue(record.get('deviceghdata') ? new Date(record.get('deviceghdata')) : null);
         devicexzwindow.down('textfield[name=deviceyh]').setValue(record.get('deviceyh'));
-        devicexzwindow.down('textfield[name=devicestate]').setValue(record.get('devicestate'));
-        devicexzwindow.down('textfield[name=deviceop]').setValue(record.get('deviceop'));
+        var devicestate = record.get('devicestate');
+        devicexzwindow.down('combo[name=devicestate.id]').setValue(devicestate ? devicestate.id : null);
         
         var devCpu = record.get('devCpu');
         var devType = record.get('devType');

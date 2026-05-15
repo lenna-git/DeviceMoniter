@@ -1,0 +1,11 @@
+INSERT INTO devicestate (id, state_detail) VALUES (1, '已录入待安检');
+INSERT INTO devicestate (id, state_detail) VALUES (2, '已安检待借用');
+INSERT INTO devicestate (id, state_detail) VALUES (3, '借用中待通过');
+INSERT INTO devicestate (id, state_detail) VALUES (4, '借用中');
+INSERT INTO devicestate (id, state_detail) VALUES (5, '借出中待修理');
+INSERT INTO devicestate (id, state_detail) VALUES (6, '修理中');
+INSERT INTO devicestate (id, state_detail) VALUES (7, '转借中待转借人通过');
+INSERT INTO devicestate (id, state_detail) VALUES (8, '申请归还中待通过');
+INSERT INTO devicestate (id, state_detail) VALUES (9, '已下架');
+INSERT INTO devicestate (id, state_detail) VALUES (10, '已退回');
+INSERT INTO devicestate (id, state_detail) VALUES (11, '转借中待管理员通过');

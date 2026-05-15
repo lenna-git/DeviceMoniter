@@ -13,13 +13,13 @@ Ext.define('AM.model.devicelist',{
         {name:'deviceajdata',type:'String'},//安检日期
         {name:'deviceghdata',type:'String'},//归还厂商日期
         {name:'deviceyh',type:'String'},//借用人
-        {name:'devicestate',type:'String'},//状态
+        {name:'devicestate.stateDetail',type:'String'},//状态
         {name:'deviceop',type:'String'},//操作
-        {name:'deviceop1',type:'String',convert: function(v, record){ return 'borrow'; }},//操作
 
         {name:'devCpu', type: 'auto'},
         {name:'devType', type: 'auto'},
         {name:'devManufacturer', type: 'auto'},
+        {name:'devicestate', type: 'auto'},//设备状态关联对象
 
     ]
 })

@@ -1,0 +1,13 @@
+Ext.define('AM.store.devicestatestore',{
+    extend:'Ext.data.Store',
+    model:'AM.model.devicestate',
+    proxy:{
+        type:'ajax',
+        url:'devicestateaction/allstates',
+        reader:{
+            type:'json',
+            rootProperty:'',
+        }
+    },
+    autoLoad:true
+});

@@ -35,7 +35,11 @@ public class Device {
     private LocalDateTime deviceajdata;//设备安检日期
     private LocalDateTime deviceghdata;//设备归还厂商日期
     private String deviceyh;//设备借用人
-    private String devicestate;//设备状态
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "devicestate_id")
+    private Devicestate devicestate;//设备状态
+    
     private String deviceop;//设备操作
 
 
@@ -127,11 +131,11 @@ public class Device {
         this.deviceyh = deviceyh;
     }
 
-    public String getDevicestate() {
+    public Devicestate getDevicestate() {
         return devicestate;
     }
 
-    public void setDevicestate(String devicestate) {
+    public void setDevicestate(Devicestate devicestate) {
         this.devicestate = devicestate;
     }
 

@@ -9,12 +9,14 @@ Ext.define('AM.view.device.devicexzwindow',{
         align:'left'
     },
     title: '设备新增',
+    isEdit: false,
     
     listeners: {
         afterrender: function(win) {
             var cpuCombo = win.down('combo[name=devcpu_id]');
             var typeCombo = win.down('combo[name=devtype_id]');
             var manufacturerCombo = win.down('combo[name=devmanufacturer_id]');
+            var stateCombo = win.down('#devicestateCombo');
             
             var setDefaultValue = function(combo) {
                 var store = combo.getStore();
@@ -32,6 +34,13 @@ Ext.define('AM.view.device.devicexzwindow',{
             setDefaultValue(cpuCombo);
             setDefaultValue(typeCombo);
             setDefaultValue(manufacturerCombo);
+            
+            if (win.isEdit) {
+                stateCombo.setReadOnly(true);
+                stateCombo.setFieldStyle('background-color: #f0f0f0;');
+            } else {
+                stateCombo.hide();
+            }
         }
     },
 
@@ -238,21 +247,19 @@ Ext.define('AM.view.device.devicexzwindow',{
         labelWidth: 80,
         margin: '0 0 10 60',
     },{
-        xtype: 'textfield',
+        xtype: 'combo',
         fieldLabel:'状态',
-        name:'devicestate',
-        allowBlank:false,//不允许为空
+        name:'devicestate.id',
+        itemId: 'devicestateCombo',
+        allowBlank:true,
         width:300,
         labelWidth: 80,
         margin: '0 0 10 60',
-    },{
-        xtype: 'textfield',
-        fieldLabel:'操作',
-        name:'deviceop',
-        allowBlank:false,//不允许为空
-        width:300,
-        labelWidth: 80,
-        margin: '0 0 10 60',
+        store: Ext.create('AM.store.devicestatestore'),
+        displayField: 'stateDetail',
+        valueField: 'id',
+        queryMode: 'local',
+        emptyText: '请选择设备状态'
     },{
         xtype: 'panel',
         layout:'hbox',

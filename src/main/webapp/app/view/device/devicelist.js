@@ -144,17 +144,12 @@ Ext.define('AM.view.device.devicelistgrid',{
     },{
         text:'状态',
         align:'center',
-        dataIndex:'devicestate',
+        dataIndex:'devicestate.stateDetail',
         flex:1,
     },{
         text:'操作',
         align:'center',
         dataIndex:'deviceop',
-        flex:1,
-    },{
-        text:'操作1',
-        align:'center',
-        dataIndex:'deviceop1',
         flex:1,
     }],
     bbar: {
