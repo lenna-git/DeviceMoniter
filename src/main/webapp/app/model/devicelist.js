@@ -14,7 +14,6 @@ Ext.define('AM.model.devicelist',{
         {name:'deviceghdata',type:'String'},//归还厂商日期
         {name:'deviceyh',type:'String'},//借用人
         {name:'devicestate.stateDetail',type:'String'},//状态
-        {name:'deviceop',type:'String'},//操作
 
         {name:'devCpu', type: 'auto'},
         {name:'devType', type: 'auto'},

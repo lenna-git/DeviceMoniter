@@ -40,11 +40,6 @@ public class Device {
     @JoinColumn(name = "devicestate_id")
     private Devicestate devicestate;//设备状态
     
-    private String deviceop;//设备操作
-
-
-
-
     @OneToMany(mappedBy = "device")
     private List<DeviceRecord> deviceRecordLists;
 
@@ -138,15 +133,6 @@ public class Device {
     public void setDevicestate(Devicestate devicestate) {
         this.devicestate = devicestate;
     }
-
-    public String getDeviceop() {
-        return deviceop;
-    }
-
-    public void setDeviceop(String deviceop) {
-        this.deviceop = deviceop;
-    }
-
 
     public Long getDeviceid() {
         return id;

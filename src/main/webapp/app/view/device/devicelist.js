@@ -147,9 +147,19 @@ Ext.define('AM.view.device.devicelistgrid',{
         dataIndex:'devicestate.stateDetail',
         flex:1,
     },{
+        text:'维修记录',
+        align:'center',
+        flex:1,
+        renderer: function(value, metaData, record) {
+            var role = SYS_USER ? SYS_USER.sysuserrole : 1;
+            if (role === 1) {
+                return '<a href="#" class="view-repair-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">查看</a>';
+            }
+            return '-';
+        }
+    },{
         text:'操作',
         align:'center',
-        dataIndex:'deviceop',
         flex:1,
         renderer: function(value, metaData, record) {
             var stateDetail = record.get('devicestate') ? record.get('devicestate').stateDetail : '';

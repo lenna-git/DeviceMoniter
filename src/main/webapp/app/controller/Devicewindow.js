@@ -55,9 +55,6 @@ Ext.define('AM.controller.Devicewindow', {
         selector: 'devicexzwindow > textfield[name=devicestate]',
         ref: 'devicestatetextfield'
     },{
-        selector: 'devicexzwindow > textfield[name=deviceop]',
-        ref: 'deviceoptextfield'
-    },{
         selector: 'devicexzwindow',
         ref: 'devicexzwindow'
     }],

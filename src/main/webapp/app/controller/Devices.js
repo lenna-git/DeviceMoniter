@@ -406,27 +406,93 @@ Ext.define('AM.controller.Devices', {
                     width: 100,
                     margin: '10 0 10 10',
                     handler: function() {
-                        Ext.Ajax.request({
-                            url: 'deviceaction/repairdevice/' + deviceId,
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            success: function(response, opts) {
-                                var obj = Ext.decode(response.responseText);
-                                if (obj.success) {
-                                    Ext.Msg.alert('结果显示', obj.message);
-                                    var store = Ext.data.StoreMgr.lookup('deviceliststore');
-                                    store.reload();
-                                } else {
-                                    Ext.Msg.alert('提示', obj.message);
-                                }
-                            },
-                            failure: function(response, opts) {
-                                Ext.Msg.alert('操作失败', '设备维修状态更新失败');
-                            }
-                        });
                         actionWindow.close();
+                        
+                        var repairWindow = Ext.create('Ext.window.Window', {
+                            title: '设备维修',
+                            width: 400,
+                            height: 200,
+                            layout: 'vbox',
+                            align: 'center',
+                            items: [{
+                                xtype: 'textarea',
+                                fieldLabel: '维修原因',
+                                name: 'repairReason',
+                                width: 350,
+                                height: 80,
+                                labelWidth: 60,
+                                margin: '10 0 10 0',
+                                emptyText: '请输入维修原因...'
+                            }, {
+                                xtype: 'panel',
+                                layout: 'hbox',
+                                margin: '0 0 10 50',
+                                items: [{
+                                    xtype: 'button',
+                                    text: '确定',
+                                    width: 100,
+                                    margin: '0 10 0 0',
+                                    handler: function() {
+                                        var repairReason = repairWindow.down('textarea[name=repairReason]').getValue();
+                                        if (!repairReason || repairReason.trim() === '') {
+                                            Ext.Msg.alert('提示', '请输入维修原因');
+                                            return;
+                                        }
+                                        
+                                        Ext.Ajax.request({
+                                            url: 'devicerepair/create',
+                                            method: 'POST',
+                                            jsonData: {
+                                                deviceId: deviceId,
+                                                repairReason: repairReason
+                                            },
+                                            headers: {
+                                                'Content-Type': 'application/json'
+                                            },
+                                            success: function(response, opts) {
+                                                var obj = Ext.decode(response.responseText);
+                                                if (obj.success) {
+                                                    Ext.Ajax.request({
+                                                        url: 'deviceaction/repairdevice/' + deviceId,
+                                                        method: 'PUT',
+                                                        headers: {
+                                                            'Content-Type': 'application/json'
+                                                        },
+                                                        success: function(response2, opts2) {
+                                                            var obj2 = Ext.decode(response2.responseText);
+                                                            if (obj2.success) {
+                                                                Ext.Msg.alert('结果显示', '维修记录创建成功，设备状态已更新');
+                                                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                                                store.reload();
+                                                            } else {
+                                                                Ext.Msg.alert('提示', obj2.message);
+                                                            }
+                                                        },
+                                                        failure: function(response2, opts2) {
+                                                            Ext.Msg.alert('操作失败', '设备维修状态更新失败');
+                                                        }
+                                                    });
+                                                } else {
+                                                    Ext.Msg.alert('提示', obj.message);
+                                                }
+                                            },
+                                            failure: function(response, opts) {
+                                                Ext.Msg.alert('操作失败', '维修记录创建失败');
+                                            }
+                                        });
+                                        repairWindow.close();
+                                    }
+                                }, {
+                                    xtype: 'button',
+                                    text: '取消',
+                                    width: 100,
+                                    handler: function() {
+                                        repairWindow.close();
+                                    }
+                                }]
+                            }]
+                        });
+                        repairWindow.show();
                     }
                 }]
             });
@@ -438,31 +504,137 @@ Ext.define('AM.controller.Devices', {
         if (target) {
             e.stopEvent();
             var deviceId = target.getAttribute('data-id');
-            Ext.Msg.confirm('确认上架', '确定要将该设备上架吗？', function(btn) {
-                if (btn === 'yes') {
-                    Ext.Ajax.request({
-                        url: 'deviceaction/unshelvedevice/' + deviceId,
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        success: function(response, opts) {
-                            var obj = Ext.decode(response.responseText);
-                            if (obj.success) {
-                                Ext.Msg.alert('结果显示', obj.message);
-                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
-                                store.reload();
-                            } else {
-                                Ext.Msg.alert('提示', obj.message);
-                            }
-                        },
-                        failure: function(response, opts) {
-                            Ext.Msg.alert('上架失败', '设备上架失败');
-                        },
-                        scope: this
+            
+            var unshelveWindow = Ext.create('Ext.window.Window', {
+                title: '设备上架',
+                width: 400,
+                height: 200,
+                layout: 'vbox',
+                align: 'center',
+                items: [{
+                    xtype: 'textarea',
+                    fieldLabel: '维修记录',
+                    name: 'repairRecord',
+                    width: 350,
+                    height: 80,
+                    labelWidth: 60,
+                    margin: '10 0 10 0',
+                    emptyText: '请输入维修记录备注...'
+                }, {
+                    xtype: 'panel',
+                    layout: 'hbox',
+                    margin: '0 0 10 50',
+                    items: [{
+                        xtype: 'button',
+                        text: '确定',
+                        width: 100,
+                        margin: '0 10 0 0',
+                        handler: function() {
+                            var repairRecord = unshelveWindow.down('textarea[name=repairRecord]').getValue();
+                            
+                            Ext.Ajax.request({
+                                url: 'deviceaction/unshelvedevice/' + deviceId,
+                                method: 'PUT',
+                                jsonData: {
+                                    repairRecord: repairRecord
+                                },
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                success: function(response, opts) {
+                                    var obj = Ext.decode(response.responseText);
+                                    if (obj.success) {
+                                        Ext.Msg.alert('结果显示', obj.message);
+                                        var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                        store.reload();
+                                    } else {
+                                        Ext.Msg.alert('提示', obj.message);
+                                    }
+                                },
+                                failure: function(response, opts) {
+                                    Ext.Msg.alert('上架失败', '设备上架失败');
+                                },
+                                scope: this
+                            });
+                            unshelveWindow.close();
+                        }
+                    }, {
+                        xtype: 'button',
+                        text: '取消',
+                        width: 100,
+                        handler: function() {
+                            unshelveWindow.close();
+                        }
+                    }]
+                }]
+            });
+            unshelveWindow.show();
+            return;
+        }
+        
+        target = e.getTarget('.view-repair-link');
+        if (target) {
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            
+            Ext.Ajax.request({
+                url: 'devicerepair/bydevice/' + deviceId,
+                method: 'GET',
+                success: function(response, opts) {
+                    var repairs = Ext.decode(response.responseText);
+                    
+                    var grid = Ext.create('Ext.grid.Panel', {
+                        border: false,
+                        columns: [{
+                            text: '维修时间',
+                            dataIndex: 'repairTime',
+                            width: 180
+                        }, {
+                            text: '结束时间',
+                            dataIndex: 'endRepairTime',
+                            width: 180
+                        }, {
+                            text: '维修原因',
+                            dataIndex: 'repairReason',
+                            flex: 1
+                        }, {
+                            text: '修理记录',
+                            dataIndex: 'repairRecord',
+                            flex: 1
+                        }],
+                        store: Ext.create('Ext.data.Store', {
+                            fields: ['repairTime', 'endRepairTime', 'repairReason', 'repairRecord'],
+                            data: repairs.map(function(r) {
+                                return {
+                                    repairTime: r.repairTime ? r.repairTime.replace('T', ' ') : '-',
+                                    endRepairTime: r.endRepairTime ? r.endRepairTime.replace('T', ' ') : '-',
+                                    repairReason: r.repairReason || '-',
+                                    repairRecord: r.repairRecord || '-'
+                                };
+                            })
+                        }),
+                        height: 300
                     });
+                    
+                    var window = Ext.create('Ext.window.Window', {
+                        title: '设备维修记录',
+                        width: 800,
+                        height: 400,
+                        layout: 'fit',
+                        items: [grid],
+                        buttons: [{
+                            text: '关闭',
+                            handler: function() {
+                                window.close();
+                            }
+                        }]
+                    });
+                    window.show();
+                },
+                failure: function(response, opts) {
+                    Ext.Msg.alert('错误', '获取维修记录失败');
                 }
-            }, this);
+            });
             return;
         }
         

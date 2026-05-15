@@ -1,8 +1,10 @@
 package com.example.demo20250620.controller;
 
 import com.example.demo20250620.entity.Device;
+import com.example.demo20250620.entity.DeviceRepair;
 import com.example.demo20250620.entity.Devicestate;
 import com.example.demo20250620.repository.DeviceRepository;
+import com.example.demo20250620.repository.DeviceRepairRepository;
 import com.example.demo20250620.repository.DevicestateRepository;
 import com.example.demo20250620.util.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,8 @@ public class DeviceController {
     private DeviceRepository deviceRepository;
     @Autowired
     private DevicestateRepository devicestateRepository;
+    @Autowired
+    private DeviceRepairRepository deviceRepairRepository;
 
     @Autowired
     private final HttpServletRequest request;
@@ -196,7 +200,7 @@ public class DeviceController {
     }
     
     @PutMapping("/unshelvedevice/{id}")
-    public Map<String, Object> unshelveDevice(@PathVariable Long id){
+    public Map<String, Object> unshelveDevice(@PathVariable Long id, @RequestBody(required = false) Map<String, String> request){
         Map<String, Object> responseObj = new HashMap<>();
         try {
             Optional<Device> device1 = deviceRepository.findById(id);
@@ -217,6 +221,18 @@ public class DeviceController {
             }
             
             deviceRepository.save(device2);
+            
+            List<DeviceRepair> repairs = deviceRepairRepository.findByDeviceId(id);
+            for (DeviceRepair repair : repairs) {
+                if (repair.getEndRepairTime() == null) {
+                    repair.setEndRepairTime(LocalDateTime.now());
+                    if (request != null && request.containsKey("repairRecord")) {
+                        repair.setRepairRecord(request.get("repairRecord"));
+                    }
+                    deviceRepairRepository.save(repair);
+                }
+            }
+            
             responseObj.put("success", true);
             responseObj.put("message", "设备上架成功");
         } catch (Exception e) {
@@ -248,7 +264,6 @@ public class DeviceController {
             device2.setDeviceghdata(device.getDeviceghdata());
             device2.setDeviceyh(device.getDeviceyh());
             device2.setDevicestate(device.getDevicestate());
-            device2.setDeviceop(device.getDeviceop());
 
             deviceRepository.save(device2);
             responseObj.put("success", true);
