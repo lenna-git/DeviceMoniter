@@ -8,6 +8,31 @@ Ext.define('AM.view.device.devicexzwindow',{
         type:'vbox'
     },
     title: '设备新增',
+    
+    listeners: {
+        afterrender: function(win) {
+            var cpuCombo = win.down('combo[name=devcpu_id]');
+            var typeCombo = win.down('combo[name=devtype_id]');
+            var manufacturerCombo = win.down('combo[name=devmanufacturer_id]');
+            
+            var setDefaultValue = function(combo) {
+                var store = combo.getStore();
+                if (store.getCount() > 0) {
+                    combo.setValue(store.first().getId());
+                } else {
+                    store.on('load', function() {
+                        if (store.getCount() > 0) {
+                            combo.setValue(store.first().getId());
+                        }
+                    }, null, { single: true });
+                }
+            };
+            
+            setDefaultValue(cpuCombo);
+            setDefaultValue(typeCombo);
+            setDefaultValue(manufacturerCombo);
+        }
+    },
 
     items:[{
         xtype: 'textfield',
