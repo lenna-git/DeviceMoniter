@@ -676,84 +676,60 @@ Ext.define('AM.controller.Devices', {
             return;
         }
         
+        if (!SYS_USER) {
+            Ext.Msg.alert('提示', '请先登录');
+            return;
+        }
+        
         var role = SYS_USER.sysuserrole;
         var sm = this.getTestgrid().getSelectionModel();
         var sr = sm.getSelection();
         var ida = sr[0].get('id');
         var now = new Date();
         var borrowTime = now.toISOString();
-        if(role===1)
-            return;//角色为1，是管理员，没有借阅权限，点此按钮无反应
-        else if(role===2){
+        if(role===1) {
+            // 管理员：没有普通借阅权限，但可以审核借用申请
+            // 通过/拒绝逻辑已经在前面的事件处理中处理
+        } else if(role===2){
             console.log('allowed');//角色为2，是用户，有借阅权限，点此按钮对图书进行借阅
 
-        if(colIdx===12){
-            console.log('开始借阅。。。');//列号为12，才能出发借阅操作，点其他列无反应
-            //接下来写借阅代码
-            Ext.Ajax.request({
-                url:'devicerecord/createDeviceRecord',
-                method:'post',
-                jsonData: {
-                    deviceid:ida,
-                    borrorDate:borrowTime,
-                    returnDate:null,
-                    detail:null,
-                },//跟rec生成json字符串一样
-                // jsonData:rec,
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                sucess:function(response,opts){
-                    var obj = Ext.decode(response.responseText);
-                    if(obj.sucess){
-                        Ext.Msg.alert('结果显示',obj.message);
+            if(colIdx===12){
+                console.log('开始借阅。。。');//列号为12，才能出发借阅操作，点其他列无反应
+                //接下来写借阅代码
+                Ext.Ajax.request({
+                    url:'devicerecord/createDeviceRecord',
+                    method:'post',
+                    jsonData: {
+                        deviceid:ida,
+                        borrorDate:borrowTime,
+                        returnDate:null,
+                        detail:null,
+                    },//跟rec生成json字符串一样
+                    // jsonData:rec,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    sucess:function(response,opts){
+                        var obj = Ext.decode(response.responseText);
+                        if(obj.sucess){
+                            Ext.Msg.alert('结果显示',obj.message);
+                        }
+                    },
+                    failure:function(response,opts){
+                        var obj = Ext.decode(response.responseText);
+                        Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
                     }
-                },
-                failure:function(response,opts){
-                    var obj = Ext.decode(response.responseText);
-                    Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-                }
-            })
-        }
-        }
-    },
-    
-    onDeviceGridClick: function(view, record, item, index, e, eOpts) {
-        var target = e.getTarget('.check-device-link');
-        if (target) {
-            e.stopEvent();
-            var deviceId = target.getAttribute('data-id');
-            Ext.Msg.confirm('确认安检', '确定要对该设备进行安检吗？', function(btn) {
-                if (btn === 'yes') {
-                    Ext.Ajax.request({
-                        url: 'deviceaction/checkdevice/' + deviceId,
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        success: function(response, opts) {
-                            var obj = Ext.decode(response.responseText);
-                            if (obj.success) {
-                                Ext.Msg.alert('结果显示', obj.message);
-                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
-                                store.reload();
-                            } else {
-                                Ext.Msg.alert('提示', obj.message);
-                            }
-                        },
-                        failure: function(response, opts) {
-                            Ext.Msg.alert('安检失败', '设备安检失败');
-                        },
-                        scope: this
-                    });
-                }
-            }, this);
+                })
+            }
         }
         
+        // 管理员审核借用申请 - 通过
         target = e.getTarget('.approve-borrow-link');
         if (target) {
+            console.log('approve-borrow-link clicked');
             e.stopEvent();
             var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
             Ext.Msg.confirm('确认通过', '确定要通过该设备的借用申请吗？', function(btn) {
                 if (btn === 'yes') {
                     Ext.Ajax.request({
@@ -786,10 +762,13 @@ Ext.define('AM.controller.Devices', {
             return;
         }
         
+        // 管理员审核借用申请 - 拒绝
         target = e.getTarget('.reject-borrow-link');
         if (target) {
+            console.log('reject-borrow-link clicked');
             e.stopEvent();
             var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
             Ext.Msg.confirm('确认拒绝', '确定要拒绝该设备的借用申请吗？', function(btn) {
                 if (btn === 'yes') {
                     Ext.Ajax.request({

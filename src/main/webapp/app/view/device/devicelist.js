@@ -164,6 +164,7 @@ Ext.define('AM.view.device.devicelistgrid',{
         renderer: function(value, metaData, record) {
             var stateDetail = record.get('devicestate') ? record.get('devicestate').stateDetail : '';
             var role = SYS_USER ? SYS_USER.sysuserrole : 1;
+            console.log('操作列渲染 - 角色:', role, '状态:', stateDetail, '设备ID:', record.get('id'));
             
             if (role === 1) {
                 if (stateDetail === '已录入待安检') {

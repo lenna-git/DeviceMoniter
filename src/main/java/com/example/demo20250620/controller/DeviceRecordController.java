@@ -160,7 +160,7 @@ public class DeviceRecordController {
             // 创建借用记录
             DeviceRecord record = new DeviceRecord();
             record.setDevice(device);
-            record.setSysUser(user);
+            record.setUserId(userId);
             record.setBorrorDate(java.time.LocalDateTime.now().toString());
             record.setReturnDate(null);
             record.setDetail("设备借用");
