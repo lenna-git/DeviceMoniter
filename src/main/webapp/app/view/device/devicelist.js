@@ -91,6 +91,22 @@ Ext.define('AM.view.device.devicelistgrid',{
     viewConfig: {
         loadMask: true
     },
+    listeners: {
+        afterrender: function(grid) {
+            var role = SYS_USER ? SYS_USER.sysuserrole : null;
+            var columns = grid.columns;
+            for (var i = 0; i < columns.length; i++) {
+                if (columns[i].text === '维修记录') {
+                    if (role === 1) {
+                        columns[i].show();
+                    } else {
+                        columns[i].hide();
+                    }
+                    break;
+                }
+            }
+        }
+    },
     columns:[{
         text:'芯片',
         align:'center',
@@ -155,7 +171,7 @@ Ext.define('AM.view.device.devicelistgrid',{
             if (role === 1) {
                 return '<a href="#" class="view-repair-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">查看</a>';
             }
-            return '-';
+            return '';
         }
     },{
         text:'操作',
