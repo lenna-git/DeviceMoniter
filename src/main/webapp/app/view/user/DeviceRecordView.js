@@ -20,6 +20,12 @@ Ext.define('AM.view.user.DeviceRecordView' ,{
                 action:'select',
                 text:'查询',
                 height:'30',
+            },{
+                margin: '15 10 10 10',
+                xtype: 'button',
+                action:'export',
+                text:'导出Excel',
+                height:'30',
             }]
         },
         {

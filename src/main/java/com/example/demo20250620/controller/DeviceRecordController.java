@@ -8,8 +8,18 @@ import com.example.demo20250620.repository.DeviceRecordRepository;
 import com.example.demo20250620.repository.DeviceRepository;
 import com.example.demo20250620.repository.SysUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -443,6 +453,155 @@ public class DeviceRecordController {
             responseObj.put("message", "验证失败: " + e.getMessage());
         }
         return responseObj;
+    }
+
+    /**
+     * 导出设备借用记录到Excel
+     */
+    @GetMapping("/exportExcel")
+    public ResponseEntity<byte[]> exportExcel(@RequestParam(required = false) String keyword) throws IOException {
+        // 获取数据
+        List<DeviceRecord> records;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            records = deviceRecordRepository.findAllWithDeviceAndUser();
+        } else {
+            records = deviceRecordRepository.findByKeywordWithUsername(keyword.trim());
+        }
+        
+        // 填充用户名
+        for (DeviceRecord record : records) {
+            if (record.getUserId() != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(record.getUserId());
+                if (userOpt.isPresent()) {
+                    record.setBorrowerUsername(userOpt.get().getSysusername());
+                }
+            }
+            if (record.getReturnApprovalUserId() != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(record.getReturnApprovalUserId());
+                if (userOpt.isPresent()) {
+                    record.setReturnApprovalUsername(userOpt.get().getSysusername());
+                }
+            }
+        }
+        
+        // 创建Excel工作簿
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("设备借用记录");
+        
+        // 创建表头样式
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        
+        // 创建数据样式
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        
+        // 创建表头
+        String[] headers = {"设备编号", "芯片", "类型", "型号", "厂商", "借用人", "借用日期", "批准人", "批准借用日期", "归还日期", "批准归还人", "批准归还日期"};
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+        
+        // 填充数据
+        int rowNum = 1;
+        for (DeviceRecord record : records) {
+            Row row = sheet.createRow(rowNum++);
+            
+            // 设备编号
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(record.getDevice() != null ? record.getDevice().getDeviceno() : "");
+            cell0.setCellStyle(dataStyle);
+            
+            // 芯片
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(record.getDevice() != null && record.getDevice().getDevCpu() != null ? record.getDevice().getDevCpu().getCpuname() : "");
+            cell1.setCellStyle(dataStyle);
+            
+            // 类型
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(record.getDevice() != null && record.getDevice().getDevType() != null ? record.getDevice().getDevType().getTypename() : "");
+            cell2.setCellStyle(dataStyle);
+            
+            // 型号
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(record.getDevice() != null ? record.getDevice().getDevicexh() : "");
+            cell3.setCellStyle(dataStyle);
+            
+            // 厂商
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(record.getDevice() != null && record.getDevice().getDevManufacturer() != null ? record.getDevice().getDevManufacturer().getManufacturername() : "");
+            cell4.setCellStyle(dataStyle);
+            
+            // 借用人
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(record.getBorrowerUsername() != null ? record.getBorrowerUsername() : "");
+            cell5.setCellStyle(dataStyle);
+            
+            // 借用日期
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(record.getBorrorDate() != null ? record.getBorrorDate() : "");
+            cell6.setCellStyle(dataStyle);
+            
+            // 批准人
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(record.getSysUser() != null ? record.getSysUser().getSysusername() : "");
+            cell7.setCellStyle(dataStyle);
+            
+            // 批准借用日期
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(record.getApprovalDate() != null ? record.getApprovalDate() : "");
+            cell8.setCellStyle(dataStyle);
+            
+            // 归还日期
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(record.getReturnDate() != null ? record.getReturnDate() : "");
+            cell9.setCellStyle(dataStyle);
+            
+            // 批准归还人
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(record.getReturnApprovalUsername() != null ? record.getReturnApprovalUsername() : "");
+            cell10.setCellStyle(dataStyle);
+            
+            // 批准归还日期
+            Cell cell11 = row.createCell(11);
+            cell11.setCellValue(record.getReturnApprovalDate() != null ? record.getReturnApprovalDate() : "");
+            cell11.setCellStyle(dataStyle);
+        }
+        
+        // 自动调整列宽
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+        
+        // 写入字节数组输出流
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        
+        // 设置响应头
+        String filename = "设备借用记录_" + java.time.LocalDateTime.now().toString().replace(":", "-") + ".xlsx";
+        String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+        
+        org.springframework.http.HttpHeaders responseHeaders = new org.springframework.http.HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        responseHeaders.setContentDispositionFormData("attachment", encodedFilename);
+        responseHeaders.add("Access-Control-Expose-Headers", "Content-Disposition");
+        
+        return new ResponseEntity<>(outputStream.toByteArray(), responseHeaders, org.springframework.http.HttpStatus.OK);
     }
 
 }

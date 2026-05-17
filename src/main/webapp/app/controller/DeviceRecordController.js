@@ -22,6 +22,9 @@ Ext.define('AM.controller.DeviceRecordController', {
             },
             'viewport centerpage DeviceRecordView button[action=select]': {
                 click: this.onselectbuttioncick
+            },
+            'viewport centerpage DeviceRecordView button[action=export]': {
+                click: this.onexportbuttonclick
             }
         }
         );
@@ -197,5 +200,25 @@ Ext.define('AM.controller.DeviceRecordController', {
 
     onCellDblClick1:function (){
         console.log('onCellDblClick1');
+    },
+    
+    //导出Excel
+    onexportbuttonclick:function (){
+        var keyword = this.getSearchKeywordtf().getValue();
+        var url = 'devicerecord/exportExcel';
+        if (keyword && keyword.trim()) {
+            url += '?keyword=' + encodeURIComponent(keyword.trim());
+        }
+        
+        // 创建隐藏的iframe来下载文件
+        var iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        // 下载完成后移除iframe
+        setTimeout(function() {
+            document.body.removeChild(iframe);
+        }, 10000);
     }
 });
