@@ -175,10 +175,18 @@ Ext.define('AM.view.device.devicelistgrid',{
                     return '<a href="#" class="unshelve-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">上架</a>';
                 } else if (stateDetail === '借用中待通过') {
                     return '<a href="#" class="approve-borrow-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">通过</a> / <a href="#" class="reject-borrow-link" data-id="' + record.get('id') + '" style="color: red; text-decoration: underline;">拒绝</a>';
+                } else if (stateDetail === '申请归还中待通过') {
+                    return '<a href="#" class="approve-return-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">批准</a>';
                 }
             } else if (role === 2) {
                 if (stateDetail === '已安检待借用') {
                     return '<a href="#" class="borrow-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">借用</a>';
+                } else if (stateDetail === '借用中') {
+                    var borrowerId = record.get('deviceyh') ? record.get('deviceyh').id : null;
+                    var currentUserId = SYS_USER ? SYS_USER.id : null;
+                    if (borrowerId === currentUserId) {
+                        return '<a href="#" class="repair-device-link" data-id="' + record.get('id') + '" style="color: orange; text-decoration: underline;">申请报修</a> / <a href="#" class="return-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">退回</a>';
+                    }
                 }
             }
             

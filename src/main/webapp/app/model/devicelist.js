@@ -12,6 +12,7 @@ Ext.define('AM.model.devicelist',{
         {name:'devicescdata',type:'String'},//送测日期
         {name:'deviceajdata',type:'String'},//安检日期
         {name:'deviceghdata',type:'String'},//归还厂商日期
+        {name:'deviceyh.id',type:'Number'},//借用人ID
         {name:'deviceyh.sysusername',type:'String'},//借用人用户名
         {name:'devicestate.stateDetail',type:'String'},//状态
 

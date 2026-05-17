@@ -20,4 +20,7 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
     @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NULL")
     Optional<DeviceRecord> findPendingBorrowRecord(@Param("deviceId") Long deviceId);
 
+    @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NOT NULL AND dr.returnDate IS NULL")
+    Optional<DeviceRecord> findActiveBorrowRecord(@Param("deviceId") Long deviceId);
+
 }

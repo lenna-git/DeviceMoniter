@@ -2,14 +2,16 @@ Ext.define('AM.view.device.devicexzwindow',{
     extend: 'Ext.window.Window',
     alias:'widget.devicexzwindow',
     border: true,
-    width:600,
-    height:700,
+    width: 550,
+    height: 500,
     layout:{
         type:'vbox',
-        align:'left'
+        align:'center'
     },
     title: '设备新增',
     isEdit: false,
+    maximizable: true,
+    resizable: true,
     
     listeners: {
         afterrender: function(win) {

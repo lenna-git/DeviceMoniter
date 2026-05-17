@@ -687,39 +687,43 @@ Ext.define('AM.controller.Devices', {
         var ida = sr[0].get('id');
         var now = new Date();
         var borrowTime = now.toISOString();
-        if(role===1) {
-            // 管理员：没有普通借阅权限，但可以审核借用申请
-            // 通过/拒绝逻辑已经在前面的事件处理中处理
-        } else if(role===2){
+        // 管理员角色：跳过旧的借阅逻辑，只处理审核相关操作
+        if(role !== 2) {
+            // 非操作员角色，跳过旧的借阅逻辑
+        } else {
             console.log('allowed');//角色为2，是用户，有借阅权限，点此按钮对图书进行借阅
 
             if(colIdx===12){
                 console.log('开始借阅。。。');//列号为12，才能出发借阅操作，点其他列无反应
-                //接下来写借阅代码
-                Ext.Ajax.request({
-                    url:'devicerecord/createDeviceRecord',
-                    method:'post',
-                    jsonData: {
-                        deviceid:ida,
-                        borrorDate:borrowTime,
-                        returnDate:null,
-                        detail:null,
-                    },//跟rec生成json字符串一样
-                    // jsonData:rec,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    sucess:function(response,opts){
-                        var obj = Ext.decode(response.responseText);
-                        if(obj.sucess){
-                            Ext.Msg.alert('结果显示',obj.message);
+                //检查是否点击的是借用链接
+                var borrowTarget = e.getTarget('.borrow-device-link');
+                if (borrowTarget) {
+                    //接下来写借阅代码
+                    Ext.Ajax.request({
+                        url:'devicerecord/createDeviceRecord',
+                        method:'post',
+                        jsonData: {
+                            deviceid:ida,
+                            borrorDate:borrowTime,
+                            returnDate:null,
+                            detail:null,
+                        },//跟rec生成json字符串一样
+                        // jsonData:rec,
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        sucess:function(response,opts){
+                            var obj = Ext.decode(response.responseText);
+                            if(obj.sucess){
+                                Ext.Msg.alert('结果显示',obj.message);
+                            }
+                        },
+                        failure:function(response,opts){
+                            var obj = Ext.decode(response.responseText);
+                            Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
                         }
-                    },
-                    failure:function(response,opts){
-                        var obj = Ext.decode(response.responseText);
-                        Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-                    }
-                })
+                    })
+                }
             }
         }
         
@@ -793,6 +797,123 @@ Ext.define('AM.controller.Devices', {
                         },
                         failure: function(response, opts) {
                             Ext.Msg.alert('操作失败', '拒绝借用申请失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
+        // 操作员申请报修
+        target = e.getTarget('.repair-device-link');
+        if (target) {
+            console.log('repair-device-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            Ext.Msg.confirm('确认报修', '确定要申请报修该设备吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerepair/createRepair',
+                        method: 'POST',
+                        jsonData: {
+                            deviceId: parseInt(deviceId),
+                            reporterId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '申请报修失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
+        // 操作员退回设备
+        target = e.getTarget('.return-device-link');
+        if (target) {
+            console.log('return-device-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            Ext.Msg.confirm('确认退回', '确定要退回该设备吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerecord/returnDevice',
+                        method: 'POST',
+                        jsonData: {
+                            deviceId: parseInt(deviceId),
+                            userId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '退回设备失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
+        // 管理员批准设备归还
+        target = e.getTarget('.approve-return-link');
+        if (target) {
+            console.log('approve-return-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            Ext.Msg.confirm('确认批准', '确定要批准该设备的归还申请吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerecord/approveReturn',
+                        method: 'POST',
+                        jsonData: {
+                            deviceId: parseInt(deviceId),
+                            adminId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '批准归还失败');
                         },
                         scope: this
                     });

@@ -315,4 +315,101 @@ public class DeviceRecordController {
         return responseObj;
     }
 
+    /**
+     * 操作员退回设备
+     * 1. 更新设备状态为"申请归还中待通过"(ID=8)
+     */
+    @PostMapping("/returnDevice")
+    public Map<String, Object> returnDevice(@RequestBody Map<String, Long> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = request.get("deviceId");
+            Long userId = request.get("userId");
+            
+            if (deviceId == null || userId == null) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备ID和用户ID不能为空");
+                return responseObj;
+            }
+            
+            // 查询设备
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            Device device = deviceOpt.get();
+            
+            // 更新设备状态为"申请归还中待通过"(ID=8)
+            Devicestate state = new Devicestate();
+            state.setId(8L);
+            device.setDevicestate(state);
+            deviceRepository.save(device);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "设备退回申请已提交，等待管理员审核");
+            
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "退回设备失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
+    /**
+     * 管理员批准设备归还
+     * 1. 更新设备状态为"已安检待借用"(ID=2)，借用人置空
+     * 2. 在devicerecord中找到该设备returndate为空的记录，填入当前时间
+     */
+    @PostMapping("/approveReturn")
+    public Map<String, Object> approveReturn(@RequestBody Map<String, Long> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = request.get("deviceId");
+            Long adminId = request.get("adminId");
+            
+            if (deviceId == null || adminId == null) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备ID和管理员ID不能为空");
+                return responseObj;
+            }
+            
+            // 查询设备
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            Device device = deviceOpt.get();
+            
+            // 更新设备状态为"已安检待借用"(ID=2)，借用人置空
+            Devicestate state = new Devicestate();
+            state.setId(2L);
+            device.setDevicestate(state);
+            device.setDeviceyh(null);
+            deviceRepository.save(device);
+            
+            // 找到该设备returndate为空的记录，填入归还时间
+            Optional<DeviceRecord> recordOpt = deviceRecordRepository.findActiveBorrowRecord(deviceId);
+            if (recordOpt.isPresent()) {
+                DeviceRecord record = recordOpt.get();
+                record.setReturnDate(java.time.LocalDateTime.now().toString());
+                record.setDetail("设备已归还");
+                deviceRecordRepository.save(record);
+            }
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "设备归还已批准，状态已更新为已安检待借用");
+            
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "批准归还失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
 }
