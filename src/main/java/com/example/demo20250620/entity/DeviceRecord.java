@@ -35,6 +35,12 @@ public class DeviceRecord {
     private Long returnApprovalUserId;//归还批准人ID
     private String returnApprovalDate;//归还批准时间
     private String detail;//详情
+    
+    @Transient
+    private String borrowerUsername;//借用人用户名
+    
+    @Transient
+    private String returnApprovalUsername;//归还批准人用户名
 
 //-------------------------------------------
 //    @OneToOne
@@ -166,6 +172,22 @@ public class DeviceRecord {
 
     public void setDevice(Device device) {
         this.device = device;
+    }
+
+    public String getBorrowerUsername() {
+        return borrowerUsername;
+    }
+
+    public void setBorrowerUsername(String borrowerUsername) {
+        this.borrowerUsername = borrowerUsername;
+    }
+
+    public String getReturnApprovalUsername() {
+        return returnApprovalUsername;
+    }
+
+    public void setReturnApprovalUsername(String returnApprovalUsername) {
+        this.returnApprovalUsername = returnApprovalUsername;
     }
 
 //    public Device getDevice() {

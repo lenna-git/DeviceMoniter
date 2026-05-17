@@ -55,33 +55,30 @@ public class DeviceRecordController {
     }
 
     @GetMapping("/alldevicerecords")
-    public List<DeviceRecord> getAllDevicerecords(@RequestParam(required = false) Long userId,String detail){
-//<<<<<<< .mine
-//        if(EmptyorNot(userId)&&EmptyorNot(detail)){
-//            return deviceRecordRepository.findAll();
-//        }
-//        else if(!EmptyorNot(userId)&&EmptyorNot(detail)){
-//
-//            return deviceRecordRepository.findByUserId(userId);
-//        }
-//        else if(EmptyorNot(userId)&&!EmptyorNot(detail)){
-//            return deviceRecordRepository.findByDetail(detail);
-//        }else {
-//            return deviceRecordRepository.findDeviceRecordByUserIdAndDetail(userId,detail);
-//        }
-//=======
-        return deviceRecordRepository.findAll();
-//        if(EmptyorNot(userId)&&EmptyorNot(detail))
-//            return deviceRecordRepository.findAll();
-//        else if(!EmptyorNot(userId)&&EmptyorNot(detail))
-//            return deviceRecordRepository.findByUserId(userId);
-//        else if(EmptyorNot(userId)&&!EmptyorNot(detail)){
-//            return deviceRecordRepository.findByDetail(detail);
-//        }else {
-//            return deviceRecordRepository.findDeviceRecordByUserIdAndDetail(userId,detail);
-//        }
-
-//>>>>>>> .r35
+    public List<DeviceRecord> getAllDevicerecords(@RequestParam(required = false) String keyword){
+        List<DeviceRecord> records;
+        if (keyword == null || keyword.trim().isEmpty()) {
+            records = deviceRecordRepository.findAllWithDeviceAndUser();
+        } else {
+            records = deviceRecordRepository.findByKeywordWithUsername(keyword.trim());
+        }
+        for (DeviceRecord record : records) {
+            // 填充借用人用户名
+            if (record.getUserId() != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(record.getUserId());
+                if (userOpt.isPresent()) {
+                    record.setBorrowerUsername(userOpt.get().getSysusername());
+                }
+            }
+            // 填充归还批准人用户名
+            if (record.getReturnApprovalUserId() != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(record.getReturnApprovalUserId());
+                if (userOpt.isPresent()) {
+                    record.setReturnApprovalUsername(userOpt.get().getSysusername());
+                }
+            }
+        }
+        return records;
     }
 
     @PutMapping("/updateDeviceRecordById/{deviceId}")

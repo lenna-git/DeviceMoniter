@@ -10,17 +10,10 @@ Ext.define('AM.view.user.DeviceRecordView' ,{
             items: [{
                 margin: '10 10 10 10',
                 xtype: 'textfield',
-                name: 'searchUserId',
-                width:240,
+                name: 'searchKeyword',
+                width:300,
                 height:30,
-                emptyText:' 请输入用户id查询',
-            },{
-                margin: '10 10 10 10',
-                xtype: 'textfield',
-                name: 'searchDetail',
-                width:240,
-                height:30,
-                emptyText:' 请输入Detail查询',
+                emptyText:' 请输入借用人/设备编号/详情查询',
             },{
                 margin: '15 10 10 10',
                 xtype: 'button',
@@ -34,29 +27,6 @@ Ext.define('AM.view.user.DeviceRecordView' ,{
             xtype:'DeviceRecordGrid',
             width:'100%',
             flex:1,
-        },
-        {
-            xtype: 'panel',
-            layout:{
-                type:'hbox',
-                pack:'end'
-            },
-            items: [
-            {
-                margin: '10 10 10 10',
-                xtype: 'button',
-                action:'xj',
-                text:'新建',
-                height:'30',
-            },
-            {
-                margin: '10 10 10 10',
-                xtype: 'button',
-                action:'sc',
-                text:'删除',
-                height:'30',
-            }
-            ]
         }
     ],
 
@@ -69,13 +39,6 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
     //
     columns:[
     {
-        text:'借用人',
-        align:'center',
-        style:'font-size:16px',
-        dataIndex:'sysUser.sysusername',
-        flex:1,
-    },
-    {
         text:'设备编号',
         align:'center',
         style:'font-size:16px',
@@ -86,13 +49,13 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         text:'芯片',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device.devicexp',
+        dataIndex:'device.devCpu.cpuname',
         flex:1,
     },{
         text:'类型',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device.devicetype',
+        dataIndex:'device.devType.typename',
         flex:1,
     },{
         text:'型号',
@@ -104,7 +67,14 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         text:'厂商',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device.devicecs',
+        dataIndex:'device.devManufacturer.manufacturername',
+        flex:1,
+    },
+    {
+        text:'借用人',
+        align:'center',
+        style:'font-size:16px',
+        dataIndex:'borrowerUsername',
         flex:1,
     },
     {
@@ -114,10 +84,34 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         dataIndex:'borrorDate',
         flex:1,
     },{
+        text:'批准人',
+        align:'center',
+        style:'font-size:16px',
+        dataIndex:'sysUser.sysusername',
+        flex:1,
+    },{
+        text:'批准借用日期',
+        align:'center',
+        style:'font-size:16px',
+        dataIndex:'approvalDate',
+        flex:1,
+    },{
         text:'归还日期',
         align:'center',
         style:'font-size:16px',
         dataIndex:'returnDate',
+        flex:1,
+    },{
+        text:'批准归还人',
+        align:'center',
+        style:'font-size:16px',
+        dataIndex:'returnApprovalUsername',
+        flex:1,
+    },{
+        text:'批准归还日期',
+        align:'center',
+        style:'font-size:16px',
+        dataIndex:'returnApprovalDate',
         flex:1,
     }],
 

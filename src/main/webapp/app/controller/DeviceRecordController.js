@@ -34,11 +34,8 @@ Ext.define('AM.controller.DeviceRecordController', {
         selector: 'viewport centerpage DeviceRecordView DeviceRecordGrid',
         ref:'DeviceRecordGrid'
     },{
-        selector: 'viewport centerpage DeviceRecordView textfield[name=searchUserId]',
-        ref: 'searchUserIdtf'
-    },{
-        selector: 'viewport centerpage DeviceRecordView textfield[name=searchDetail]',
-        ref: 'searchDetailtf'
+        selector: 'viewport centerpage DeviceRecordView textfield[name=searchKeyword]',
+        ref: 'searchKeywordtf'
     },
 
     {
@@ -80,10 +77,9 @@ Ext.define('AM.controller.DeviceRecordController', {
 
     //查询
     onselectbuttioncick:function (){
-        console.log('搜索用户id：'+this.getSearchUserIdtf().getValue()+'搜索Detail：'+this.getSearchDetailtf().getValue());
+        console.log('搜索关键词：'+this.getSearchKeywordtf().getValue());
         var store = this.getDeviceRecordGrid().getStore();
-        store.getProxy().extraParams.userId=this.getSearchUserIdtf().getValue();
-        store.getProxy().extraParams.detail=this.getSearchDetailtf().getValue();
+        store.getProxy().extraParams.keyword=this.getSearchKeywordtf().getValue();
         store.reload();
     },
 
