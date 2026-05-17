@@ -393,11 +393,13 @@ public class DeviceRecordController {
             device.setDeviceyh(null);
             deviceRepository.save(device);
             
-            // 找到该设备returndate为空的记录，填入归还时间
+            // 找到该设备returndate为空的记录，填入归还时间和归还批准人
             Optional<DeviceRecord> recordOpt = deviceRecordRepository.findActiveBorrowRecord(deviceId);
             if (recordOpt.isPresent()) {
                 DeviceRecord record = recordOpt.get();
                 record.setReturnDate(java.time.LocalDateTime.now().toString());
+                record.setReturnApprovalUserId(adminId);
+                record.setReturnApprovalDate(java.time.LocalDateTime.now().toString());
                 record.setDetail("设备已归还");
                 deviceRecordRepository.save(record);
             }

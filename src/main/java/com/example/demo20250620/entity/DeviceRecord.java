@@ -32,6 +32,8 @@ public class DeviceRecord {
     private String borrorDate;//借用日期
     private String approvalDate;//批准时间
     private String returnDate;//归还日期
+    private Long returnApprovalUserId;//归还批准人ID
+    private String returnApprovalDate;//归还批准时间
     private String detail;//详情
 
 //-------------------------------------------
@@ -110,8 +112,26 @@ public class DeviceRecord {
                 ", borrorDate='" + borrorDate + '\'' +
                 ", approvalDate='" + approvalDate + '\'' +
                 ", returnDate='" + returnDate + '\'' +
+                ", returnApprovalUserId=" + returnApprovalUserId +
+                ", returnApprovalDate='" + returnApprovalDate + '\'' +
                 ", detail='" + detail + '\'' +
                 '}';
+    }
+
+    public Long getReturnApprovalUserId() {
+        return returnApprovalUserId;
+    }
+
+    public void setReturnApprovalUserId(Long returnApprovalUserId) {
+        this.returnApprovalUserId = returnApprovalUserId;
+    }
+
+    public String getReturnApprovalDate() {
+        return returnApprovalDate;
+    }
+
+    public void setReturnApprovalDate(String returnApprovalDate) {
+        this.returnApprovalDate = returnApprovalDate;
     }
 
 
