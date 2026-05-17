@@ -22,6 +22,10 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     Page<Device> findDeviceByDevicexh(String devicexh, Pageable pageable);
 
+    List<Device> findByDevicesn(String devicesn);
+
+    List<Device> findByDeviceno(String deviceno);
+
     @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType dt LEFT JOIN FETCH d.devCpu dc LEFT JOIN FETCH d.devManufacturer dm WHERE " +
            "(:devicexp IS NULL OR :devicexp = '' OR dc.cpuname LIKE %:devicexp%) AND " +
            "(:devicetype IS NULL OR :devicetype = '' OR dt.typename LIKE %:devicetype%) AND " +

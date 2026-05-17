@@ -414,4 +414,38 @@ public class DeviceRecordController {
         return responseObj;
     }
 
+    @PostMapping("/checkDeviceSnAndNo")
+    @ResponseBody
+    public Map<String, Object> checkDeviceSnAndNo(@RequestParam String devicesn, 
+                                                   @RequestParam String deviceno,
+                                                   @RequestParam(required = false) Long excludeId) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            List<Device> snDevices = deviceRepository.findByDevicesn(devicesn);
+            if (!snDevices.isEmpty()) {
+                if (excludeId == null || !snDevices.get(0).getId().equals(excludeId)) {
+                    responseObj.put("success", false);
+                    responseObj.put("message", "序列号已存在");
+                    return responseObj;
+                }
+            }
+            
+            List<Device> noDevices = deviceRepository.findByDeviceno(deviceno);
+            if (!noDevices.isEmpty()) {
+                if (excludeId == null || !noDevices.get(0).getId().equals(excludeId)) {
+                    responseObj.put("success", false);
+                    responseObj.put("message", "设备编号已存在");
+                    return responseObj;
+                }
+            }
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "验证通过");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "验证失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+
 }

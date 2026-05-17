@@ -100,8 +100,26 @@ Ext.define('AM.controller.Devicewindow', {
         // var deviceoptextfield =this.getDeviceoptextfield();
         // var deviceop = deviceoptextfield.getValue();
         var store = Ext.data.StoreMgr.lookup('deviceliststore');
-        if(deviceid){
-            var sm = this.getTestgrid().getSelectionModel();
+        
+        var excludeId = deviceid ? deviceid : null;
+        var me = this;
+        Ext.Ajax.request({
+            url: 'devicerecord/checkDeviceSnAndNo',
+            method: 'POST',
+            params: {
+                devicesn: devicesn,
+                deviceno: deviceno,
+                excludeId: excludeId
+            },
+            success: function(response) {
+                var result = Ext.decode(response.responseText);
+                if (!result.success) {
+                    Ext.Msg.alert('提示', result.message);
+                    return;
+                }
+                
+                if(deviceid){
+            var sm = me.getTestgrid().getSelectionModel();
             var sr = sm.getSelection();
 
             var ida = sr[0].get('id');
@@ -135,15 +153,15 @@ Ext.define('AM.controller.Devicewindow', {
                     } else {
                         Ext.Msg.alert('提示', obj.message);
                     }
-                    this.getDevicexzwindow().close();
+                    me.getDevicexzwindow().close();
                     store.reload();
                 },
                 failure:function(response,opts){
                     Ext.Msg.alert('保存错误', '保存失败');
-                    this.getDevicexzwindow().close();
+                    me.getDevicexzwindow().close();
                     store.reload();
                 },
-                scope: this
+                scope: me
             })
         }else {
             Ext.Ajax.request({
@@ -169,21 +187,23 @@ Ext.define('AM.controller.Devicewindow', {
                     } else {
                         Ext.Msg.alert('提示', obj.message);
                     }
-                    this.getDevicexzwindow().close();
+                    me.getDevicexzwindow().close();
                     store.reload();
                 },
                 failure:function(response,opts){
                     var obj = Ext.decode(response.responseText);
                     Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-                    this.getDevicexzwindow().close();
+                    me.getDevicexzwindow().close();
                     store.reload();
                 },
-                scope: this
+                scope: me
             })
         }
-
-
-
+            },
+            failure: function() {
+                Ext.Msg.alert('提示', '验证序列号和编号失败');
+            }
+        });
     },
     onQuxiao: function () {
         this.getDevicexzwindow().close();
