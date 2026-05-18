@@ -25,6 +25,12 @@ public class DeviceRepair {
     
     @Column(name = "repair_record", length = 1000)
     private String repairRecord;
+    
+    @Column(name = "reporter_id")
+    private Long reporterId;
+    
+    @Column(name = "repair_person_id")
+    private Long repairPersonId;
 
     public Long getId() {
         return id;
@@ -72,5 +78,21 @@ public class DeviceRepair {
 
     public void setRepairRecord(String repairRecord) {
         this.repairRecord = repairRecord;
+    }
+
+    public Long getReporterId() {
+        return reporterId;
+    }
+
+    public void setReporterId(Long reporterId) {
+        this.reporterId = reporterId;
+    }
+
+    public Long getRepairPersonId() {
+        return repairPersonId;
+    }
+
+    public void setRepairPersonId(Long repairPersonId) {
+        this.repairPersonId = repairPersonId;
     }
 }

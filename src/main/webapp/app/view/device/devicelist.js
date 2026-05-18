@@ -193,6 +193,11 @@ Ext.define('AM.view.device.devicelistgrid',{
                     return '<a href="#" class="approve-borrow-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">通过</a> / <a href="#" class="reject-borrow-link" data-id="' + record.get('id') + '" style="color: red; text-decoration: underline;">拒绝</a>';
                 } else if (stateDetail === '申请归还中待通过') {
                     return '<a href="#" class="approve-return-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">批准</a>';
+                } else if (stateDetail === '借出中待修理') {
+                    return '<a href="#" class="confirm-repair-link" data-id="' + record.get('id') + '" style="color: orange; text-decoration: underline;">维修</a>';
+                } else if (stateDetail === '转借中待管理员批准') {
+                    console.log('管理员批准转借状态检测');
+                    return '<a href="#" class="approve-transfer-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">同意转借</a> / <a href="#" class="reject-transfer-link" data-id="' + record.get('id') + '" style="color: red; text-decoration: underline;">拒绝</a>';
                 }
             } else if (role === 2) {
                 if (stateDetail === '已安检待借用') {
@@ -201,7 +206,14 @@ Ext.define('AM.view.device.devicelistgrid',{
                     var borrowerId = record.get('deviceyh') ? record.get('deviceyh').id : null;
                     var currentUserId = SYS_USER ? SYS_USER.id : null;
                     if (borrowerId === currentUserId) {
-                        return '<a href="#" class="repair-device-link" data-id="' + record.get('id') + '" style="color: orange; text-decoration: underline;">申请报修</a> / <a href="#" class="return-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">退回</a>';
+                        return '<a href="#" class="repair-device-link" data-id="' + record.get('id') + '" style="color: orange; text-decoration: underline;">申请报修</a> / <a href="#" class="return-device-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">退回</a> / <a href="#" class="transfer-device-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">转借</a>';
+                    }
+                } else if (stateDetail === '转借中待转借人通过') {
+                    var transferTargetId = record.get('transferTargetId');
+                    var currentUserId = SYS_USER ? SYS_USER.id : null;
+                    console.log('转借状态检测 - transferTargetId:', transferTargetId, 'currentUserId:', currentUserId, '类型:', typeof transferTargetId, typeof currentUserId);
+                    if (transferTargetId == currentUserId) {
+                        return '<a href="#" class="accept-transfer-link" data-id="' + record.get('id') + '" style="color: green; text-decoration: underline;">同意转借</a> / <a href="#" class="reject-transfer-by-user-link" data-id="' + record.get('id') + '" style="color: red; text-decoration: underline;">拒绝</a>';
                     }
                 }
             }

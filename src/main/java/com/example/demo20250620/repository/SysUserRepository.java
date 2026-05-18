@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface SysUserRepository  extends JpaRepository<SysUser, Long> {
     Optional<SysUser> findUserBySysusernameAndSysuserpassword(String sysusername, String sysuserpassword);
     Optional<SysUser> findBySysusername(String sysusername);
+    java.util.List<SysUser> findBySysuserrole(int sysuserrole);
 }

@@ -3,6 +3,7 @@ package com.example.demo20250620.controller;
 import com.example.demo20250620.entity.Device;
 import com.example.demo20250620.entity.DeviceRepair;
 import com.example.demo20250620.entity.Devicestate;
+import com.example.demo20250620.entity.SysUser;
 import com.example.demo20250620.repository.DeviceRepository;
 import com.example.demo20250620.repository.DeviceRepairRepository;
 import com.example.demo20250620.repository.DevicestateRepository;
@@ -34,6 +35,9 @@ public class DeviceController {
     private DevicestateRepository devicestateRepository;
     @Autowired
     private DeviceRepairRepository deviceRepairRepository;
+    
+    @Autowired
+    private com.example.demo20250620.repository.SysUserRepository sysUserRepository;
 
     @Autowired
     private final HttpServletRequest request;
@@ -211,7 +215,12 @@ public class DeviceController {
             }
             Device device2 = device1.get();
             
-            Optional<Devicestate> stateOpt = devicestateRepository.findById(2L);
+            // 根据设备是否被借出来决定上架后的状态
+            // 如果设备被借出（deviceyhid 不为空），状态变为"借用中"(ID=4)
+            // 否则状态变为"已安检待借用"(ID=2)
+            Long newStateId = (device2.getDeviceyh() != null) ? 4L : 2L;
+            
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(newStateId);
             if (stateOpt.isPresent()) {
                 device2.setDevicestate(stateOpt.get());
             } else {
@@ -275,7 +284,106 @@ public class DeviceController {
         return responseObj;
     }
 
+    /**
+     * 操作员转借设备
+     */
+    @PostMapping("/transferDevice")
+    public Map<String, Object> transferDevice(@RequestBody Map<String, Object> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = Long.parseLong(request.get("deviceId").toString());
+            Long targetUserId = Long.parseLong(request.get("targetUserId").toString());
+            
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            Device device = deviceOpt.get();
+            
+            // 设置转借目标用户ID
+            device.setTransferTargetId(targetUserId);
+            
+            // 更新设备状态为"转借中待转借人通过"(ID=7)
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(7L);
+            if (stateOpt.isPresent()) {
+                device.setDevicestate(stateOpt.get());
+            } else {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备状态不存在");
+                return responseObj;
+            }
+            
+            deviceRepository.save(device);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "转借申请已提交，等待转借人确认");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "转借失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
 
-
+    /**
+     * 转借人同意转借
+     */
+    @PostMapping("/acceptTransfer")
+    public Map<String, Object> acceptTransfer(@RequestBody Map<String, Object> request) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Long deviceId = Long.parseLong(request.get("deviceId").toString());
+            Long userId = Long.parseLong(request.get("userId").toString());
+            
+            Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+                return responseObj;
+            }
+            
+            Device device = deviceOpt.get();
+            
+            // 验证当前用户是否是转借目标用户
+            if (!userId.equals(device.getTransferTargetId())) {
+                responseObj.put("success", false);
+                responseObj.put("message", "您不是转借目标用户，无法同意转借");
+                return responseObj;
+            }
+            
+            // 更新借用人为当前用户
+            Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+            if (!userOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户不存在");
+                return responseObj;
+            }
+            device.setDeviceyh(userOpt.get());
+            
+            // 更新设备状态为"借用中"(ID=4)
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(4L);
+            if (stateOpt.isPresent()) {
+                device.setDevicestate(stateOpt.get());
+            } else {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备状态不存在");
+                return responseObj;
+            }
+            
+            // 清空转借目标用户ID
+            device.setTransferTargetId(null);
+            
+            deviceRepository.save(device);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "转借已同意，设备状态已更新为借用中");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "同意转借失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
 
 }

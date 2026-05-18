@@ -15,6 +15,7 @@ Ext.define('AM.model.devicelist',{
         {name:'deviceyh.id',type:'Number'},//借用人ID
         {name:'deviceyh.sysusername',type:'String'},//借用人用户名
         {name:'devicestate.stateDetail',type:'String'},//状态
+        {name:'transferTargetId',type:'Number'},//转借目标用户ID
 
         {name:'devCpu', type: 'auto'},
         {name:'devType', type: 'auto'},

@@ -42,6 +42,9 @@ public class Device {
     @JoinColumn(name = "devicestate_id")
     private Devicestate devicestate;//设备状态
     
+    @Column(name = "transfer_target_id")
+    private Long transferTargetId;//转借目标用户ID
+    
     @OneToMany(mappedBy = "device")
     private List<DeviceRecord> deviceRecordLists;
 
@@ -134,6 +137,14 @@ public class Device {
 
     public void setDevicestate(Devicestate devicestate) {
         this.devicestate = devicestate;
+    }
+
+    public Long getTransferTargetId() {
+        return transferTargetId;
+    }
+
+    public void setTransferTargetId(Long transferTargetId) {
+        this.transferTargetId = transferTargetId;
     }
 
     public Long getDeviceid() {

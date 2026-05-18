@@ -190,6 +190,20 @@ public class SysUserController {
     public void setMessage(String message) {
         this.message = message;
     }
+    
+    /**
+     * 获取操作员列表（角色为2的用户）
+     */
+    @GetMapping("/getOperators")
+    public List<Map<String, Object>> getOperators() {
+        List<SysUser> operators = sysUserRepository.findBySysuserrole(2);
+        return operators.stream().map(user -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", user.getId());
+            map.put("sysusername", user.getSysusername());
+            return map;
+        }).toList();
+    }
 }
 
 

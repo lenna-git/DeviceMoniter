@@ -805,6 +805,44 @@ Ext.define('AM.controller.Devices', {
             return;
         }
         
+        // 管理员确认维修
+        target = e.getTarget('.confirm-repair-link');
+        if (target) {
+            console.log('confirm-repair-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            Ext.Msg.confirm('确认维修', '确定要确认维修该设备吗？', function(btn) {
+                if (btn === 'yes') {
+                    Ext.Ajax.request({
+                        url: 'devicerepair/confirm/' + deviceId,
+                        method: 'POST',
+                        jsonData: {
+                            adminId: SYS_USER.id
+                        },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                        failure: function(response, opts) {
+                            Ext.Msg.alert('操作失败', '确认维修失败');
+                        },
+                        scope: this
+                    });
+                }
+            }, this);
+            return;
+        }
+        
         // 操作员申请报修
         target = e.getTarget('.repair-device-link');
         if (target) {
@@ -815,7 +853,7 @@ Ext.define('AM.controller.Devices', {
             Ext.Msg.confirm('确认报修', '确定要申请报修该设备吗？', function(btn) {
                 if (btn === 'yes') {
                     Ext.Ajax.request({
-                        url: 'devicerepair/createRepair',
+                        url: 'devicerepair/create',
                         method: 'POST',
                         jsonData: {
                             deviceId: parseInt(deviceId),
@@ -880,6 +918,405 @@ Ext.define('AM.controller.Devices', {
                     });
                 }
             }, this);
+            return;
+        }
+        
+        // 操作员转借设备
+        target = e.getTarget('.transfer-device-link');
+        if (target) {
+            console.log('transfer-device-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            
+            // 加载操作员列表
+            Ext.Ajax.request({
+                url: 'sysuseraction/getOperators',
+                method: 'GET',
+                success: function(response) {
+                    var operators = Ext.decode(response.responseText);
+                    
+                    // 过滤掉当前用户自己
+                    var currentUserId = SYS_USER ? SYS_USER.id : null;
+                    if (currentUserId) {
+                        operators = operators.filter(function(op) {
+                            return op.id !== currentUserId;
+                        });
+                    }
+                    
+                    // 创建转借窗口
+                    var transferWindow = Ext.create('Ext.window.Window', {
+                        title: '转借设备',
+                        width: 400,
+                        height: 200,
+                        layout: 'vbox',
+                        align: 'center',
+                        items: [{
+                            xtype: 'combobox',
+                            fieldLabel: '选择转借对象',
+                            name: 'targetUser',
+                            width: 350,
+                            labelWidth: 80,
+                            margin: '10 0 10 0',
+                            store: Ext.create('Ext.data.Store', {
+                                fields: ['id', 'sysusername'],
+                                data: operators
+                            }),
+                            displayField: 'sysusername',
+                            valueField: 'id',
+                            editable: false,
+                            allowBlank: false,
+                            emptyText: '请选择转借对象'
+                        }, {
+                            xtype: 'panel',
+                            layout: 'hbox',
+                            margin: '0 0 10 50',
+                            items: [{
+                                xtype: 'button',
+                                text: '确定',
+                                width: 100,
+                                margin: '0 10 0 0',
+                                handler: function() {
+                                    var targetUserId = transferWindow.down('combobox[name=targetUser]').getValue();
+                                    if (!targetUserId) {
+                                        Ext.Msg.alert('提示', '请选择转借对象');
+                                        return;
+                                    }
+                                    
+                                    Ext.Ajax.request({
+                                        url: 'transfer/apply',
+                                        method: 'POST',
+                                        jsonData: {
+                                            deviceId: parseInt(deviceId),
+                                            fromUserId: SYS_USER.id,
+                                            toUserId: targetUserId
+                                        },
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        success: function(response, opts) {
+                                            var obj = Ext.decode(response.responseText);
+                                            if (obj.success) {
+                                                Ext.Msg.alert('结果显示', obj.message);
+                                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                                store.reload();
+                                            } else {
+                                                Ext.Msg.alert('提示', obj.message);
+                                            }
+                                        },
+                                        failure: function(response, opts) {
+                                            Ext.Msg.alert('操作失败', '转借失败');
+                                        },
+                                        scope: this
+                                    });
+                                    transferWindow.close();
+                                }
+                            }, {
+                                xtype: 'button',
+                                text: '取消',
+                                width: 100,
+                                handler: function() {
+                                    transferWindow.close();
+                                }
+                            }]
+                        }]
+                    });
+                    
+                    transferWindow.show();
+                },
+                failure: function() {
+                    Ext.Msg.alert('错误', '加载操作员列表失败');
+                }
+            });
+            
+            return;
+        }
+        
+        // 转借人同意转借
+        target = e.getTarget('.accept-transfer-link');
+        if (target) {
+            console.log('accept-transfer-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            
+            // 先获取转借记录ID
+            Ext.Ajax.request({
+                url: 'transfer/pendingForUser/' + SYS_USER.id,
+                method: 'GET',
+                success: function(response) {
+                    var records = Ext.decode(response.responseText);
+                    var transferRecord = records.find(function(r) {
+                        return r.device.id === parseInt(deviceId);
+                    });
+                    
+                    if (!transferRecord) {
+                        Ext.Msg.alert('错误', '未找到对应的转借记录');
+                        return;
+                    }
+                    
+                    Ext.Msg.confirm('确认同意转借', '确定要同意转借该设备吗？', function(btn) {
+                        if (btn === 'yes') {
+                            Ext.Ajax.request({
+                                url: 'transfer/userApprove',
+                                method: 'POST',
+                                jsonData: {
+                                    transferId: transferRecord.id,
+                                    userId: SYS_USER.id
+                                },
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        success: function(response, opts) {
+                            var obj = Ext.decode(response.responseText);
+                            if (obj.success) {
+                                Ext.Msg.alert('结果显示', obj.message);
+                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                store.reload();
+                            } else {
+                                Ext.Msg.alert('提示', obj.message);
+                            }
+                        },
+                                failure: function(response, opts) {
+                                    Ext.Msg.alert('操作失败', '同意转借失败');
+                                },
+                                scope: this
+                            });
+                        }
+                    }, this);
+                }
+            });
+            
+            return;
+        }
+        
+        // 被转借人拒绝转借
+        target = e.getTarget('.reject-transfer-by-user-link');
+        if (target) {
+            console.log('reject-transfer-by-user-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            
+            Ext.Ajax.request({
+                url: 'transfer/pendingForUser/' + SYS_USER.id,
+                method: 'GET',
+                success: function(response) {
+                    var records = Ext.decode(response.responseText);
+                    var transferRecord = records.find(function(r) {
+                        return r.device.id === parseInt(deviceId);
+                    });
+                    
+                    if (!transferRecord) {
+                        Ext.Msg.alert('错误', '未找到对应的转借记录');
+                        return;
+                    }
+                    
+                    var rejectWindow = Ext.create('Ext.window.Window', {
+                        title: '拒绝转借',
+                        width: 400,
+                        height: 200,
+                        layout: 'fit',
+                        modal: true,
+                        items: [{
+                            xtype: 'textarea',
+                            fieldLabel: '拒绝原因',
+                            labelAlign: 'top',
+                            name: 'reason',
+                            anchor: '100%',
+                            height: 80,
+                            emptyText: '请输入拒绝原因'
+                        }],
+                        buttons: [{
+                            text: '取消',
+                            handler: function() {
+                                rejectWindow.close();
+                            }
+                        }, {
+                            text: '确定',
+                            handler: function() {
+                                var reason = rejectWindow.down('textarea').getValue();
+                                if (!reason || reason.trim() === '') {
+                                    Ext.Msg.alert('提示', '请输入拒绝原因');
+                                    return;
+                                }
+                                Ext.Ajax.request({
+                                    url: 'transfer/reject',
+                                    method: 'POST',
+                                    jsonData: {
+                                        transferId: transferRecord.id,
+                                        userId: SYS_USER.id,
+                                        reason: reason
+                                    },
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    success: function(response, opts) {
+                                        var obj = Ext.decode(response.responseText);
+                                        if (obj.success) {
+                                            Ext.Msg.alert('结果显示', obj.message);
+                                            var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                            store.reload();
+                                        } else {
+                                            Ext.Msg.alert('提示', obj.message);
+                                        }
+                                    },
+                                    failure: function(response, opts) {
+                                        Ext.Msg.alert('操作失败', '拒绝转借失败');
+                                    }
+                                });
+                                rejectWindow.close();
+                            }
+                        }]
+                    });
+                    rejectWindow.show();
+                }
+            });
+            
+            return;
+        }
+        
+        // 管理员批准转借
+        target = e.getTarget('.approve-transfer-link');
+        if (target) {
+            console.log('approve-transfer-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            
+            // 先获取转借记录ID
+            Ext.Ajax.request({
+                url: 'transfer/pendingForAdmin',
+                method: 'GET',
+                success: function(response) {
+                    var records = Ext.decode(response.responseText);
+                    var transferRecord = records.find(function(r) {
+                        return r.device.id === parseInt(deviceId);
+                    });
+                    
+                    if (!transferRecord) {
+                        Ext.Msg.alert('错误', '未找到对应的转借记录');
+                        return;
+                    }
+                    
+                    Ext.Msg.confirm('确认批准转借', '确定要批准该设备的转借申请吗？', function(btn) {
+                        if (btn === 'yes') {
+                            Ext.Ajax.request({
+                                url: 'transfer/adminApprove',
+                                method: 'POST',
+                                jsonData: {
+                                    transferId: transferRecord.id,
+                                    adminId: SYS_USER.id
+                                },
+                                headers: {
+                                    'Content-Type': 'application/json'
+                                },
+                                success: function(response, opts) {
+                                    var obj = Ext.decode(response.responseText);
+                                    if (obj.success) {
+                                        Ext.Msg.alert('结果显示', obj.message);
+                                        var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                        store.reload();
+                                    } else {
+                                        Ext.Msg.alert('提示', obj.message);
+                                    }
+                                },
+                                failure: function(response, opts) {
+                                    Ext.Msg.alert('操作失败', '批准转借失败');
+                                },
+                                scope: this
+                            });
+                        }
+                    }, this);
+                }
+            });
+            
+            return;
+        }
+        
+        // 管理员拒绝转借
+        target = e.getTarget('.reject-transfer-link');
+        if (target) {
+            console.log('reject-transfer-link clicked');
+            e.stopEvent();
+            var deviceId = target.getAttribute('data-id');
+            console.log('deviceId:', deviceId);
+            
+            Ext.Ajax.request({
+                url: 'transfer/pendingForAdmin',
+                method: 'GET',
+                success: function(response) {
+                    var records = Ext.decode(response.responseText);
+                    var transferRecord = records.find(function(r) {
+                        return r.device.id === parseInt(deviceId);
+                    });
+                    
+                    if (!transferRecord) {
+                        Ext.Msg.alert('错误', '未找到对应的转借记录');
+                        return;
+                    }
+                    
+                    var rejectWindow = Ext.create('Ext.window.Window', {
+                        title: '拒绝转借',
+                        width: 400,
+                        height: 200,
+                        layout: 'fit',
+                        modal: true,
+                        items: [{
+                            xtype: 'textarea',
+                            fieldLabel: '拒绝原因',
+                            labelAlign: 'top',
+                            name: 'reason',
+                            anchor: '100%',
+                            height: 80,
+                            emptyText: '请输入拒绝原因'
+                        }],
+                        buttons: [{
+                            text: '取消',
+                            handler: function() {
+                                rejectWindow.close();
+                            }
+                        }, {
+                            text: '确定',
+                            handler: function() {
+                                var reason = rejectWindow.down('textarea').getValue();
+                                if (!reason || reason.trim() === '') {
+                                    Ext.Msg.alert('提示', '请输入拒绝原因');
+                                    return;
+                                }
+                                Ext.Ajax.request({
+                                    url: 'transfer/reject',
+                                    method: 'POST',
+                                    jsonData: {
+                                        transferId: transferRecord.id,
+                                        userId: SYS_USER.id,
+                                        reason: reason
+                                    },
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    success: function(response, opts) {
+                                        var obj = Ext.decode(response.responseText);
+                                        if (obj.success) {
+                                            Ext.Msg.alert('结果显示', obj.message);
+                                            var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                            store.reload();
+                                        } else {
+                                            Ext.Msg.alert('提示', obj.message);
+                                        }
+                                    },
+                                    failure: function(response, opts) {
+                                        Ext.Msg.alert('操作失败', '拒绝转借失败');
+                                    }
+                                });
+                                rejectWindow.close();
+                            }
+                        }]
+                    });
+                    rejectWindow.show();
+                }
+            });
+            
             return;
         }
         
