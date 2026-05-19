@@ -8,16 +8,21 @@ Ext.application({
     autoCreateViewport:true,
 
     controllers: [
-
-
         'Users','LoginController','mainpageltbarController1',
         'Devices','DeviceRecordController',
+        'DeviceTransferRecordController',
         'xinjianyonghujilucontroller','Devicewindow','UserwindowController'
+    ],
 
+    stores: [
+        'DeviceTransferRecordStore'
+    ],
 
+    models: [
+        'DeviceTransferRecordModel'
     ],
 
     launch: function() {
-        // console.log('launch app');
+        console.log('App launched');
     }
 });

@@ -24,6 +24,10 @@
 			"id": "main-DeviceRecord",
 			"leaf": true
 		},{
+			"text": "<font size=4>转借记录</font>",
+			"id": "main-DeviceTransferRecord",
+			"leaf": true
+		},{
 			"text": "<font size=4>标签2-3</font>",
 			"id": "pagesix",
 			"leaf": true

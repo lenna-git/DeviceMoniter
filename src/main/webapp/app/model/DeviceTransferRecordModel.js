@@ -1,0 +1,20 @@
+Ext.define('AM.model.DeviceTransferRecordModel', {
+    extend: 'Ext.data.Model',
+    fields: [
+        { name: 'id', type: 'int' },
+        { name: 'device.deviceno', type: 'string', mapping: 'device.deviceno' },
+        { name: 'device.devCpu.cpuname', type: 'string', mapping: 'device.devCpu.cpuname' },
+        { name: 'device.devType.typename', type: 'string', mapping: 'device.devType.typename' },
+        { name: 'device.devicexh', type: 'string', mapping: 'device.devicexh' },
+        { name: 'device.devManufacturer.manufacturername', type: 'string', mapping: 'device.devManufacturer.manufacturername' },
+        { name: 'fromUsername', type: 'string', mapping: 'fromUsername' },
+        { name: 'transferDate', type: 'string', mapping: 'transferDate' },
+        { name: 'toUsername', type: 'string', mapping: 'toUsername' },
+        { name: 'approvalDate', type: 'string', mapping: 'approvalDate' },
+        { name: 'adminApprovalUsername', type: 'string', mapping: 'adminApprovalUsername' },
+        { name: 'adminApprovalDate', type: 'string', mapping: 'adminApprovalDate' },
+        { name: 'status', type: 'int', mapping: 'status' },
+        { name: 'statusText', type: 'string', mapping: 'statusText' },
+        { name: 'detail', type: 'string', mapping: 'detail' },
+    ],
+});

@@ -1,0 +1,120 @@
+Ext.define('AM.view.user.DeviceTransferRecordView', {
+    extend: 'Ext.panel.Panel',
+    alias: 'widget.DeviceTransferRecordView',
+    requires: ['AM.model.DeviceTransferRecordModel', 'AM.store.DeviceTransferRecordStore'],
+    border: true,
+    items: [{
+        xtype: 'panel',
+        layout: 'hbox',
+        items: [{
+            margin: '10 10 10 10',
+            xtype: 'textfield',
+            name: 'searchKeyword',
+            width: 300,
+            height: 30,
+            emptyText: '请输入设备编号/借用人/转借人查询',
+        }, {
+            margin: '15 10 10 10',
+            xtype: 'button',
+            action: 'select',
+            text: '查询',
+            height: '30',
+        }, {
+            margin: '15 10 10 10',
+            xtype: 'button',
+            action: 'export',
+            text: '导出Excel',
+            height: '30',
+        }]
+    }, {
+        border: false,
+        xtype: 'DeviceTransferRecordGrid',
+        width: '100%',
+        flex: 1,
+    }],
+});
+
+Ext.define('AM.view.user.DeviceTransferRecordGrid', {
+    extend: 'Ext.grid.Panel',
+    alias: 'widget.DeviceTransferRecordGrid',
+    store: 'DeviceTransferRecordStore',
+    columns: [{
+        text: '设备编号',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.deviceno',
+        flex: 1,
+    }, {
+        text: '芯片',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.devCpu.cpuname',
+        flex: 1,
+    }, {
+        text: '类型',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.devType.typename',
+        flex: 1,
+    }, {
+        text: '型号',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.devicexh',
+        flex: 1,
+    }, {
+        text: '厂商',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.devManufacturer.manufacturername',
+        flex: 1,
+    }, {
+        text: '原借用人',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'fromUsername',
+        flex: 1,
+    }, {
+        text: '转借申请日期',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'transferDate',
+        flex: 1,
+    }, {
+        text: '新借用人',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'toUsername',
+        flex: 1,
+    }, {
+        text: '新借用人同意日期',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'approvalDate',
+        flex: 1,
+    }, {
+        text: '批准管理员',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'adminApprovalUsername',
+        flex: 1,
+    }, {
+        text: '批准日期',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'adminApprovalDate',
+        flex: 1,
+    }, {
+        text: '状态',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'statusText',
+        flex: 1,
+    }, {
+        text: '详情',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'detail',
+        flex: 1,
+    }],
+});

@@ -35,6 +35,18 @@ public class DeviceTransferRecord {
     private Integer status;
     
     private String detail;
+    
+    @Transient
+    private String fromUsername;
+    
+    @Transient
+    private String toUsername;
+    
+    @Transient
+    private String adminApprovalUsername;
+    
+    @Transient
+    private String statusText;
 
     public Long getId() {
         return id;
@@ -114,5 +126,37 @@ public class DeviceTransferRecord {
 
     public void setDetail(String detail) {
         this.detail = detail;
+    }
+
+    public String getFromUsername() {
+        return fromUsername;
+    }
+
+    public void setFromUsername(String fromUsername) {
+        this.fromUsername = fromUsername;
+    }
+
+    public String getToUsername() {
+        return toUsername;
+    }
+
+    public void setToUsername(String toUsername) {
+        this.toUsername = toUsername;
+    }
+
+    public String getAdminApprovalUsername() {
+        return adminApprovalUsername;
+    }
+
+    public void setAdminApprovalUsername(String adminApprovalUsername) {
+        this.adminApprovalUsername = adminApprovalUsername;
+    }
+
+    public String getStatusText() {
+        return statusText;
+    }
+
+    public void setStatusText(String statusText) {
+        this.statusText = statusText;
     }
 }

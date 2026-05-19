@@ -9,6 +9,7 @@ Ext.define('AM.view.Viewport',{
         'AM.view.Center',
         'AM.view.mainpageltbar1',
         'AM.view.user.DeviceRecordView',
+        'AM.view.user.DeviceTransferRecordView',
         'AM.view.user.userwindow',
     ],
     layout:'vbox',

@@ -12,6 +12,7 @@ Ext.define('AM.view.Center',{
         'AM.view.user.userlist',
         'AM.view.device.devicelist',
         'AM.view.user.DeviceRecordView',
+        'AM.view.user.DeviceTransferRecordView',
         'AM.view.user.xinjianyonghujiluwindow',
         // 'AM.view.user.userwindow'
         //右側有哪些頁面，都要放在這裏
@@ -39,7 +40,10 @@ Ext.define('AM.view.Center',{
             xtype:'DeviceRecordView',
             id:'main-DeviceRecord',
             title: '借用记录:',
-            // titleAlign: 'center'
+        },{
+            xtype:'DeviceTransferRecordView',
+            id:'main-DeviceTransferRecord',
+            title: '转借记录:',
         },{
 
             xtype:'panel',
