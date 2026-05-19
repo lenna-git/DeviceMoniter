@@ -45,6 +45,12 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         dataIndex: 'device.deviceno',
         flex: 1,
     }, {
+        text: '序列号',
+        align: 'center',
+        style: 'font-size:16px',
+        dataIndex: 'device.deviceserialno',
+        flex: 1,
+    }, {
         text: '芯片',
         align: 'center',
         style: 'font-size:16px',
