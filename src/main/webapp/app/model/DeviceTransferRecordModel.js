@@ -3,7 +3,7 @@ Ext.define('AM.model.DeviceTransferRecordModel', {
     fields: [
         { name: 'id', type: 'int' },
         { name: 'device.deviceno', type: 'string', mapping: 'device.deviceno' },
-        { name: 'device.deviceserialno', type: 'string', mapping: 'device.deviceserialno' },
+        { name: 'device.devicesn', type: 'string', mapping: 'device.devicesn' },
         { name: 'device.devCpu.cpuname', type: 'string', mapping: 'device.devCpu.cpuname' },
         { name: 'device.devType.typename', type: 'string', mapping: 'device.devType.typename' },
         { name: 'device.devicexh', type: 'string', mapping: 'device.devicexh' },
