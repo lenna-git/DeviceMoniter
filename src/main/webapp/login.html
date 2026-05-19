@@ -39,8 +39,12 @@
             border-radius: 3px;
             box-sizing: border-box;
         }
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
         button {
-            width: 100%;
+            flex: 1;
             padding: 10px;
             background-color: #007BFF;
             color: #fff;
@@ -51,10 +55,60 @@
         button:hover {
             background-color: #0056b3;
         }
+        button.register-btn {
+            background-color: #28a745;
+        }
+        button.register-btn:hover {
+            background-color: #1e7e34;
+        }
         .error {
             color: red;
             font-size: 14px;
             margin-top: 5px;
+        }
+        /* 弹窗样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 300px;
+            border-radius: 5px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .forgot-password {
+            text-align: center;
+            margin-top: 15px;
+        }
+        .forgot-password a {
+            color: #007BFF;
+            text-decoration: none;
+        }
+        .forgot-password a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -72,23 +126,91 @@
             <input type="password" id="sysuserpassword" name="sysuserpassword" required>
             <div class="error" id="passwordError"></div>
         </div>
-        <button type="submit">登录</button>
+        <div class="button-group">
+            <button type="submit">登录</button>
+            <button type="button" class="register-btn" onclick="showRegisterModal()">注册</button>
+        </div>
+        <div class="forgot-password">
+            <a href="#" onclick="showForgotPasswordModal()">忘记密码？</a>
+        </div>
     </form>
 </div>
 
+<!-- 注册弹窗 -->
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeRegisterModal()">&times;</span>
+        <h2>用户注册</h2>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="regUsername">用户名:</label>
+                <input type="text" id="regUsername" name="regUsername" required>
+                <div class="error" id="regUsernameError"></div>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">密码:</label>
+                <input type="password" id="regPassword" name="regPassword" required>
+                <div class="error" id="regPasswordError"></div>
+            </div>
+            <div class="form-group">
+                <label for="regConfirmPassword">确认密码:</label>
+                <input type="password" id="regConfirmPassword" name="regConfirmPassword" required>
+                <div class="error" id="regConfirmPasswordError"></div>
+            </div>
+            <button type="submit">注册</button>
+        </form>
+    </div>
+</div>
+
+<!-- 忘记密码弹窗 -->
+<div id="forgotPasswordModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeForgotPasswordModal()">&times;</span>
+        <h2>忘记密码</h2>
+        <div id="forgotPasswordStep1">
+            <form id="forgotPasswordForm1">
+                <div class="form-group">
+                    <label for="forgotUsername">用户名:</label>
+                    <input type="text" id="forgotUsername" name="forgotUsername" required>
+                    <div class="error" id="forgotUsernameError"></div>
+                </div>
+                <button type="submit">获取验证码</button>
+            </form>
+        </div>
+        <div id="forgotPasswordStep2" style="display: none;">
+            <form id="forgotPasswordForm2">
+                <div class="form-group">
+                    <label for="resetToken">验证码:</label>
+                    <input type="text" id="resetToken" name="resetToken" required>
+                    <div class="error" id="resetTokenError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="newPassword">新密码:</label>
+                    <input type="password" id="newPassword" name="newPassword" required>
+                    <div class="error" id="newPasswordError"></div>
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword">确认新密码:</label>
+                    <input type="password" id="confirmNewPassword" name="confirmNewPassword" required>
+                    <div class="error" id="confirmNewPasswordError"></div>
+                </div>
+                <button type="submit">重置密码</button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
+    // 登录功能
     document.getElementById('loginForm').addEventListener('submit', function(event) {
         event.preventDefault();
 
-        // 获取表单元素
         const sysusername = document.getElementById('sysusername').value.trim();
         const sysuserpassword = document.getElementById('sysuserpassword').value.trim();
 
-        // 清除之前的错误信息
         document.getElementById('usernameError').textContent = '';
         document.getElementById('passwordError').textContent = '';
 
-        // 简单验证
         let isValid = true;
         if (sysusername === '') {
             document.getElementById('usernameError').textContent = '请输入用户名';
@@ -104,47 +226,209 @@
             var url='/sysuseraction/login'+'?sysusername='+sysusername+'&sysuserpassword='+sysuserpassword;
             xhr.open('GET', url, true);
             xhr.responseType = 'json';
-            // 4. 监听请求完成事件
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
-                    // 获取解析后的对象
-                        const responseObject = xhr.response;
-                        if(responseObject==null){
-                            alert("登录失败");
-                        }else{
-                        // 5. 存储对象到 localStorage
+                    const responseObject = xhr.response;
+                    if(responseObject==null){
+                        alert("登录失败");
+                    }else{
                         sessionStorage.setItem('SYS_USER', JSON.stringify(xhr.response));
-                        console.log('数据已存储到 sessionStorage-SYSUSER', JSON.stringify(xhr.response));
                         window.location.href="index.html";
                     }
                 } else {
                     console.error('请求失败，状态码：', xhr.status);
                 }
             };
-
-            // 处理请求错误
             xhr.onerror = function() {
                 console.error('请求发生错误');
             };
-
-            // 发送请求
             xhr.send();
+        }
+    });
 
+    // 注册弹窗功能
+    function showRegisterModal() {
+        document.getElementById('registerModal').style.display = 'block';
+    }
 
-            // xhr.onreadystatechange = function() {
-            //     if (xhr.readyState === 4 && xhr.status === 200) {
-            //         console.log('response:'+xhr.responseText);
-            //         if(xhr.responseText=='true'){
-            //             sessionStorage.setItem('message', 'user111');
-            //             window.location.href="index.html";
-            //         }else {
-            //             alert("登录失败", "提交的表单数据无效,请检查!");
-            //         }
-            //
-            //         // document.getElementById('result').innerHTML = xhr.responseText;
-            //     }
-            // };
-            // xhr.send();
+    function closeRegisterModal() {
+        document.getElementById('registerModal').style.display = 'none';
+        document.getElementById('registerForm').reset();
+        document.getElementById('regUsernameError').textContent = '';
+        document.getElementById('regPasswordError').textContent = '';
+        document.getElementById('regConfirmPasswordError').textContent = '';
+    }
+
+    // 点击弹窗外部关闭
+    window.onclick = function(event) {
+        const modal = document.getElementById('registerModal');
+        if (event.target == modal) {
+            closeRegisterModal();
+        }
+    }
+
+    // 注册功能
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        const username = document.getElementById('regUsername').value.trim();
+        const password = document.getElementById('regPassword').value.trim();
+        const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+
+        document.getElementById('regUsernameError').textContent = '';
+        document.getElementById('regPasswordError').textContent = '';
+        document.getElementById('regConfirmPasswordError').textContent = '';
+
+        let isValid = true;
+        if (username === '') {
+            document.getElementById('regUsernameError').textContent = '请输入用户名';
+            isValid = false;
+        }
+        if (password === '') {
+            document.getElementById('regPasswordError').textContent = '请输入密码';
+            isValid = false;
+        }
+        if (confirmPassword === '') {
+            document.getElementById('regConfirmPasswordError').textContent = '请确认密码';
+            isValid = false;
+        }
+        if (password !== confirmPassword) {
+            document.getElementById('regConfirmPasswordError').textContent = '两次输入的密码不一致';
+            isValid = false;
+        }
+
+        if (isValid) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/sysuseraction/register', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        alert(response.message);
+                        closeRegisterModal();
+                    } else {
+                        document.getElementById('regUsernameError').textContent = response.message;
+                    }
+                } else {
+                    console.error('请求失败，状态码：', xhr.status);
+                }
+            };
+            xhr.onerror = function() {
+                console.error('请求发生错误');
+            };
+            xhr.send(JSON.stringify({
+                sysusername: username,
+                sysuserpassword: password,
+                sysuserrole: 2
+            }));
+        }
+    });
+
+    // 忘记密码弹窗功能
+    function showForgotPasswordModal() {
+        document.getElementById('forgotPasswordModal').style.display = 'block';
+    }
+
+    function closeForgotPasswordModal() {
+        document.getElementById('forgotPasswordModal').style.display = 'none';
+        document.getElementById('forgotPasswordStep1').style.display = 'block';
+        document.getElementById('forgotPasswordStep2').style.display = 'none';
+        document.getElementById('forgotPasswordForm1').reset();
+        document.getElementById('forgotPasswordForm2').reset();
+        document.getElementById('forgotUsernameError').textContent = '';
+        document.getElementById('resetTokenError').textContent = '';
+        document.getElementById('newPasswordError').textContent = '';
+        document.getElementById('confirmNewPasswordError').textContent = '';
+    }
+
+    // 获取验证码
+    document.getElementById('forgotPasswordForm1').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const username = document.getElementById('forgotUsername').value.trim();
+        
+        document.getElementById('forgotUsernameError').textContent = '';
+        
+        if (username === '') {
+            document.getElementById('forgotUsernameError').textContent = '请输入用户名';
+            return;
+        }
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/sysuseraction/forgotPassword', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onload = function() {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    alert('验证码已发送到控制台，请查看后端日志');
+                    document.getElementById('forgotPasswordStep1').style.display = 'none';
+                    document.getElementById('forgotPasswordStep2').style.display = 'block';
+                } else {
+                    document.getElementById('forgotUsernameError').textContent = response.message;
+                }
+            } else {
+                console.error('请求失败，状态码：', xhr.status);
+            }
+        };
+        xhr.onerror = function() {
+            console.error('请求发生错误');
+        };
+        xhr.send(JSON.stringify({ sysusername: username }));
+    });
+
+    // 重置密码
+    document.getElementById('forgotPasswordForm2').addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        const token = document.getElementById('resetToken').value.trim();
+        const newPassword = document.getElementById('newPassword').value.trim();
+        const confirmPassword = document.getElementById('confirmNewPassword').value.trim();
+        
+        document.getElementById('resetTokenError').textContent = '';
+        document.getElementById('newPasswordError').textContent = '';
+        document.getElementById('confirmNewPasswordError').textContent = '';
+        
+        let isValid = true;
+        if (token === '') {
+            document.getElementById('resetTokenError').textContent = '请输入验证码';
+            isValid = false;
+        }
+        if (newPassword === '') {
+            document.getElementById('newPasswordError').textContent = '请输入新密码';
+            isValid = false;
+        }
+        if (confirmPassword === '') {
+            document.getElementById('confirmNewPasswordError').textContent = '请确认新密码';
+            isValid = false;
+        }
+        if (newPassword !== confirmPassword) {
+            document.getElementById('confirmNewPasswordError').textContent = '两次输入的密码不一致';
+            isValid = false;
+        }
+        
+        if (isValid) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/sysuseraction/resetPassword', true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.onload = function() {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        alert(response.message);
+                        closeForgotPasswordModal();
+                    } else {
+                        document.getElementById('resetTokenError').textContent = response.message;
+                    }
+                } else {
+                    console.error('请求失败，状态码：', xhr.status);
+                }
+            };
+            xhr.onerror = function() {
+                console.error('请求发生错误');
+            };
+            xhr.send(JSON.stringify({ token: token, newPassword: newPassword }));
         }
     });
 </script>

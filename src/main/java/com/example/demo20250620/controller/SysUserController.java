@@ -1,7 +1,9 @@
 package com.example.demo20250620.controller;
 
 
+import com.example.demo20250620.entity.PasswordResetToken;
 import com.example.demo20250620.entity.SysUser;
+import com.example.demo20250620.repository.PasswordResetTokenRepository;
 import com.example.demo20250620.repository.SysUserRepository;
 import com.example.demo20250620.util.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
@@ -10,6 +12,7 @@ import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -27,6 +30,11 @@ public class SysUserController {
 
     @Autowired
     private SysUserRepository sysUserRepository;
+    
+    @Autowired
+    private PasswordResetTokenRepository passwordResetTokenRepository;
+    
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
     private final HttpServletRequest request;
@@ -66,14 +74,15 @@ public class SysUserController {
 
     @GetMapping("/login")
     public Optional<SysUser> login(@RequestParam String sysusername, @RequestParam String sysuserpassword,HttpSession session) {
-        Optional<SysUser> sysuser = sysUserRepository.findUserBySysusernameAndSysuserpassword(sysusername, sysuserpassword);
-//        System.out.print( sysuser.isPresent());
-//        HttpServletRequest request = ServletActionContext.getRequest();
-//        HttpSession session = request.getSession();
-        session.setAttribute("SYS_USER",sysuser);
-//        javax.servlet.http.HttpServletRequest httpRequest = (HttpServletRequest) request;
-        return sysuser;
-
+        Optional<SysUser> optionalUser = sysUserRepository.findBySysusername(sysusername);
+        if (optionalUser.isPresent()) {
+            SysUser user = optionalUser.get();
+            if (passwordEncoder.matches(sysuserpassword, user.getSysuserpassword())) {
+                session.setAttribute("SYS_USER", optionalUser);
+                return optionalUser;
+            }
+        }
+        return Optional.empty();
     }
 
     @GetMapping("/logout")
@@ -224,13 +233,15 @@ public class SysUserController {
             
             SysUser user = optionalUser.get();
             
-            if (!user.getSysuserpassword().equals(oldPassword)) {
+            // 使用BCrypt验证原密码
+            if (!passwordEncoder.matches(oldPassword, user.getSysuserpassword())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "原密码不正确");
                 return responseObj;
             }
             
-            user.setSysuserpassword(newPassword);
+            // 使用BCrypt加密新密码
+            user.setSysuserpassword(passwordEncoder.encode(newPassword));
             sysUserRepository.save(user);
             
             responseObj.put("success", true);
@@ -239,6 +250,131 @@ public class SysUserController {
             logger.error("changePassword error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "密码修改失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    /**
+     * 用户注册
+     */
+    @PostMapping("/register")
+    public Map<String, Object> register(@RequestBody SysUser sysUser) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
+            if (existingUser.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户名已存在");
+                return responseObj;
+            }
+            
+            if (sysUser.getSysuserrole() == null) {
+                sysUser.setSysuserrole(2L); // 默认注册为操作员
+            }
+            
+            // 使用BCrypt加密密码
+            sysUser.setSysuserpassword(passwordEncoder.encode(sysUser.getSysuserpassword()));
+            
+            sysUserRepository.save(sysUser);
+            responseObj.put("success", true);
+            responseObj.put("message", "注册成功");
+        } catch (Exception e) {
+            logger.error("register error: " + e.getMessage(), e);
+            responseObj.put("success", false);
+            responseObj.put("message", "注册失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    /**
+     * 忘记密码 - 生成重置令牌
+     */
+    @PostMapping("/forgotPassword")
+    public Map<String, Object> forgotPassword(@RequestBody Map<String, String> requestBody) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            String sysusername = requestBody.get("sysusername");
+            Optional<SysUser> optionalUser = sysUserRepository.findBySysusername(sysusername);
+            
+            if (!optionalUser.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户不存在");
+                return responseObj;
+            }
+            
+            SysUser user = optionalUser.get();
+            
+            // 删除用户之前的令牌
+            passwordResetTokenRepository.deleteByUserId(user.getId());
+            
+            // 生成6位数字验证码
+            String token = String.format("%06d", (int)(Math.random() * 900000) + 100000);
+            
+            // 保存令牌，有效期5分钟
+            PasswordResetToken resetToken = new PasswordResetToken(token, user, 
+                java.time.LocalDateTime.now().plusMinutes(5));
+            passwordResetTokenRepository.save(resetToken);
+            
+            // 输出验证码到控制台（实际项目中应发送邮件/短信）
+            logger.info("密码重置验证码 - 用户: " + sysusername + ", 验证码: " + token);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "验证码已发送");
+        } catch (Exception e) {
+            logger.error("forgotPassword error: " + e.getMessage(), e);
+            responseObj.put("success", false);
+            responseObj.put("message", "操作失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
+    
+    /**
+     * 重置密码
+     */
+    @PostMapping("/resetPassword")
+    public Map<String, Object> resetPassword(@RequestBody Map<String, String> requestBody) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            String token = requestBody.get("token");
+            String newPassword = requestBody.get("newPassword");
+            
+            Optional<PasswordResetToken> optionalResetToken = passwordResetTokenRepository.findByToken(token);
+            
+            if (!optionalResetToken.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "验证码无效");
+                return responseObj;
+            }
+            
+            PasswordResetToken resetToken = optionalResetToken.get();
+            
+            if (resetToken.getUsed()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "验证码已使用");
+                return responseObj;
+            }
+            
+            if (resetToken.isExpired()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "验证码已过期");
+                return responseObj;
+            }
+            
+            // 更新用户密码
+            SysUser user = resetToken.getUser();
+            user.setSysuserpassword(passwordEncoder.encode(newPassword));
+            sysUserRepository.save(user);
+            
+            // 标记令牌已使用
+            resetToken.setUsed(true);
+            passwordResetTokenRepository.save(resetToken);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "密码重置成功");
+        } catch (Exception e) {
+            logger.error("resetPassword error: " + e.getMessage(), e);
+            responseObj.put("success", false);
+            responseObj.put("message", "操作失败: " + e.getMessage());
         }
         return responseObj;
     }
