@@ -18,6 +18,12 @@ Ext.define('AM.controller.ChangePasswordController', {
     }],
     
     onSaveClick: function() {
+        // 检查用户是否已登录
+        if (!SYS_USER || !SYS_USER.id) {
+            Ext.Msg.alert('提示', '请先登录');
+            return;
+        }
+        
         var view = this.getChangePasswordView();
         var form = view.down('form');
         
