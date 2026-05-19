@@ -3,42 +3,61 @@ Ext.define('AM.view.user.userlist', {
     alias: 'widget.userlist1',
     border: true,
     layout: 'border',
-    items: [
-        {
-            xtype: 'toolbar',
-            region: 'north',
-            items: [
-                '->',
-                {
-                    xtype: 'button',
-                    action: 'xj',
-                    text: '新增',
-                    iconCls: 'add-icon',
-                    margin: '0 5 0 0',
-                    padding: '5 15'
-                },
-                {
-                    xtype: 'button',
-                    action: 'sc',
-                    text: '删除',
-                    iconCls: 'delete-icon',
-                    margin: '0 5 0 0',
-                    padding: '5 15'
-                },
-                {
-                    xtype: 'button',
-                    action: 'update',
-                    text: '修改',
-                    iconCls: 'edit-icon',
-                    padding: '5 15'
-                }
-            ]
-        },
-        {
-            xtype: 'testlistgrid',
-            region: 'center'
+    initComponent: function() {
+        var me = this;
+        var toolbarItems = [
+            '->',
+            {
+                xtype: 'button',
+                action: 'xj',
+                text: '新增',
+                iconCls: 'add-icon',
+                margin: '0 5 0 0',
+                padding: '5 15'
+            },
+            {
+                xtype: 'button',
+                action: 'sc',
+                text: '删除',
+                iconCls: 'delete-icon',
+                margin: '0 5 0 0',
+                padding: '5 15'
+            },
+            {
+                xtype: 'button',
+                action: 'update',
+                text: '修改',
+                iconCls: 'edit-icon',
+                padding: '5 15'
+            }
+        ];
+        
+        if (SYS_USER && (SYS_USER.sysuserrole === 1 || SYS_USER.sysuserrole === '1')) {
+            toolbarItems.push({
+                xtype: 'button',
+                action: 'resetPassword',
+                text: '重置密码',
+                iconCls: 'edit-icon',
+                margin: '0 5 0 0',
+                padding: '5 15',
+                style: 'background-color: #dc3545; color: white; border: none;'
+            });
         }
-    ]
+        
+        me.items = [
+            {
+                xtype: 'toolbar',
+                region: 'north',
+                items: toolbarItems
+            },
+            {
+                xtype: 'testlistgrid',
+                region: 'center'
+            }
+        ];
+        
+        me.callParent(arguments);
+    }
 });
 Ext.define('AM.view.user.testlistgrid',{
     extend:'Ext.grid.Panel',

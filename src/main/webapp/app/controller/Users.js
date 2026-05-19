@@ -18,6 +18,9 @@ Ext.define('AM.controller.Users', {
             'viewport > panel > centerpage > userlist1 toolbar button[action=update]': {
                 click: this.onupdatebuttioncick
             },
+            'viewport > panel > centerpage > userlist1 toolbar button[action=resetPassword]': {
+                click: this.onResetPasswordClick
+            },
         });
     },
     models:['userlist'],
@@ -30,6 +33,42 @@ Ext.define('AM.controller.Users', {
 
     onPanelRendered: function() {
         // console.log('The userlistpanel was rendered');
+    },
+    onResetPasswordClick: function() {
+        var grid = this.getTestgrid();
+        var selection = grid.getSelectionModel().getSelection();
+        
+        if (selection.length === 0) {
+            Ext.Msg.alert('提示', '请先选择要重置密码的用户');
+            return;
+        }
+        
+        var record = selection[0];
+        var userId = record.get('id');
+        var username = record.get('sysusername');
+        
+        Ext.Msg.confirm('确认重置密码', '确定要将用户 "' + username + '" 的密码重置为默认密码吗？', function(btn) {
+            if (btn === 'yes') {
+                Ext.Ajax.request({
+                    url: 'sysuseraction/adminResetPassword',
+                    method: 'POST',
+                    params: {
+                        userId: userId
+                    },
+                    success: function(response, opts) {
+                        var result = Ext.decode(response.responseText);
+                        if (result.success) {
+                            Ext.Msg.alert('提示', result.message);
+                        } else {
+                            Ext.Msg.alert('提示', result.message);
+                        }
+                    },
+                    failure: function(response, opts) {
+                        Ext.Msg.alert('提示', '重置密码失败');
+                    }
+                });
+            }
+        });
     },
     onxjbuttioncick:function (){
         console.log('userlistpanel onxjbuttioncick ');
