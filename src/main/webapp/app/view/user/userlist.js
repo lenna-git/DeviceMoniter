@@ -62,16 +62,6 @@ Ext.define('AM.view.user.testlistgrid',{
         renderer:function (value){
             return value===1?'管理员':'普通用户';
         }
-    },{
-        text:'操作',
-        align:'center',
-        xtype:'actioncolumn',
-        dataIndex:'sysuseroperation',
-        flex:1,
-        renderer:function (grid,rowIndex,colIndex){
-            return '<button class="operation-button" >查看</button>';
-        },
-
     }],
     bbar: {
         xtype: 'pagingtoolbar',

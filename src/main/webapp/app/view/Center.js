@@ -13,8 +13,7 @@ Ext.define('AM.view.Center',{
         'AM.view.device.devicelist',
         'AM.view.user.DeviceRecordView',
         'AM.view.user.DeviceTransferRecordView',
-        'AM.view.user.xinjianyonghujiluwindow',
-        // 'AM.view.user.userwindow'
+        'AM.view.user.ChangePasswordView',
         //右側有哪些頁面，都要放在這裏
     ],
     items:[
@@ -24,19 +23,16 @@ Ext.define('AM.view.Center',{
             title: 'card1:devices',
         },
         {
-
-            xtype:'panel',
-            id:'pagetwo',
-            title: 'card2:',
-        },
-        {
             width:'100%',
             height:'100%',
             xtype:'userlist1',
             id:'main-user',
             title: '用户信息',
         },{
-
+            xtype:'ChangePasswordView',
+            id:'main-ChangePassword',
+            title: '修改密码',
+        },{
             xtype:'DeviceRecordView',
             id:'main-DeviceRecord',
             title: '借用记录:',
@@ -44,11 +40,6 @@ Ext.define('AM.view.Center',{
             xtype:'DeviceTransferRecordView',
             id:'main-DeviceTransferRecord',
             title: '转借记录:',
-        },{
-
-            xtype:'panel',
-            id:'pagefive',
-            title: 'card5:',
         }
     ]
 })

@@ -11,7 +11,8 @@ Ext.application({
         'Users','LoginController','mainpageltbarController1',
         'Devices','DeviceRecordController',
         'DeviceTransferRecordController',
-        'xinjianyonghujilucontroller','Devicewindow','UserwindowController'
+        'Devicewindow','UserwindowController',
+        'ChangePasswordController'
     ],
 
     stores: [

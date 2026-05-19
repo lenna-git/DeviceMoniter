@@ -204,6 +204,44 @@ public class SysUserController {
             return map;
         }).toList();
     }
+    
+    /**
+     * 修改密码
+     */
+    @PostMapping("/changePassword")
+    public Map<String, Object> changePassword(
+            @RequestParam Long userId,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            Optional<SysUser> optionalUser = sysUserRepository.findById(userId);
+            if (!optionalUser.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "用户不存在");
+                return responseObj;
+            }
+            
+            SysUser user = optionalUser.get();
+            
+            if (!user.getSysuserpassword().equals(oldPassword)) {
+                responseObj.put("success", false);
+                responseObj.put("message", "原密码不正确");
+                return responseObj;
+            }
+            
+            user.setSysuserpassword(newPassword);
+            sysUserRepository.save(user);
+            
+            responseObj.put("success", true);
+            responseObj.put("message", "密码修改成功");
+        } catch (Exception e) {
+            logger.error("changePassword error: " + e.getMessage(), e);
+            responseObj.put("success", false);
+            responseObj.put("message", "密码修改失败: " + e.getMessage());
+        }
+        return responseObj;
+    }
 }
 
 

@@ -1,44 +1,42 @@
 {
-  	"text": ".",
-  	"children": [{
-    	"text": "<font size=4>设备</font>",
-      	"expanded": true,
-      	"children": [{
-          	"text": "<font size=4>设备信息</font>",
-      		"id": "main-device",
-      		"leaf": true
-      	},{
-          	"text": "<font size=4>标签1-2</font>",
-      		"id": "pagetwo",
-      		"leaf": true
-      	}]
-    },{
-		"text": "<font size=4>用戶</font>",
-		"expanded": true,
-		"children": [{
-			"text": "<font size=4>用戶信息</font>",
-			"id": "main-user",
-			"leaf": true
-		},{
-			"text": "<font size=4>借用记录</font>",
-			"id": "main-DeviceRecord",
-			"leaf": true
-		},{
-			"text": "<font size=4>转借记录</font>",
-			"id": "main-DeviceTransferRecord",
-			"leaf": true
-		},{
-			"text": "<font size=4>标签2-3</font>",
-			"id": "pagesix",
-			"leaf": true
-		},{
-			"text": "<font size=4>标签2-4</font>",
-			"id": "pageseven",
-			"leaf": true
-		}]
-	},{
-        "text": "<font size=4>标签3</font>",
-      	"id": "pagefive",
-      	"leaf": true
-    }]
+    "text": ".",
+    "children": [
+        {
+            "text": "<font size=4>设备</font>",
+            "expanded": true,
+            "children": [
+                {
+                    "text": "<font size=4>设备信息</font>",
+                    "id": "main-device",
+                    "leaf": true
+                }
+            ]
+        },
+        {
+            "text": "<font size=4>用户</font>",
+            "expanded": true,
+            "children": [
+                {
+                    "text": "<font size=4>用户信息</font>",
+                    "id": "main-user",
+                    "leaf": true
+                },
+                {
+                    "text": "<font size=4>修改密码</font>",
+                    "id": "main-ChangePassword",
+                    "leaf": true
+                },
+                {
+                    "text": "<font size=4>借用记录</font>",
+                    "id": "main-DeviceRecord",
+                    "leaf": true
+                },
+                {
+                    "text": "<font size=4>转借记录</font>",
+                    "id": "main-DeviceTransferRecord",
+                    "leaf": true
+                }
+            ]
+        }
+    ]
 }

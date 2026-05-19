@@ -5,12 +5,12 @@ Ext.define('AM.view.Viewport',{
         'AM.view.user.userlist',
         'AM.view.device.devicelist',
         'AM.view.device.devicexzwindow',
-        'AM.view.user.sysuserrecordwindow',
         'AM.view.Center',
         'AM.view.mainpageltbar1',
         'AM.view.user.DeviceRecordView',
         'AM.view.user.DeviceTransferRecordView',
         'AM.view.user.userwindow',
+        'AM.view.user.ChangePasswordView',
     ],
     layout:'vbox',
     items:[
