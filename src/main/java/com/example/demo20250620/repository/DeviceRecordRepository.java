@@ -19,10 +19,10 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
 
 //    List<DeviceRecord> findDeviceRecordByUserIdAndDetail(Long userId,String detail);
 
-    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser")
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser")
     List<DeviceRecord> findAllWithDeviceAndUser();
     
-    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser")
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser")
     Page<DeviceRecord> findAllWithDeviceAndUser(Pageable pageable);
 
     @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NULL")
@@ -31,24 +31,25 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
     @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NOT NULL AND dr.returnDate IS NULL")
     Optional<DeviceRecord> findActiveBorrowRecord(@Param("deviceId") Long deviceId);
 
-    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser WHERE " +
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR " +
            "d.deviceno LIKE %:keyword% OR " +
-           "dr.detail LIKE %:keyword%)")
+           "dr.detail LIKE %:keyword% OR " +
+           "dr.borrowUser.sysusername LIKE %:keyword%)")
     List<DeviceRecord> findByKeyword(@Param("keyword") String keyword);
 
-    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN SysUser u ON dr.userId = u.id WHERE " +
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR " +
            "d.deviceno LIKE %:keyword% OR " +
            "dr.detail LIKE %:keyword% OR " +
-           "u.sysusername LIKE %:keyword%)")
+           "dr.borrowUser.sysusername LIKE %:keyword%)")
     List<DeviceRecord> findByKeywordWithUsername(@Param("keyword") String keyword);
     
-    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN SysUser u ON dr.userId = u.id WHERE " +
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser WHERE " +
            "(:keyword IS NULL OR :keyword = '' OR " +
            "d.deviceno LIKE %:keyword% OR " +
            "dr.detail LIKE %:keyword% OR " +
-           "u.sysusername LIKE %:keyword%)")
+           "dr.borrowUser.sysusername LIKE %:keyword%)")
     Page<DeviceRecord> findByKeywordWithUsername(@Param("keyword") String keyword, Pageable pageable);
 
 }

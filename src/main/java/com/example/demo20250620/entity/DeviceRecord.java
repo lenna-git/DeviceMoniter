@@ -24,17 +24,22 @@ public class DeviceRecord {
 //,referencedColumnName = "id"
 
 
+    @ManyToOne
+    @JoinColumn(name = "userId", insertable = false, updatable = false)
+    private SysUser borrowUser;
+
     private Long userId;
 
+    @ManyToOne
+    @JoinColumn(name = "returnApprovalUserId", insertable = false, updatable = false)
+    private SysUser returnApprovalUser;
 
-//    @Column(name = "device_id")
-//    private Long DeviceId;
-    private String borrorDate;//借用日期
-    private String approvalDate;//批准时间
-    private String returnDate;//归还日期
-    private Long returnApprovalUserId;//归还批准人ID
-    private String returnApprovalDate;//归还批准时间
-    private String detail;//详情
+    private Long returnApprovalUserId;
+    private String borrorDate;
+    private String approvalDate;
+    private String returnDate;
+    private String returnApprovalDate;
+    private String detail;
     
     @Transient
     private String borrowerUsername;//借用人用户名
@@ -172,6 +177,22 @@ public class DeviceRecord {
 
     public void setDevice(Device device) {
         this.device = device;
+    }
+
+    public SysUser getBorrowUser() {
+        return borrowUser;
+    }
+
+    public void setBorrowUser(SysUser borrowUser) {
+        this.borrowUser = borrowUser;
+    }
+
+    public SysUser getReturnApprovalUser() {
+        return returnApprovalUser;
+    }
+
+    public void setReturnApprovalUser(SysUser returnApprovalUser) {
+        this.returnApprovalUser = returnApprovalUser;
     }
 
     public String getBorrowerUsername() {

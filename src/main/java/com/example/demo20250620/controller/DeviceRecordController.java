@@ -83,36 +83,8 @@ public class DeviceRecordController {
             }
             
             List<DeviceRecord> records = deviceRecordPage.getContent();
-            List<Map<String, Object>> flatRecords = new java.util.ArrayList<>();
             
-            for (DeviceRecord record : records) {
-                Map<String, Object> flatRecord = new HashMap<>();
-                flatRecord.put("id", record.getId());
-                flatRecord.put("userId", record.getUserId());
-                flatRecord.put("borrowerUsername", record.getBorrowerUsername());
-                flatRecord.put("borrorDate", record.getBorrorDate());
-                flatRecord.put("approvalDate", record.getApprovalDate());
-                flatRecord.put("returnDate", record.getReturnDate());
-                flatRecord.put("detail", record.getDetail());
-                flatRecord.put("approvalUsername", record.getSysUser() != null ? record.getSysUser().getSysusername() : null);
-                flatRecord.put("returnApprovalUserId", record.getReturnApprovalUserId());
-                flatRecord.put("returnApprovalUsername", record.getReturnApprovalUsername());
-                flatRecord.put("returnApprovalDate", record.getReturnApprovalDate());
-                
-                // 扁平化设备信息
-                if (record.getDevice() != null) {
-                    flatRecord.put("deviceid", record.getDevice().getId());
-                    flatRecord.put("deviceno", record.getDevice().getDeviceno());
-                    flatRecord.put("devicexh", record.getDevice().getDevicexh());
-                    flatRecord.put("cpuname", record.getDevice().getDevCpu() != null ? record.getDevice().getDevCpu().getCpuname() : null);
-                    flatRecord.put("typename", record.getDevice().getDevType() != null ? record.getDevice().getDevType().getTypename() : null);
-                    flatRecord.put("manufacturername", record.getDevice().getDevManufacturer() != null ? record.getDevice().getDevManufacturer().getManufacturername() : null);
-                }
-                
-                flatRecords.add(flatRecord);
-            }
-            
-            responseObj.put("data", flatRecords);
+            responseObj.put("data", records);
             responseObj.put("total", deviceRecordPage.getTotalElements());
             responseObj.put("success", true);
         } catch (Exception e) {
