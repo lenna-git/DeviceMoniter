@@ -9,6 +9,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -320,15 +323,22 @@ public class DeviceTransferController {
      * 获取所有转借记录（供页面展示）
      */
     @GetMapping("/list")
-    public Map<String, Object> listTransferRecords(@RequestParam(required = false) String keyword) {
+    public Map<String, Object> listTransferRecords(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit) {
         Map<String, Object> result = new HashMap<>();
         try {
-            List<DeviceTransferRecord> records;
+            int pageIndex = Math.max(0, page - 1);
+            Page<DeviceTransferRecord> recordPage;
+            
             if (keyword == null || keyword.trim().isEmpty()) {
-                records = transferRecordRepository.findAllWithDetails();
+                recordPage = transferRecordRepository.findAllWithDetails(PageRequest.of(pageIndex, limit));
             } else {
-                records = transferRecordRepository.findByKeywordWithDetails(keyword.trim());
+                recordPage = transferRecordRepository.findByKeywordWithDetails(keyword.trim(), PageRequest.of(pageIndex, limit));
             }
+            
+            List<DeviceTransferRecord> records = recordPage.getContent();
             
             // 填充用户名和状态文本
             for (DeviceTransferRecord record : records) {
@@ -347,6 +357,7 @@ public class DeviceTransferController {
             
             result.put("success", true);
             result.put("data", records);
+            result.put("total", recordPage.getTotalElements());
         } catch (Exception e) {
             result.put("success", false);
             result.put("message", "获取转借记录失败: " + e.getMessage());

@@ -16,11 +16,13 @@ Ext.application({
     ],
 
     stores: [
-        'DeviceTransferRecordStore'
+        'DeviceTransferRecordStore',
+        'devicerecordstore'
     ],
 
     models: [
-        'DeviceTransferRecordModel'
+        'DeviceTransferRecordModel',
+        'devicerecord'
     ],
 
     launch: function() {

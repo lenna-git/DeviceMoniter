@@ -7,7 +7,7 @@
         if (!sessionUser) {
             window.location.href = 'login.html';
         } else {
-            window.SYS_USER = Ext.decode(sessionUser);
+            window.SYS_USER = JSON.parse(sessionUser);
         }
     </script>
     <link rel="stylesheet" type="text/css" href="extjs4.2/resources/css/ext-all.css">

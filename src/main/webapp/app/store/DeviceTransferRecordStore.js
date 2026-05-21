@@ -3,12 +3,17 @@ Ext.define('AM.store.DeviceTransferRecordStore', {
     model: 'AM.model.DeviceTransferRecordModel',
     storeId: 'DeviceTransferRecordStore',
     autoLoad: true,
+    pageSize: 20,
     proxy: {
         type: 'ajax',
         url: 'transfer/list',
         reader: {
             type: 'json',
-            root: 'data'
+            rootProperty: 'data',
+            totalProperty: 'total'
+        },
+        extraParams: {
+            keyword: '',
         }
     }
 });

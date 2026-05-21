@@ -20,6 +20,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,30 +68,58 @@ public class DeviceRecordController {
     }
 
     @GetMapping("/alldevicerecords")
-    public List<DeviceRecord> getAllDevicerecords(@RequestParam(required = false) String keyword){
-        List<DeviceRecord> records;
-        if (keyword == null || keyword.trim().isEmpty()) {
-            records = deviceRecordRepository.findAllWithDeviceAndUser();
-        } else {
-            records = deviceRecordRepository.findByKeywordWithUsername(keyword.trim());
-        }
-        for (DeviceRecord record : records) {
-            // 填充借用人用户名
-            if (record.getUserId() != null) {
-                Optional<SysUser> userOpt = sysUserRepository.findById(record.getUserId());
-                if (userOpt.isPresent()) {
-                    record.setBorrowerUsername(userOpt.get().getSysusername());
-                }
+    public Map<String, Object> getAllDevicerecords(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int limit){
+        Map<String, Object> responseObj = new HashMap<>();
+        try {
+            int pageIndex = Math.max(0, page - 1);
+            Page<DeviceRecord> deviceRecordPage;
+            if (keyword == null || keyword.trim().isEmpty()) {
+                deviceRecordPage = deviceRecordRepository.findAllWithDeviceAndUser(PageRequest.of(pageIndex, limit));
+            } else {
+                deviceRecordPage = deviceRecordRepository.findByKeywordWithUsername(keyword.trim(), PageRequest.of(pageIndex, limit));
             }
-            // 填充归还批准人用户名
-            if (record.getReturnApprovalUserId() != null) {
-                Optional<SysUser> userOpt = sysUserRepository.findById(record.getReturnApprovalUserId());
-                if (userOpt.isPresent()) {
-                    record.setReturnApprovalUsername(userOpt.get().getSysusername());
+            
+            List<DeviceRecord> records = deviceRecordPage.getContent();
+            List<Map<String, Object>> flatRecords = new java.util.ArrayList<>();
+            
+            for (DeviceRecord record : records) {
+                Map<String, Object> flatRecord = new HashMap<>();
+                flatRecord.put("id", record.getId());
+                flatRecord.put("userId", record.getUserId());
+                flatRecord.put("borrowerUsername", record.getBorrowerUsername());
+                flatRecord.put("borrorDate", record.getBorrorDate());
+                flatRecord.put("approvalDate", record.getApprovalDate());
+                flatRecord.put("returnDate", record.getReturnDate());
+                flatRecord.put("detail", record.getDetail());
+                flatRecord.put("approvalUsername", record.getSysUser() != null ? record.getSysUser().getSysusername() : null);
+                flatRecord.put("returnApprovalUserId", record.getReturnApprovalUserId());
+                flatRecord.put("returnApprovalUsername", record.getReturnApprovalUsername());
+                flatRecord.put("returnApprovalDate", record.getReturnApprovalDate());
+                
+                // 扁平化设备信息
+                if (record.getDevice() != null) {
+                    flatRecord.put("deviceid", record.getDevice().getId());
+                    flatRecord.put("deviceno", record.getDevice().getDeviceno());
+                    flatRecord.put("devicexh", record.getDevice().getDevicexh());
+                    flatRecord.put("cpuname", record.getDevice().getDevCpu() != null ? record.getDevice().getDevCpu().getCpuname() : null);
+                    flatRecord.put("typename", record.getDevice().getDevType() != null ? record.getDevice().getDevType().getTypename() : null);
+                    flatRecord.put("manufacturername", record.getDevice().getDevManufacturer() != null ? record.getDevice().getDevManufacturer().getManufacturername() : null);
                 }
+                
+                flatRecords.add(flatRecord);
             }
+            
+            responseObj.put("data", flatRecords);
+            responseObj.put("total", deviceRecordPage.getTotalElements());
+            responseObj.put("success", true);
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "获取借用记录失败: " + e.getMessage());
         }
-        return records;
+        return responseObj;
     }
 
     @PutMapping("/updateDeviceRecordById/{deviceId}")

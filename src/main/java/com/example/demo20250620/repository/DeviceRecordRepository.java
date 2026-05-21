@@ -2,6 +2,8 @@ package com.example.demo20250620.repository;
 
 
 import com.example.demo20250620.entity.DeviceRecord;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,6 +21,9 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
 
     @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser")
     List<DeviceRecord> findAllWithDeviceAndUser();
+    
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser")
+    Page<DeviceRecord> findAllWithDeviceAndUser(Pageable pageable);
 
     @Query("SELECT dr FROM DeviceRecord dr WHERE dr.device.id = :deviceId AND dr.borrorDate IS NOT NULL AND dr.approvalDate IS NULL")
     Optional<DeviceRecord> findPendingBorrowRecord(@Param("deviceId") Long deviceId);
@@ -38,5 +43,12 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
            "dr.detail LIKE %:keyword% OR " +
            "u.sysusername LIKE %:keyword%)")
     List<DeviceRecord> findByKeywordWithUsername(@Param("keyword") String keyword);
+    
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN SysUser u ON dr.userId = u.id WHERE " +
+           "(:keyword IS NULL OR :keyword = '' OR " +
+           "d.deviceno LIKE %:keyword% OR " +
+           "dr.detail LIKE %:keyword% OR " +
+           "u.sysusername LIKE %:keyword%)")
+    Page<DeviceRecord> findByKeywordWithUsername(@Param("keyword") String keyword, Pageable pageable);
 
 }

@@ -13,8 +13,8 @@ Ext.define('AM.controller.DeviceRecordController', {
         );
     },
 
-    models:['DeviceRecordModel'],
-    stores:['DeviceRecordStore'],
+    models:['devicerecord'],
+    stores:['deviceliststore'],
 
     refs:[{
         selector: 'viewport centerpage DeviceRecordView DeviceRecordGrid',
