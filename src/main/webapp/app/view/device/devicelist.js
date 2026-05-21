@@ -130,7 +130,18 @@ Ext.define('AM.view.device.devicelistgrid',{
     autoScroll:true,
     forceFit:true,
     viewConfig: {
-        loadMask: true
+        loadMask: true,
+        listeners: {
+            cellmouseenter: function(view, td, cellIndex, record, tr, rowIndex, e) {
+                var column = view.columns[cellIndex];
+                var dataIndex = column.dataIndex;
+                var value = record.get(dataIndex);
+                if (value && typeof value === 'object') {
+                    value = Ext.encode(value);
+                }
+                td.setAttribute('data-qtip', value ? String(value) : '');
+            }
+        }
     },
     listeners: {
         afterrender: function(grid) {
@@ -153,62 +164,123 @@ Ext.define('AM.view.device.devicelistgrid',{
         align:'center',
         dataIndex:'devCpu.cpuname',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'类型',
         align:'center',
         dataIndex:'devType.typename',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'型号',
         align:'center',
         dataIndex:'devicexh',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'厂商',
         align:'center',
         dataIndex:'devManufacturer.manufacturername',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'序列号',
         align:'center',
         dataIndex:'devicesn',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'编号',
         align:'center',
         dataIndex:'deviceno',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'送测日期',
         align:'center',
         dataIndex:'devicescdata',
         flex:1,
+        renderer: function(value, metaData, record) {
+            var displayValue = value;
+            if (value && typeof value === 'string') {
+                displayValue = value.replace('T', ' ');
+            }
+            if (!displayValue) displayValue = '';
+            metaData.tdAttr = 'title="' + displayValue + '" data-qtip="' + displayValue + '"';
+            return displayValue;
+        }
     },{
         text:'安检日期',
         align:'center',
         dataIndex:'deviceajdata',
         flex:1,
+        renderer: function(value, metaData, record) {
+            var displayValue = value;
+            if (value && typeof value === 'string') {
+                displayValue = value.replace('T', ' ');
+            }
+            if (!displayValue) displayValue = '';
+            metaData.tdAttr = 'title="' + displayValue + '" data-qtip="' + displayValue + '"';
+            return displayValue;
+        }
     },{
         text:'归还厂商日期',
         align:'center',
         dataIndex:'deviceghdata',
         flex:1,
+        renderer: function(value, metaData, record) {
+            var displayValue = value;
+            if (value && typeof value === 'string') {
+                displayValue = value.replace('T', ' ');
+            }
+            if (!displayValue) displayValue = '';
+            metaData.tdAttr = 'title="' + displayValue + '" data-qtip="' + displayValue + '"';
+            return displayValue;
+        }
     },{
         text:'借用人',
         align:'center',
         dataIndex:'deviceyh.sysusername',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'状态',
         align:'center',
         dataIndex:'devicestate.stateDetail',
         flex:1,
+        renderer: function(value, metaData, record) {
+            metaData.tdAttr = 'data-qtip="' + (value ? Ext.String.htmlEncode(value) : '') + '"';
+            return value;
+        }
     },{
         text:'维修记录',
         align:'center',
         flex:1,
         renderer: function(value, metaData, record) {
             var role = SYS_USER ? SYS_USER.sysuserrole : 1;
+            var displayValue = role === 1 ? '查看' : '';
+            metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(displayValue) + '"';
             if (role === 1) {
                 return '<a href="#" class="view-repair-link" data-id="' + record.get('id') + '" style="color: blue; text-decoration: underline;">查看</a>';
             }
