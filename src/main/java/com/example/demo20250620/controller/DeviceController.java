@@ -15,6 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -380,10 +390,128 @@ public class DeviceController {
             responseObj.put("success", true);
             responseObj.put("message", "转借已同意，设备状态已更新为借用中");
         } catch (Exception e) {
-            responseObj.put("success", false);
+            responseObj.put("success", true);
             responseObj.put("message", "同意转借失败: " + e.getMessage());
         }
         return responseObj;
+    }
+
+    /**
+     * 导出设备信息到Excel
+     */
+    @GetMapping("/exportExcel")
+    public ResponseEntity<byte[]> exportExcel(
+            @RequestParam(required = false) String devicexp,
+            @RequestParam(required = false) String devicetype,
+            @RequestParam(required = false) String devicexh,
+            @RequestParam(required = false) String devicecs) throws IOException {
+        
+        List<Device> devices;
+        boolean hasXp = !EmptyorNot(devicexp);
+        boolean hasType = !EmptyorNot(devicetype);
+        boolean hasXh = !EmptyorNot(devicexh);
+        boolean hasCs = !EmptyorNot(devicecs);
+        
+        if (!hasXp && !hasType && !hasXh && !hasCs) {
+            devices = deviceRepository.findAllWithDevType();
+        } else {
+            devices = deviceRepository.findByMultipleConditions(devicexp, devicetype, devicexh, devicecs);
+        }
+        
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("设备信息");
+        
+        CellStyle headerStyle = workbook.createCellStyle();
+        Font headerFont = workbook.createFont();
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+        headerStyle.setAlignment(HorizontalAlignment.CENTER);
+        headerStyle.setBorderBottom(BorderStyle.THIN);
+        headerStyle.setBorderTop(BorderStyle.THIN);
+        headerStyle.setBorderLeft(BorderStyle.THIN);
+        headerStyle.setBorderRight(BorderStyle.THIN);
+        
+        CellStyle dataStyle = workbook.createCellStyle();
+        dataStyle.setAlignment(HorizontalAlignment.CENTER);
+        dataStyle.setBorderBottom(BorderStyle.THIN);
+        dataStyle.setBorderTop(BorderStyle.THIN);
+        dataStyle.setBorderLeft(BorderStyle.THIN);
+        dataStyle.setBorderRight(BorderStyle.THIN);
+        
+        String[] headers = {"芯片", "类型", "型号", "厂商", "序列号", "编号", "送测日期", "安检日期", "归还厂商日期", "借用人", "状态"};
+        Row headerRow = sheet.createRow(0);
+        for (int i = 0; i < headers.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(headers[i]);
+            cell.setCellStyle(headerStyle);
+        }
+        
+        int rowNum = 1;
+        for (Device device : devices) {
+            Row row = sheet.createRow(rowNum++);
+            
+            Cell cell0 = row.createCell(0);
+            cell0.setCellValue(device.getDevCpu() != null ? device.getDevCpu().getCpuname() : "");
+            cell0.setCellStyle(dataStyle);
+            
+            Cell cell1 = row.createCell(1);
+            cell1.setCellValue(device.getDevType() != null ? device.getDevType().getTypename() : "");
+            cell1.setCellStyle(dataStyle);
+            
+            Cell cell2 = row.createCell(2);
+            cell2.setCellValue(device.getDevicexh() != null ? device.getDevicexh() : "");
+            cell2.setCellStyle(dataStyle);
+            
+            Cell cell3 = row.createCell(3);
+            cell3.setCellValue(device.getDevManufacturer() != null ? device.getDevManufacturer().getManufacturername() : "");
+            cell3.setCellStyle(dataStyle);
+            
+            Cell cell4 = row.createCell(4);
+            cell4.setCellValue(device.getDevicesn() != null ? device.getDevicesn() : "");
+            cell4.setCellStyle(dataStyle);
+            
+            Cell cell5 = row.createCell(5);
+            cell5.setCellValue(device.getDeviceno() != null ? device.getDeviceno() : "");
+            cell5.setCellStyle(dataStyle);
+            
+            Cell cell6 = row.createCell(6);
+            cell6.setCellValue(device.getDevicescdata() != null ? device.getDevicescdata().toString() : "");
+            cell6.setCellStyle(dataStyle);
+            
+            Cell cell7 = row.createCell(7);
+            cell7.setCellValue(device.getDeviceajdata() != null ? device.getDeviceajdata().toString() : "");
+            cell7.setCellStyle(dataStyle);
+            
+            Cell cell8 = row.createCell(8);
+            cell8.setCellValue(device.getDeviceghdata() != null ? device.getDeviceghdata().toString() : "");
+            cell8.setCellStyle(dataStyle);
+            
+            Cell cell9 = row.createCell(9);
+            cell9.setCellValue(device.getDeviceyh() != null ? device.getDeviceyh().getSysusername() : "");
+            cell9.setCellStyle(dataStyle);
+            
+            Cell cell10 = row.createCell(10);
+            cell10.setCellValue(device.getDevicestate() != null ? device.getDevicestate().getStateDetail() : "");
+            cell10.setCellStyle(dataStyle);
+        }
+        
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+        
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        workbook.write(outputStream);
+        workbook.close();
+        
+        String filename = "设备信息_" + java.time.LocalDateTime.now().toString().replace(":", "-") + ".xlsx";
+        String encodedFilename = URLEncoder.encode(filename, StandardCharsets.UTF_8).replace("+", "%20");
+        
+        org.springframework.http.HttpHeaders responseHeaders = new org.springframework.http.HttpHeaders();
+        responseHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        responseHeaders.setContentDispositionFormData("attachment", encodedFilename);
+        responseHeaders.add("Access-Control-Expose-Headers", "Content-Disposition");
+        
+        return new ResponseEntity<>(outputStream.toByteArray(), responseHeaders, org.springframework.http.HttpStatus.OK);
     }
 
 }

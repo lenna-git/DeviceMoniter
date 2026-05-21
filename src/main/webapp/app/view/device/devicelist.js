@@ -8,10 +8,11 @@ Ext.define('AM.view.device.devicelist' ,{
         {
             xtype: 'toolbar',
             region: 'north',
+            overflowHandler: 'menu',
             items: [
                 {
                     xtype:'textfield',
-                    width:180,
+                    width:150,
                     name:'queryxp',
                     emptyText:'请输入设备芯片',
                     fieldLabel:'芯片',
@@ -20,7 +21,7 @@ Ext.define('AM.view.device.devicelist' ,{
                 },
                 {
                     xtype:'textfield',
-                    width:180,
+                    width:150,
                     name:'querylx',
                     emptyText:'请输入设备类型',
                     fieldLabel:'类型',
@@ -29,7 +30,7 @@ Ext.define('AM.view.device.devicelist' ,{
                 },
                 {
                     xtype:'textfield',
-                    width:180,
+                    width:150,
                     name:'queryxh',
                     emptyText:'请输入设备型号',
                     fieldLabel:'型号',
@@ -38,7 +39,7 @@ Ext.define('AM.view.device.devicelist' ,{
                 },
                 {
                     xtype:'textfield',
-                    width:180,
+                    width:150,
                     name:'querycs',
                     emptyText:'请输入设备厂商',
                     fieldLabel:'厂商',
@@ -69,8 +70,35 @@ Ext.define('AM.view.device.devicelist' ,{
                 },
                 {
                     xtype: 'button',
+                    action: 'export',
+                    text: '导出Excel',
+                    margin: '0 5 0 0',
+                    padding: '5 15',
+                    width: 90,
+                    handler: function() {
+                        var toolbar = this.up('toolbar');
+                        var queryxp = toolbar.down('textfield[name=queryxp]').getValue();
+                        var querylx = toolbar.down('textfield[name=querylx]').getValue();
+                        var queryxh = toolbar.down('textfield[name=queryxh]').getValue();
+                        var querycs = toolbar.down('textfield[name=querycs]').getValue();
+                        
+                        var url = 'deviceaction/exportExcel?';
+                        var params = [];
+                        if (queryxp) params.push('devicexp=' + encodeURIComponent(queryxp));
+                        if (querylx) params.push('devicetype=' + encodeURIComponent(querylx));
+                        if (queryxh) params.push('devicexh=' + encodeURIComponent(queryxh));
+                        if (querycs) params.push('devicecs=' + encodeURIComponent(querycs));
+                        
+                        url += params.join('&');
+                        
+                        window.location.href = url;
+                    }
+                },
+                {
+                    xtype: 'button',
                     action: 'update',
                     text: '修改',
+                    margin: '0 5 0 0',
                     padding: '5 15'
                 }
             ]
