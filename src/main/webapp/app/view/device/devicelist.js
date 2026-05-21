@@ -9,6 +9,19 @@ Ext.define('AM.view.device.devicelist' ,{
             xtype: 'toolbar',
             region: 'north',
             overflowHandler: 'menu',
+            listeners: {
+                afterrender: function(toolbar) {
+                    var role = SYS_USER ? SYS_USER.sysuserrole : null;
+                    if (role !== 1) {
+                        toolbar.items.each(function(item) {
+                            var action = item.action;
+                            if (action && (action === 'xz' || action === 'sc' || action === 'update' || action === 'export')) {
+                                item.hide();
+                            }
+                        });
+                    }
+                }
+            },
             items: [
                 {
                     xtype:'textfield',
