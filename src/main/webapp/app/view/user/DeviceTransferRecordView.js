@@ -83,8 +83,11 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '原借用人',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'fromUsername',
+        dataIndex: 'fromUser',
         flex: 1,
+        renderer: function(value) {
+            return value ? value.sysusername : '';
+        }
     }, {
         text: '转借申请日期',
         align: 'center',
@@ -95,8 +98,11 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '新借用人',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'toUsername',
+        dataIndex: 'toUser',
         flex: 1,
+        renderer: function(value) {
+            return value ? value.sysusername : '';
+        }
     }, {
         text: '新借用人同意日期',
         align: 'center',
@@ -107,8 +113,11 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '批准管理员',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'adminApprovalUsername',
+        dataIndex: 'adminApprovalUser',
         flex: 1,
+        renderer: function(value) {
+            return value ? value.sysusername : '';
+        }
     }, {
         text: '批准日期',
         align: 'center',
@@ -119,8 +128,18 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '状态',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'statusText',
+        dataIndex: 'status',
         flex: 1,
+        renderer: function(value) {
+            if (value == null) return '';
+            switch (value) {
+                case 1: return '申请中';
+                case 2: return '新借用人已同意';
+                case 3: return '管理员已同意';
+                case 4: return '已拒绝';
+                default: return '未知状态';
+            }
+        }
     }, {
         text: '详情',
         align: 'center',

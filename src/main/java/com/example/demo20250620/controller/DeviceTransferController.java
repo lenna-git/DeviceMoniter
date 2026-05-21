@@ -340,21 +340,6 @@ public class DeviceTransferController {
             
             List<DeviceTransferRecord> records = recordPage.getContent();
             
-            // 填充用户名和状态文本
-            for (DeviceTransferRecord record : records) {
-                if (record.getFromUser() != null) {
-                    record.setFromUsername(record.getFromUser().getSysusername());
-                }
-                if (record.getToUser() != null) {
-                    record.setToUsername(record.getToUser().getSysusername());
-                }
-                if (record.getAdminApprovalUser() != null) {
-                    record.setAdminApprovalUsername(record.getAdminApprovalUser().getSysusername());
-                }
-                // 设置状态文本
-                record.setStatusText(getStatusText(record.getStatus()));
-            }
-            
             result.put("success", true);
             result.put("data", records);
             result.put("total", recordPage.getTotalElements());
