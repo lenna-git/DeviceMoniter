@@ -43,66 +43,65 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
     viewConfig: {
         loadMask: true
     },
-    columns: [{
+    columns: [
+        {
         text: '设备编号',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.deviceno',
+        dataIndex: 'deviceNo',
         flex: 1,
-    }, {
+    },
+        {
         text: '序列号',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.devicesn',
+        dataIndex: 'deviceSn',
         flex: 1,
-    }, {
+    },
+        {
         text: '芯片',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.devCpu.cpuname',
+        dataIndex: 'cpuName',
         flex: 1,
     }, {
         text: '类型',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.devType.typename',
+        dataIndex: 'typeName',
         flex: 1,
     }, {
         text: '型号',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.devicexh',
+        dataIndex: 'deviceXh',
         flex: 1,
     }, {
         text: '厂商',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'device.devManufacturer.manufacturername',
+        dataIndex: 'manufacturerName',
         flex: 1,
     }, {
         text: '原借用人',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'fromUser',
+        dataIndex: 'fromUsername',
         flex: 1,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
-    }, {
+    },
+        {
         text: '转借申请日期',
         align: 'center',
         style: 'font-size:16px',
         dataIndex: 'transferDate',
         flex: 1,
-    }, {
+    },
+        {
         text: '新借用人',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'toUser',
+        dataIndex: 'toUsername',
         flex: 1,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
     }, {
         text: '新借用人同意日期',
         align: 'center',
@@ -113,11 +112,8 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '批准管理员',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'adminApprovalUser',
+        dataIndex: 'adminApprovalUsername',
         flex: 1,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
     }, {
         text: '批准日期',
         align: 'center',
@@ -128,25 +124,16 @@ Ext.define('AM.view.user.DeviceTransferRecordGrid', {
         text: '状态',
         align: 'center',
         style: 'font-size:16px',
-        dataIndex: 'status',
+        dataIndex: 'statusText',
         flex: 1,
-        renderer: function(value) {
-            if (value == null) return '';
-            switch (value) {
-                case 1: return '申请中';
-                case 2: return '新借用人已同意';
-                case 3: return '管理员已同意';
-                case 4: return '已拒绝';
-                default: return '未知状态';
-            }
-        }
     }, {
         text: '详情',
         align: 'center',
         style: 'font-size:16px',
         dataIndex: 'detail',
         flex: 1,
-    }],
+    }
+    ],
     bbar: {
         xtype: 'pagingtoolbar',
         store: 'DeviceTransferRecordStore',

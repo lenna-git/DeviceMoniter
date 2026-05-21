@@ -57,65 +57,44 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         text:'设备编号',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'deviceno',
         flex:2,
-        renderer: function(value) {
-            return value ? value.deviceno : '';
-        }
     },{
         text:'序列号',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'devicesn',
         flex:2,
-        renderer: function(value) {
-            return value ? value.devicesn : '';
-        }
     },{
         text:'芯片',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'cpuname',
         flex:2,
-        renderer: function(value) {
-            return value && value.devCpu ? value.devCpu.cpuname : '';
-        }
     },{
         text:'型号',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'devicexh',
         flex:2,
-        renderer: function(value) {
-            return value ? value.devicexh : '';
-        }
     },{
         text:'类型',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'typename',
         flex:1,
-        renderer: function(value) {
-            return value && value.devType ? value.devType.typename : '';
-        }
     },{
         text:'厂商',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'device',
+        dataIndex:'manufacturername',
         flex:2,
-        renderer: function(value) {
-            return value && value.devManufacturer ? value.devManufacturer.manufacturername : '';
-        }
     },{
         text:'借用人',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'borrowUser',
+        dataIndex:'borrowerUsername',
         flex:2,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
     },{
         text:'借用日期',
         align:'center',
@@ -126,11 +105,8 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         text:'批准人',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'sysUser',
+        dataIndex:'approvalUsername',
         flex:2,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
     },{
         text:'批准借用日期',
         align:'center',
@@ -147,11 +123,8 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
         text:'批准归还人',
         align:'center',
         style:'font-size:16px',
-        dataIndex:'returnApprovalUser',
+        dataIndex:'returnApprovalUsername',
         flex:2,
-        renderer: function(value) {
-            return value ? value.sysusername : '';
-        }
     },{
         text:'批准归还日期',
         align:'center',
