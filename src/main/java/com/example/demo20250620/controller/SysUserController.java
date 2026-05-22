@@ -233,12 +233,37 @@ public class SysUserController {
     public Map<String, Object> deleteUser(@RequestParam Long id) {
         Map<String, Object> responseObj = new HashMap<>();
         try {
-            if (!sysUserRepository.existsById(id)) {
+            Optional<SysUser> optionalUserToDelete = sysUserRepository.findById(id);
+            if (!optionalUserToDelete.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
                 return responseObj;
             }
+            SysUser userToDelete = optionalUserToDelete.get();
             sysUserRepository.deleteById(id);
+
+            // 记录删除用户日志
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logSuccess(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_DELETE,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "管理员【" + admin.getSysusername() + "】删除用户【" + userToDelete.getSysusername() + "】",
+                                null,
+                                userToDelete.getId(),
+                                userToDelete.getSysusername(),
+                                request);
+                    }
+                }
+            }
+
             responseObj.put("success", true);
             responseObj.put("message", "用户删除成功");
         } catch (Exception e) {
