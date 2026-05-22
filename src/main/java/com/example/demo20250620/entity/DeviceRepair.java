@@ -31,6 +31,9 @@ public class DeviceRepair {
     
     @Column(name = "repair_person_id")
     private Long repairPersonId;
+    
+    @Column(name = "admin_start_repair_time")
+    private LocalDateTime adminStartRepairTime;
 
     public Long getId() {
         return id;
@@ -94,5 +97,13 @@ public class DeviceRepair {
 
     public void setRepairPersonId(Long repairPersonId) {
         this.repairPersonId = repairPersonId;
+    }
+
+    public LocalDateTime getAdminStartRepairTime() {
+        return adminStartRepairTime;
+    }
+
+    public void setAdminStartRepairTime(LocalDateTime adminStartRepairTime) {
+        this.adminStartRepairTime = adminStartRepairTime;
     }
 }

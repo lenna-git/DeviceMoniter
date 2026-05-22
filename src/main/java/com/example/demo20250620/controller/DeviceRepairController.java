@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @RestController
 @RequestMapping("/devicerepair/")
 public class DeviceRepairController {
@@ -81,9 +83,10 @@ public class DeviceRepairController {
     }
     
     /**
-     * 管理员确认维修 - 将设备状态改为"修理中"并创建维修记录
+     * 管理员确认维修 - 将设备状态改为"修理中"并更新维修记录
      */
     @PostMapping("/confirm/{deviceId}")
+    @Transactional
     public Map<String, Object> confirmRepair(@PathVariable Long deviceId, @RequestBody Map<String, Object> request) {
         Map<String, Object> responseObj = new HashMap<>();
         try {
@@ -98,16 +101,39 @@ public class DeviceRepairController {
             
             Device device = deviceOpt.get();
             
-            // 创建维修记录
-            DeviceRepair repair = new DeviceRepair();
-            repair.setDevice(device);
-            repair.setRepairTime(LocalDateTime.now());
-            repair.setRepairReason("管理员确认维修");
-            if (adminId != null) {
-                repair.setRepairPersonId(adminId);
-            }
+            // 查找该设备已有的维修记录（操作员申请的记录）
+            List<DeviceRepair> existingRepairs = deviceRepairRepository.findByDeviceId(deviceId);
             
-            deviceRepairRepository.save(repair);
+            // 按ID降序排序，取最新的记录
+            existingRepairs.sort((a, b) -> Long.compare(b.getId(), a.getId()));
+            
+            DeviceRepair repair;
+            
+            if (!existingRepairs.isEmpty()) {
+                // 如果存在已有记录，更新最新的一条记录
+                repair = existingRepairs.get(0);
+                
+                // 重新从数据库获取实体然后更新，确保JPA正确检测到修改
+                DeviceRepair managedRepair = deviceRepairRepository.findById(repair.getId()).orElse(null);
+                if (managedRepair != null) {
+                    if (adminId != null) {
+                        managedRepair.setRepairPersonId(adminId);
+                    }
+                    managedRepair.setAdminStartRepairTime(LocalDateTime.now());
+                    deviceRepairRepository.saveAndFlush(managedRepair);
+                }
+            } else {
+                // 如果没有已有记录，创建新记录（兼容旧数据）
+                repair = new DeviceRepair();
+                repair.setDevice(device);
+                repair.setRepairTime(LocalDateTime.now());
+                repair.setRepairReason("管理员确认维修");
+                if (adminId != null) {
+                    repair.setRepairPersonId(adminId);
+                }
+                repair.setAdminStartRepairTime(LocalDateTime.now());
+                deviceRepairRepository.saveAndFlush(repair);
+            }
             
             // 更新设备状态为"修理中"(ID=6)
             Optional<com.example.demo20250620.entity.Devicestate> stateOpt = devicestateRepository.findById(6L);
