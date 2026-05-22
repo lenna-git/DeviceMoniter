@@ -850,35 +850,74 @@ Ext.define('AM.controller.Devices', {
             e.stopEvent();
             var deviceId = target.getAttribute('data-id');
             console.log('deviceId:', deviceId);
-            Ext.Msg.confirm('确认报修', '确定要申请报修该设备吗？', function(btn) {
-                if (btn === 'yes') {
-                    Ext.Ajax.request({
-                        url: 'devicerepair/create',
-                        method: 'POST',
-                        jsonData: {
-                            deviceId: parseInt(deviceId),
-                            reporterId: SYS_USER.id
-                        },
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        success: function(response, opts) {
-                            var obj = Ext.decode(response.responseText);
-                            if (obj.success) {
-                                Ext.Msg.alert('结果显示', obj.message);
-                                var store = Ext.data.StoreMgr.lookup('deviceliststore');
-                                store.reload();
-                            } else {
-                                Ext.Msg.alert('提示', obj.message);
-                            }
-                        },
-                        failure: function(response, opts) {
-                            Ext.Msg.alert('操作失败', '申请报修失败');
-                        },
-                        scope: this
-                    });
-                }
-            }, this);
+            
+            // 创建一个弹窗让操作员输入维修原因
+            var repairWindow = Ext.create('Ext.window.Window', {
+                title: '申请报修',
+                width: 400,
+                modal: true,
+                items: [{
+                    xtype: 'form',
+                    padding: 10,
+                    items: [{
+                        xtype: 'textarea',
+                        fieldLabel: '维修原因',
+                        name: 'repairReason',
+                        allowBlank: false,
+                        labelWidth: 80,
+                        width: '100%',
+                        height: 100,
+                        emptyText: '请输入设备故障描述或维修原因...'
+                    }]
+                }],
+                buttons: [{
+                    text: '确定',
+                    handler: function() {
+                        var form = repairWindow.down('form');
+                        var repairReason = form.getForm().findField('repairReason').getValue();
+                        if (!repairReason || repairReason.trim() === '') {
+                            Ext.Msg.alert('提示', '请输入维修原因');
+                            return;
+                        }
+                        
+                        Ext.Ajax.request({
+                            url: 'devicerepair/create',
+                            method: 'POST',
+                            jsonData: {
+                                deviceId: parseInt(deviceId),
+                                reporterId: SYS_USER.id,
+                                repairReason: repairReason.trim()
+                            },
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            success: function(response, opts) {
+                                var obj = Ext.decode(response.responseText);
+                                if (obj.success) {
+                                    Ext.Msg.alert('结果显示', obj.message);
+                                    var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                    store.reload();
+                                } else {
+                                    Ext.Msg.alert('提示', obj.message);
+                                }
+                            },
+                            failure: function(response, opts) {
+                                Ext.Msg.alert('操作失败', '申请报修失败');
+                            },
+                            scope: this
+                        });
+                        
+                        repairWindow.close();
+                    }
+                }, {
+                    text: '取消',
+                    handler: function() {
+                        repairWindow.close();
+                    }
+                }]
+            });
+            
+            repairWindow.show();
             return;
         }
         

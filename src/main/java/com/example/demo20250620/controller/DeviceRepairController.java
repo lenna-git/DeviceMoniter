@@ -59,7 +59,11 @@ public class DeviceRepairController {
             DeviceRepair repair = new DeviceRepair();
             repair.setDevice(device);
             repair.setRepairTime(LocalDateTime.now());
-            repair.setRepairReason("操作员申请维修");
+            
+            // 获取前端传过来的维修原因，如果没有则使用默认值
+            String repairReason = request.get("repairReason") != null ? request.get("repairReason").toString() : "操作员申请维修";
+            repair.setRepairReason(repairReason);
+            
             if (reporterId != null) {
                 repair.setReporterId(reporterId);
             }
