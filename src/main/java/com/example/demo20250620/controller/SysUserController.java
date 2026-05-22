@@ -187,6 +187,12 @@ public class SysUserController {
                 responseObj.put("message", "用户名已存在");
                 return responseObj;
             }
+            
+            // 使用BCrypt加密密码
+            if (sysUser.getSysuserpassword() != null && !sysUser.getSysuserpassword().isEmpty()) {
+                sysUser.setSysuserpassword(passwordEncoder.encode(sysUser.getSysuserpassword()));
+            }
+            
             sysUserRepository.save(sysUser);
             responseObj.put("success", true);
             responseObj.put("message", "用户创建成功");
