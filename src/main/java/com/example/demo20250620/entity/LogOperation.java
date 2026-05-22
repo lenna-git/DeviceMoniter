@@ -117,6 +117,7 @@ public class LogOperation {
     public static final String TYPE_BORROW_APPROVE = "借用批准";
     public static final String TYPE_USER_LOGIN = "用户登录";
     public static final String TYPE_USER_LOGOUT = "用户登出";
+    public static final String TYPE_USER_CREATE = "用户新增";
 
     // 操作模块常量
     public static final String MODULE_DEVICE = "设备管理";

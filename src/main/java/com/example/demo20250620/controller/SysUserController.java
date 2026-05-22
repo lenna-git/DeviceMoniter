@@ -30,13 +30,13 @@ public class SysUserController {
 
     @Autowired
     private SysUserRepository sysUserRepository;
-    
+
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
-    
+
     @Autowired
     private com.example.demo20250620.service.LogOperationService logOperationService;
-    
+
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
@@ -82,7 +82,7 @@ public class SysUserController {
             SysUser user = optionalUser.get();
             if (passwordEncoder.matches(sysuserpassword, user.getSysuserpassword())) {
                 session.setAttribute("SYS_USER", optionalUser);
-                
+
                 // 记录登录成功日志
                 if (logOperationService != null) {
                     logOperationService.logSuccess(
@@ -97,11 +97,11 @@ public class SysUserController {
                             null,
                             request);
                 }
-                
+
                 return optionalUser;
             }
         }
-        
+
         // 记录登录失败日志
         if (logOperationService != null) {
             logOperationService.logFail(
@@ -117,7 +117,7 @@ public class SysUserController {
                     "用户名或密码错误",
                     request);
         }
-        
+
         return Optional.empty();
     }
 
@@ -136,7 +136,7 @@ public class SysUserController {
                 if (optionalUser != null && optionalUser.isPresent()) {
                     SysUser user = optionalUser.get();
                     System.out.println("用户ID: " + user.getId() + ", 用户名: " + user.getSysusername());
-                    
+
                     if (logOperationService != null) {
                         System.out.println("logOperationService 可用，准备记录登出日志");
                         logOperationService.logSuccess(
@@ -152,25 +152,25 @@ public class SysUserController {
                                 request);
                         System.out.println("登出日志记录成功");
                     } else {
-                        System.out.println("logOperationService 为 null");
+                        System.out.println("logOperationService 为null");
                     }
                 } else {
                     System.out.println("session 中没有用户信息，可能是已过期或未登录");
                 }
-                
-                // 清除 session 中特定的用户记录，假设用户记录的键名为 "user"
+
+                // 清除 session 中特定的用户记录，假设用户记录的键名为user
                 session.removeAttribute("SYS_USER");
                 // 使 session 失效
                 session.invalidate();
             } else {
-                System.out.println("session 为 null");
+                System.out.println("session 为null");
             }
             responseObj.put("message", "登出成功，已清除用户信息");
             responseObj.put("success", true);
 
         }catch (Exception e){
             System.out.println("退出登录异常: " + e.getMessage());
-            responseObj.put("message", "验证登录信息出错，请稍后重试。");
+            responseObj.put("message", "验证登录信息出错，请稍后重试");
             responseObj.put("success", false);
 
         }
@@ -179,6 +179,7 @@ public class SysUserController {
 
     @PostMapping("/createuser")
     public Map<String, Object> createUser(@RequestBody SysUser sysUser) {
+        logger.info("收到创建用户请求: " + sysUser.getSysusername() + ", 角色: " + sysUser.getSysuserrole());
         Map<String, Object> responseObj = new HashMap<>();
         try {
             Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
@@ -187,16 +188,41 @@ public class SysUserController {
                 responseObj.put("message", "用户名已存在");
                 return responseObj;
             }
-            
+
             // 使用BCrypt加密密码
             if (sysUser.getSysuserpassword() != null && !sysUser.getSysuserpassword().isEmpty()) {
                 sysUser.setSysuserpassword(passwordEncoder.encode(sysUser.getSysuserpassword()));
             }
-            
+
             sysUserRepository.save(sysUser);
+            sysUserRepository.flush();
+            logger.info("用户已保存到数据库: " + sysUser.getSysusername() + ", ID: " + sysUser.getId());
+
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logSuccess(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_CREATE,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "管理员【" + admin.getSysusername() + "】新增用户【" + sysUser.getSysusername() + "】",
+                                null,
+                                null,
+                                null,
+                                request);
+                    }
+                }
+            }
+
             responseObj.put("success", true);
             responseObj.put("message", "用户创建成功");
         } catch (Exception e) {
+            logger.error("创建用户异常: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "用户创建失败: " + e.getMessage());
         }
@@ -228,13 +254,13 @@ public class SysUserController {
         try {
             logger.info("updateUser called with id: " + sysUser.getId());
             logger.info("updateUser called with username: " + sysUser.getSysusername());
-            
+
             if (sysUser.getId() == null) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户ID不能为空");
                 return responseObj;
             }
-            
+
             if (!sysUserRepository.existsById(sysUser.getId())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
@@ -272,7 +298,7 @@ public class SysUserController {
     public void setMessage(String message) {
         this.message = message;
     }
-    
+
     /**
      * 获取操作员列表（角色为2的用户）
      */
@@ -286,7 +312,7 @@ public class SysUserController {
             return map;
         }).toList();
     }
-    
+
     /**
      * 修改密码
      */
@@ -303,20 +329,20 @@ public class SysUserController {
                 responseObj.put("message", "用户不存在");
                 return responseObj;
             }
-            
+
             SysUser user = optionalUser.get();
-            
+
             // 使用BCrypt验证原密码
             if (!passwordEncoder.matches(oldPassword, user.getSysuserpassword())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "原密码不正确");
                 return responseObj;
             }
-            
+
             // 使用BCrypt加密新密码
             user.setSysuserpassword(passwordEncoder.encode(newPassword));
             sysUserRepository.save(user);
-            
+
             responseObj.put("success", true);
             responseObj.put("message", "密码修改成功");
         } catch (Exception e) {
@@ -326,7 +352,7 @@ public class SysUserController {
         }
         return responseObj;
     }
-    
+
     /**
      * 用户注册
      */
@@ -340,14 +366,14 @@ public class SysUserController {
                 responseObj.put("message", "用户名已存在");
                 return responseObj;
             }
-            
+
             if (sysUser.getSysuserrole() == null) {
                 sysUser.setSysuserrole(2L); // 默认注册为操作员
             }
-            
+
             // 使用BCrypt加密密码
             sysUser.setSysuserpassword(passwordEncoder.encode(sysUser.getSysuserpassword()));
-            
+
             sysUserRepository.save(sysUser);
             responseObj.put("success", true);
             responseObj.put("message", "注册成功");
@@ -358,7 +384,7 @@ public class SysUserController {
         }
         return responseObj;
     }
-    
+
     /**
      * 忘记密码 - 生成重置令牌
      */
@@ -368,29 +394,29 @@ public class SysUserController {
         try {
             String sysusername = requestBody.get("sysusername");
             Optional<SysUser> optionalUser = sysUserRepository.findBySysusername(sysusername);
-            
+
             if (!optionalUser.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
                 return responseObj;
             }
-            
+
             SysUser user = optionalUser.get();
-            
+
             // 删除用户之前的令牌
             passwordResetTokenRepository.deleteByUserId(user.getId());
-            
+
             // 生成6位数字验证码
             String token = String.format("%06d", (int)(Math.random() * 900000) + 100000);
-            
+
             // 保存令牌，有效期5分钟
-            PasswordResetToken resetToken = new PasswordResetToken(token, user, 
+            PasswordResetToken resetToken = new PasswordResetToken(token, user,
                 java.time.LocalDateTime.now().plusMinutes(5));
             passwordResetTokenRepository.save(resetToken);
-            
+
             // 输出验证码到控制台（实际项目中应发送邮件/短信）
             logger.info("密码重置验证码 - 用户: " + sysusername + ", 验证码: " + token);
-            
+
             responseObj.put("success", true);
             responseObj.put("message", "验证码已发送");
         } catch (Exception e) {
@@ -400,7 +426,7 @@ public class SysUserController {
         }
         return responseObj;
     }
-    
+
     /**
      * 重置密码
      */
@@ -410,38 +436,38 @@ public class SysUserController {
         try {
             String token = requestBody.get("token");
             String newPassword = requestBody.get("newPassword");
-            
+
             Optional<PasswordResetToken> optionalResetToken = passwordResetTokenRepository.findByToken(token);
-            
+
             if (!optionalResetToken.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码无效");
                 return responseObj;
             }
-            
+
             PasswordResetToken resetToken = optionalResetToken.get();
-            
+
             if (resetToken.getUsed()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码已使用");
                 return responseObj;
             }
-            
+
             if (resetToken.isExpired()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码已过期");
                 return responseObj;
             }
-            
+
             // 更新用户密码
             SysUser user = resetToken.getUser();
             user.setSysuserpassword(passwordEncoder.encode(newPassword));
             sysUserRepository.save(user);
-            
+
             // 标记令牌已使用
             resetToken.setUsed(true);
             passwordResetTokenRepository.save(resetToken);
-            
+
             responseObj.put("success", true);
             responseObj.put("message", "密码重置成功");
         } catch (Exception e) {
@@ -451,7 +477,7 @@ public class SysUserController {
         }
         return responseObj;
     }
-    
+
     /**
      * 管理员重置用户密码
      */
@@ -460,18 +486,18 @@ public class SysUserController {
         Map<String, Object> responseObj = new HashMap<>();
         try {
             Optional<SysUser> optionalUser = sysUserRepository.findById(userId);
-            
+
             if (!optionalUser.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
                 return responseObj;
             }
-            
+
             SysUser user = optionalUser.get();
             // 默认密码：Aa123456!
             user.setSysuserpassword(passwordEncoder.encode("Aa123456!"));
             sysUserRepository.save(user);
-            
+
             responseObj.put("success", true);
             responseObj.put("message", "密码已重置为默认密码：Aa123456!");
         } catch (Exception e) {
@@ -482,5 +508,3 @@ public class SysUserController {
         return responseObj;
     }
 }
-
-

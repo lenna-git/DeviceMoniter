@@ -22,6 +22,9 @@ public class LogOperationService {
     @Autowired
     private LogOperationRepository logOperationRepository;
 
+    @Autowired
+    private LogOperationNotificationService logOperationNotificationService;
+
     /**
      * 记录操作日志
      */
@@ -42,14 +45,14 @@ public class LogOperationService {
         log.setTargetId(targetId);
         log.setTargetName(targetName);
         log.setDetail(detail);
-        
-        // 获取客户端IP
+
         if (request != null) {
             log.setIpAddress(getClientIp(request));
             log.setUserAgent(request.getHeader("User-Agent"));
         }
-        
-        logOperationRepository.save(log);
+
+        LogOperation savedLog = logOperationRepository.save(log);
+        logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
     }
 
     /**
@@ -83,13 +86,14 @@ public class LogOperationService {
         log.setTargetId(targetId);
         log.setTargetName(targetName);
         log.setErrorMessage(errorMessage);
-        
+
         if (request != null) {
             log.setIpAddress(getClientIp(request));
             log.setUserAgent(request.getHeader("User-Agent"));
         }
-        
-        logOperationRepository.save(log);
+
+        LogOperation savedLog = logOperationRepository.save(log);
+        logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
     }
 
     /**

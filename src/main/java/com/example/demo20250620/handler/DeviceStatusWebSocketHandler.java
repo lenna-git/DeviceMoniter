@@ -71,4 +71,37 @@ public class DeviceStatusWebSocketHandler extends TextWebSocketHandler {
     public int getConnectedClients() {
         return sessions.size();
     }
+
+    /**
+     * 向所有客户端发送日志操作更新通知
+     */
+    public void broadcastLogOperation(Long logId, String operationType) {
+        System.out.println("=== 开始广播日志操作更新 ===");
+        System.out.println("日志ID: " + logId + ", 操作类型: " + operationType);
+        System.out.println("当前连接数: " + sessions.size());
+
+        String message = "{\"type\": \"LOG_OPERATION_UPDATE\", \"logId\": " + logId + ", \"operationType\": \"" + operationType + "\"}";
+        int successCount = 0;
+        int failCount = 0;
+
+        for (WebSocketSession session : sessions) {
+            if (session.isOpen()) {
+                try {
+                    session.sendMessage(new TextMessage(message));
+                    successCount++;
+                    System.out.println("成功发送到会话: " + session.getId());
+                } catch (IOException e) {
+                    failCount++;
+                    System.out.println("发送失败到会话: " + session.getId() + ", 错误: " + e.getMessage());
+                }
+            } else {
+                failCount++;
+                System.out.println("会话已关闭: " + session.getId());
+            }
+        }
+
+        System.out.println("=== 广播完成 ===");
+        System.out.println("成功发送: " + successCount + " 个客户端");
+        System.out.println("发送失败: " + failCount + " 个客户端");
+    }
 }

@@ -261,6 +261,16 @@ Ext.define('AM.view.user.LogOperationView', {
                 var store = grid.getStore();
                 store.load();
             }
+            registerLogOperationCallback(function(logId, operationType) {
+                console.log('日志操作更新，自动刷新日志列表，日志ID:', logId, ', 操作类型:', operationType);
+                var grid = me.down('#log-operation-grid');
+                if (grid) {
+                    var store = grid.getStore();
+                    if (store) {
+                        store.load();
+                    }
+                }
+            });
         }
     },
     
