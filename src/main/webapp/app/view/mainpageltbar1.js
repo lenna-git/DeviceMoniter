@@ -29,6 +29,12 @@ Ext.define('AM.view.mainpageltbar1', {
                             if (userInfoItem) {
                                 userFolder.removeChild(userInfoItem);
                             }
+                            
+                            // 隐藏日志审计菜单项
+                            var logOperationItem = userFolder.findChild('id', 'main-LogOperation', true);
+                            if (logOperationItem) {
+                                userFolder.removeChild(logOperationItem);
+                            }
                         }
                     }
                 }

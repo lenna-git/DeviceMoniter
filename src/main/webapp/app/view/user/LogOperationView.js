@@ -53,19 +53,20 @@ Ext.define('AM.view.user.LogOperationView', {
         // 工具栏
         me.tbar = {
             xtype: 'toolbar',
+            overflowHandler: 'menu',
             items: [
                 {
                     xtype: 'textfield',
-                    fieldLabel: '操作用户',
-                    labelWidth: 60,
-                    width: 200,
+                    fieldLabel: '用户',
+                    labelWidth: 40,
+                    width: 140,
                     id: 'log-operator-name'
                 },
                 {
                     xtype: 'combo',
-                    fieldLabel: '操作类型',
-                    labelWidth: 60,
-                    width: 200,
+                    fieldLabel: '类型',
+                    labelWidth: 40,
+                    width: 140,
                     id: 'log-operation-type',
                     store: operationTypes,
                     displayField: 1,
@@ -74,9 +75,9 @@ Ext.define('AM.view.user.LogOperationView', {
                 },
                 {
                     xtype: 'combo',
-                    fieldLabel: '操作模块',
-                    labelWidth: 60,
-                    width: 200,
+                    fieldLabel: '模块',
+                    labelWidth: 40,
+                    width: 140,
                     id: 'log-operation-module',
                     store: operationModules,
                     displayField: 1,
@@ -85,9 +86,9 @@ Ext.define('AM.view.user.LogOperationView', {
                 },
                 {
                     xtype: 'combo',
-                    fieldLabel: '操作结果',
-                    labelWidth: 60,
-                    width: 180,
+                    fieldLabel: '结果',
+                    labelWidth: 40,
+                    width: 120,
                     id: 'log-operation-result',
                     store: operationResults,
                     displayField: 1,
@@ -96,19 +97,19 @@ Ext.define('AM.view.user.LogOperationView', {
                 },
                 {
                     xtype: 'datefield',
-                    fieldLabel: '开始时间',
-                    labelWidth: 60,
-                    width: 200,
+                    fieldLabel: '开始',
+                    labelWidth: 40,
+                    width: 160,
                     id: 'log-start-time',
-                    format: 'Y-m-d H:i:s'
+                    format: 'Y-m-d'
                 },
                 {
                     xtype: 'datefield',
-                    fieldLabel: '结束时间',
-                    labelWidth: 60,
-                    width: 200,
+                    fieldLabel: '结束',
+                    labelWidth: 40,
+                    width: 160,
                     id: 'log-end-time',
-                    format: 'Y-m-d H:i:s'
+                    format: 'Y-m-d'
                 },
                 {
                     xtype: 'button',

@@ -123,7 +123,7 @@ public class SysUserController {
 
     @GetMapping("/logout")
     public Map<String, Object> logout(HttpServletRequest request, HttpServletResponse response) {
-        System.out.print( "in sysusreraction logout:");
+        System.out.println("=== 退出登录方法被调用 ===");
         logger.info("logout:");
         Map<String, Object> responseObj = new HashMap<>();
         // 获取当前 session
@@ -132,30 +132,44 @@ public class SysUserController {
             if (session != null) {
                 // 记录登出日志
                 Optional<SysUser> optionalUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
-                if (optionalUser != null && optionalUser.isPresent() && logOperationService != null) {
+                System.out.println("Session中的用户信息: " + (optionalUser != null ? "存在" : "不存在"));
+                if (optionalUser != null && optionalUser.isPresent()) {
                     SysUser user = optionalUser.get();
-                    logOperationService.logSuccess(
-                            user.getId(),
-                            user.getSysusername(),
-                            user.getSysuserrole().intValue(),
-                            com.example.demo20250620.entity.LogOperation.TYPE_USER_LOGOUT,
-                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
-                            "用户登出成功: " + user.getSysusername(),
-                            null,
-                            null,
-                            null,
-                            request);
+                    System.out.println("用户ID: " + user.getId() + ", 用户名: " + user.getSysusername());
+                    
+                    if (logOperationService != null) {
+                        System.out.println("logOperationService 可用，准备记录登出日志");
+                        logOperationService.logSuccess(
+                                user.getId(),
+                                user.getSysusername(),
+                                user.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_LOGOUT,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "用户登出成功: " + user.getSysusername(),
+                                null,
+                                null,
+                                null,
+                                request);
+                        System.out.println("登出日志记录成功");
+                    } else {
+                        System.out.println("logOperationService 为 null");
+                    }
+                } else {
+                    System.out.println("session 中没有用户信息，可能是已过期或未登录");
                 }
                 
                 // 清除 session 中特定的用户记录，假设用户记录的键名为 "user"
                 session.removeAttribute("SYS_USER");
                 // 使 session 失效
                 session.invalidate();
+            } else {
+                System.out.println("session 为 null");
             }
             responseObj.put("message", "登出成功，已清除用户信息");
             responseObj.put("success", true);
 
         }catch (Exception e){
+            System.out.println("退出登录异常: " + e.getMessage());
             responseObj.put("message", "验证登录信息出错，请稍后重试。");
             responseObj.put("success", false);
 
