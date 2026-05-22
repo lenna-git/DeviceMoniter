@@ -289,7 +289,7 @@ Ext.define('AM.view.device.devicelistgrid',{
     },{
         text:'操作',
         align:'center',
-        flex:1,
+        width: 220,
         renderer: function(value, metaData, record) {
             var stateDetail = record.get('devicestate') ? record.get('devicestate').stateDetail : '';
             var role = SYS_USER ? SYS_USER.sysuserrole : 1;

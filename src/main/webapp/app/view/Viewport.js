@@ -43,7 +43,7 @@ Ext.define('AM.view.Viewport',{
             items: [
                 {
                     xtype:'mainpageltbar1',
-                    width: 200,
+                    width: 160,
                     height: '100%',
                     border:true,
                 },
