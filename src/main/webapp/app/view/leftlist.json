@@ -35,6 +35,11 @@
                     "text": "<font size=4>修改密码</font>",
                     "id": "main-ChangePassword",
                     "leaf": true
+                },
+                {
+                    "text": "<font size=4>日志审计</font>",
+                    "id": "main-LogOperation",
+                    "leaf": true
                 }
             ]
         }

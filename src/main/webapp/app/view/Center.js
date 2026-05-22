@@ -14,6 +14,7 @@ Ext.define('AM.view.Center',{
         'AM.view.user.DeviceRecordView',
         'AM.view.user.DeviceTransferRecordView',
         'AM.view.user.ChangePasswordView',
+        'AM.view.user.LogOperationView',
         //右側有哪些頁面，都要放在這裏
     ],
     items:[
@@ -40,6 +41,10 @@ Ext.define('AM.view.Center',{
             xtype:'DeviceTransferRecordView',
             id:'main-DeviceTransferRecord',
             title: '转借记录:',
+        },{
+            xtype:'LogOperationView',
+            id:'main-LogOperation',
+            title: '日志审计',
         }
     ]
 })

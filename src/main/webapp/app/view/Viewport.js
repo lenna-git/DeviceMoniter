@@ -11,6 +11,7 @@ Ext.define('AM.view.Viewport',{
         'AM.view.user.DeviceTransferRecordView',
         'AM.view.user.userwindow',
         'AM.view.user.ChangePasswordView',
+        'AM.view.user.LogOperationView',
     ],
     layout:'vbox',
     items:[

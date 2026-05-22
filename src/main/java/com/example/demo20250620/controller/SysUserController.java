@@ -34,6 +34,9 @@ public class SysUserController {
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
     
+    @Autowired
+    private com.example.demo20250620.service.LogOperationService logOperationService;
+    
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @Autowired
@@ -79,9 +82,42 @@ public class SysUserController {
             SysUser user = optionalUser.get();
             if (passwordEncoder.matches(sysuserpassword, user.getSysuserpassword())) {
                 session.setAttribute("SYS_USER", optionalUser);
+                
+                // 记录登录成功日志
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_LOGIN,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户登录成功: " + user.getSysusername(),
+                            null,
+                            null,
+                            null,
+                            request);
+                }
+                
                 return optionalUser;
             }
         }
+        
+        // 记录登录失败日志
+        if (logOperationService != null) {
+            logOperationService.logFail(
+                    null,
+                    sysusername,
+                    null,
+                    com.example.demo20250620.entity.LogOperation.TYPE_USER_LOGIN,
+                    com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                    "用户登录失败: " + sysusername,
+                    null,
+                    null,
+                    null,
+                    "用户名或密码错误",
+                    request);
+        }
+        
         return Optional.empty();
     }
 
@@ -94,6 +130,23 @@ public class SysUserController {
         try {
             HttpSession session = request.getSession(false);
             if (session != null) {
+                // 记录登出日志
+                Optional<SysUser> optionalUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (optionalUser != null && optionalUser.isPresent() && logOperationService != null) {
+                    SysUser user = optionalUser.get();
+                    logOperationService.logSuccess(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_LOGOUT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户登出成功: " + user.getSysusername(),
+                            null,
+                            null,
+                            null,
+                            request);
+                }
+                
                 // 清除 session 中特定的用户记录，假设用户记录的键名为 "user"
                 session.removeAttribute("SYS_USER");
                 // 使 session 失效

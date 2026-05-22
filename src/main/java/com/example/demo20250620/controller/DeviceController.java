@@ -51,6 +51,9 @@ public class DeviceController {
     
     @Autowired
     private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
+    
+    @Autowired
+    private com.example.demo20250620.service.LogOperationService logOperationService;
 
     @Autowired
     private final HttpServletRequest request;
@@ -148,9 +151,36 @@ public class DeviceController {
             deviceRepository.save(device2);
             // 通知客户端设备状态更新
             deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+            
+            // 记录操作日志
+            logOperationService.logSuccess(
+                    getCurrentUserId(),
+                    getCurrentUserName(),
+                    getCurrentUserRole(),
+                    com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
+                    com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                    "设备安检: " + device2.getDeviceno(),
+                    com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                    id,
+                    device2.getDeviceno(),
+                    request);
+            
             responseObj.put("success", true);
             responseObj.put("message", "设备安检成功");
         } catch (Exception e) {
+            // 记录失败日志
+            logOperationService.logFail(
+                    getCurrentUserId(),
+                    getCurrentUserName(),
+                    getCurrentUserRole(),
+                    com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
+                    com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                    "设备安检失败",
+                    com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                    id,
+                    null,
+                    e.getMessage(),
+                    request);
             responseObj.put("success", false);
             responseObj.put("message", "设备安检失败: " + e.getMessage());
         }
@@ -537,6 +567,41 @@ public class DeviceController {
         responseHeaders.add("Access-Control-Expose-Headers", "Content-Disposition");
         
         return new ResponseEntity<>(outputStream.toByteArray(), responseHeaders, org.springframework.http.HttpStatus.OK);
+    }
+
+    /**
+     * 获取当前登录用户ID
+     */
+    private Long getCurrentUserId() {
+        try {
+            String userIdStr = (String) request.getSession().getAttribute("userId");
+            return userIdStr != null ? Long.parseLong(userIdStr) : null;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取当前登录用户名
+     */
+    private String getCurrentUserName() {
+        try {
+            return (String) request.getSession().getAttribute("userName");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * 获取当前登录用户角色
+     */
+    private Integer getCurrentUserRole() {
+        try {
+            String roleStr = (String) request.getSession().getAttribute("userRole");
+            return roleStr != null ? Integer.parseInt(roleStr) : null;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
 }
