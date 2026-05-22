@@ -588,29 +588,44 @@ Ext.define('AM.controller.Devices', {
                     var grid = Ext.create('Ext.grid.Panel', {
                         border: false,
                         columns: [{
-                            text: '维修时间',
-                            dataIndex: 'repairTime',
-                            width: 180
+                            text: '申请人',
+                            dataIndex: 'reporterId',
+                            width: 100
                         }, {
-                            text: '结束时间',
-                            dataIndex: 'endRepairTime',
+                            text: '申请时间',
+                            dataIndex: 'repairTime',
                             width: 180
                         }, {
                             text: '维修原因',
                             dataIndex: 'repairReason',
                             flex: 1
                         }, {
-                            text: '修理记录',
+                            text: '批准人',
+                            dataIndex: 'repairPersonId',
+                            width: 100
+                        }, {
+                            text: '批准时间',
+                            dataIndex: 'adminStartRepairTime',
+                            width: 180
+                        }, {
+                            text: '完成维修时间',
+                            dataIndex: 'endRepairTime',
+                            width: 180
+                        }, {
+                            text: '维修详情',
                             dataIndex: 'repairRecord',
                             flex: 1
                         }],
                         store: Ext.create('Ext.data.Store', {
-                            fields: ['repairTime', 'endRepairTime', 'repairReason', 'repairRecord'],
+                            fields: ['reporterId', 'repairTime', 'repairReason', 'repairPersonId', 'adminStartRepairTime', 'endRepairTime', 'repairRecord'],
                             data: repairs.map(function(r) {
                                 return {
+                                    reporterId: r.reporterId || '-',
                                     repairTime: r.repairTime ? r.repairTime.replace('T', ' ') : '-',
-                                    endRepairTime: r.endRepairTime ? r.endRepairTime.replace('T', ' ') : '-',
                                     repairReason: r.repairReason || '-',
+                                    repairPersonId: r.repairPersonId || '-',
+                                    adminStartRepairTime: r.adminStartRepairTime ? r.adminStartRepairTime.replace('T', ' ') : '-',
+                                    endRepairTime: r.endRepairTime ? r.endRepairTime.replace('T', ' ') : '-',
                                     repairRecord: r.repairRecord || '-'
                                 };
                             })
@@ -620,7 +635,7 @@ Ext.define('AM.controller.Devices', {
                     
                     var window = Ext.create('Ext.window.Window', {
                         title: '设备维修记录',
-                        width: 800,
+                        width: 1100,
                         height: 400,
                         layout: 'fit',
                         items: [grid],
