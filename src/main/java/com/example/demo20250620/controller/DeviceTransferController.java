@@ -36,6 +36,9 @@ public class DeviceTransferController {
     
     @Autowired
     private DevicestateRepository devicestateRepository;
+    
+    @Autowired
+    private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
 
     // 状态常量
     private static final int STATUS_PENDING = 1;      // 申请中
@@ -101,6 +104,15 @@ public class DeviceTransferController {
                 device.setDevicestate(stateOpt.get());
                 device.setTransferTargetId(toUserId);
                 deviceRepository.save(device);
+                // 通知客户端设备状态更新
+                System.out.println("=== 转借申请：准备通知客户端设备状态更新 ===");
+                System.out.println("设备ID: " + deviceId);
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
+                    System.out.println("=== 转借申请：通知已发送 ===");
+                } else {
+                    System.out.println("=== 转借申请：deviceStatusNotificationService 为 null ===");
+                }
             }
             
             responseObj.put("success", true);
@@ -154,6 +166,13 @@ public class DeviceTransferController {
             if (stateOpt.isPresent()) {
                 record.getDevice().setDevicestate(stateOpt.get());
                 deviceRepository.save(record.getDevice());
+                // 通知客户端设备状态更新
+                System.out.println("=== 用户同意转借：准备通知客户端设备状态更新 ===");
+                System.out.println("设备ID: " + record.getDevice().getId());
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(record.getDevice().getId());
+                    System.out.println("=== 用户同意转借：通知已发送 ===");
+                }
             }
             
             responseObj.put("success", true);
@@ -213,6 +232,13 @@ public class DeviceTransferController {
                 device.setDevicestate(stateOpt.get());
             }
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            System.out.println("=== 管理员批准转借：准备通知客户端设备状态更新 ===");
+            System.out.println("设备ID: " + device.getId());
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
+                System.out.println("=== 管理员批准转借：通知已发送 ===");
+            }
             
             responseObj.put("success", true);
             responseObj.put("message", "转借已批准，设备状态已更新");

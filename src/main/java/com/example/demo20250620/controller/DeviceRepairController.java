@@ -29,6 +29,9 @@ public class DeviceRepairController {
     @Autowired
     private com.example.demo20250620.repository.DevicestateRepository devicestateRepository;
     
+    @Autowired
+    private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
+    
     @GetMapping("/all")
     public List<DeviceRepair> getAllRepairs() {
         return deviceRepairRepository.findAll();
@@ -75,6 +78,13 @@ public class DeviceRepairController {
             if (stateOpt.isPresent()) {
                 device.setDevicestate(stateOpt.get());
                 deviceRepository.save(device);
+                // 通知客户端设备状态更新
+                System.out.println("=== 申请报修：准备通知客户端设备状态更新 ===");
+                System.out.println("设备ID: " + deviceId);
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
+                    System.out.println("=== 申请报修：通知已发送 ===");
+                }
             }
             
             responseObj.put("success", true);
@@ -144,6 +154,13 @@ public class DeviceRepairController {
             if (stateOpt.isPresent()) {
                 device.setDevicestate(stateOpt.get());
                 deviceRepository.save(device);
+                // 通知客户端设备状态更新
+                System.out.println("=== 管理员确认维修：准备通知客户端设备状态更新 ===");
+                System.out.println("设备ID: " + deviceId);
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
+                    System.out.println("=== 管理员确认维修：通知已发送 ===");
+                }
             }
             
             responseObj.put("success", true);

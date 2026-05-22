@@ -108,6 +108,12 @@
 		    <artifactId>spring-security-core</artifactId>
 		    <version>6.4.5</version>
 		</dependency>
+		
+		<!-- Spring WebSocket -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 
     </dependencies>
 

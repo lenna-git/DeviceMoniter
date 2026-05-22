@@ -48,6 +48,9 @@ public class DeviceController {
     
     @Autowired
     private com.example.demo20250620.repository.SysUserRepository sysUserRepository;
+    
+    @Autowired
+    private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
 
     @Autowired
     private final HttpServletRequest request;
@@ -111,6 +114,8 @@ public class DeviceController {
             device.setDevicestate(state);
             
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
             responseObj.put("success", true);
             responseObj.put("message", "设备创建成功");
         } catch (Exception e) {
@@ -141,6 +146,8 @@ public class DeviceController {
             device2.setDevicestate(state);
             
             deviceRepository.save(device2);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             responseObj.put("success", true);
             responseObj.put("message", "设备安检成功");
         } catch (Exception e) {
@@ -173,6 +180,8 @@ public class DeviceController {
             }
             
             deviceRepository.save(device2);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             responseObj.put("success", true);
             responseObj.put("message", "设备归还成功");
         } catch (Exception e) {
@@ -204,6 +213,8 @@ public class DeviceController {
             }
             
             deviceRepository.save(device2);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             responseObj.put("success", true);
             responseObj.put("message", "设备维修状态更新成功");
         } catch (Exception e) {
@@ -240,6 +251,8 @@ public class DeviceController {
             }
             
             deviceRepository.save(device2);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             
             List<DeviceRepair> repairs = deviceRepairRepository.findByDeviceId(id);
             for (DeviceRepair repair : repairs) {
@@ -299,6 +312,8 @@ public class DeviceController {
      */
     @PostMapping("/transferDevice")
     public Map<String, Object> transferDevice(@RequestBody Map<String, Object> request) {
+        System.out.println("=== transferDevice 方法被调用 ===");
+        System.out.println("请求参数: " + request);
         Map<String, Object> responseObj = new HashMap<>();
         try {
             Long deviceId = Long.parseLong(request.get("deviceId").toString());
@@ -327,6 +342,14 @@ public class DeviceController {
             }
             
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            System.out.println("=== 准备通知客户端设备状态更新 ===");
+            System.out.println("设备ID: " + deviceId);
+            System.out.println("deviceStatusNotificationService: " + (deviceStatusNotificationService != null ? "可用" : "不可用"));
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
+                System.out.println("=== 通知已发送 ===");
+            }
             
             responseObj.put("success", true);
             responseObj.put("message", "转借申请已提交，等待转借人确认");
@@ -386,6 +409,8 @@ public class DeviceController {
             device.setTransferTargetId(null);
             
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             responseObj.put("success", true);
             responseObj.put("message", "转借已同意，设备状态已更新为借用中");

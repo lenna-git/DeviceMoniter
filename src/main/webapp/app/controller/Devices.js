@@ -79,6 +79,19 @@ Ext.define('AM.controller.Devices', {
     }],
     onPanelRendered: function() {
         // console.log('The panel was rrrrendered');
+        
+        // 注册设备状态更新回调
+        var me = this;
+        registerDeviceStatusCallback(function(deviceId) {
+            console.log('设备状态更新，自动刷新设备列表，设备ID:', deviceId);
+            var grid = me.getTestgrid();
+            if (grid) {
+                var store = grid.getStore();
+                if (store) {
+                    store.load();
+                }
+            }
+        });
     },
     ondevcxbuttonclick: function (){
         var searchxp = this.getDevicequeryxptextfield() ? this.getDevicequeryxptextfield().getValue() : '';

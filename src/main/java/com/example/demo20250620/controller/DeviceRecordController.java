@@ -38,6 +38,8 @@ public class DeviceRecordController {
     private DeviceRepository deviceRepository;
     @Autowired
     private SysUserRepository sysUserRepository;
+    @Autowired
+    private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
 
 
     /**
@@ -167,6 +169,8 @@ public class DeviceRecordController {
             device.setDeviceyh(user);
             
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             // 创建借用记录
             DeviceRecord record = new DeviceRecord();
@@ -246,6 +250,8 @@ public class DeviceRecordController {
             state.setId(4L);
             device.setDevicestate(state);
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             responseObj.put("success", true);
             responseObj.put("message", "借用申请已通过，设备状态已更新为借用中");
@@ -317,6 +323,8 @@ public class DeviceRecordController {
             device.setDevicestate(state);
             device.setDeviceyh(null);
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             responseObj.put("success", true);
             responseObj.put("message", "借用申请已拒绝，设备状态已更新为已安检待借用");
@@ -360,6 +368,8 @@ public class DeviceRecordController {
             state.setId(8L);
             device.setDevicestate(state);
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             responseObj.put("success", true);
             responseObj.put("message", "设备退回申请已提交，等待管理员审核");
@@ -405,6 +415,8 @@ public class DeviceRecordController {
             device.setDevicestate(state);
             device.setDeviceyh(null);
             deviceRepository.save(device);
+            // 通知客户端设备状态更新
+            deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             // 找到该设备returndate为空的记录，填入归还时间和归还批准人
             Optional<DeviceRecord> recordOpt = deviceRecordRepository.findActiveBorrowRecord(deviceId);
