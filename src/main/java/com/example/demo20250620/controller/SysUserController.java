@@ -232,35 +232,55 @@ public class SysUserController {
     @DeleteMapping("/deleteuser")
     public Map<String, Object> deleteUser(@RequestParam Long id) {
         Map<String, Object> responseObj = new HashMap<>();
+        Optional<SysUser> optionalUserToDelete = Optional.empty();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
         try {
-            Optional<SysUser> optionalUserToDelete = sysUserRepository.findById(id);
+            optionalUserToDelete = sysUserRepository.findById(id);
             if (!optionalUserToDelete.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
-                return responseObj;
-            }
-            SysUser userToDelete = optionalUserToDelete.get();
-            sysUserRepository.deleteById(id);
-
-            // 记录删除用户日志
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                // 记录删除用户失败日志 - 用户不存在
                 if (currentUser != null && currentUser.isPresent()) {
                     SysUser admin = currentUser.get();
                     if (logOperationService != null) {
-                        logOperationService.logSuccess(
+                        logOperationService.logFail(
                                 admin.getId(),
                                 admin.getSysusername(),
                                 admin.getSysuserrole().intValue(),
                                 com.example.demo20250620.entity.LogOperation.TYPE_USER_DELETE,
                                 com.example.demo20250620.entity.LogOperation.MODULE_USER,
-                                "管理员【" + admin.getSysusername() + "】删除用户【" + userToDelete.getSysusername() + "】",
+                                "管理员【" + admin.getSysusername() + "】删除用户失败：用户不存在",
                                 null,
-                                userToDelete.getId(),
-                                userToDelete.getSysusername(),
+                                id,
+                                null,
+                                "用户不存在",
                                 request);
                     }
+                }
+                return responseObj;
+            }
+            SysUser userToDelete = optionalUserToDelete.get();
+            sysUserRepository.deleteById(id);
+
+            // 记录删除用户成功日志
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_DELETE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】删除用户【" + userToDelete.getSysusername() + "】",
+                            null,
+                            userToDelete.getId(),
+                            userToDelete.getSysusername(),
+                            request);
                 }
             }
 
@@ -269,6 +289,25 @@ public class SysUserController {
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "用户删除失败: " + e.getMessage());
+            // 记录删除用户失败日志 - 异常
+            String usernameToDelete = optionalUserToDelete.isPresent() ? optionalUserToDelete.get().getSysusername() : null;
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_DELETE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】删除用户失败：" + e.getMessage(),
+                            null,
+                            id,
+                            usernameToDelete,
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }
