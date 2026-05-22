@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import org.apache.poi.ss.usermodel.*;
@@ -194,6 +195,7 @@ public class DeviceRecordController {
      * 3. 更新设备状态为"借用中"(ID=4)
      */
     @PostMapping("/approveBorrow")
+    @Transactional
     public Map<String, Object> approveBorrow(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
         try {
@@ -262,6 +264,7 @@ public class DeviceRecordController {
      * 3. 更新设备状态为"已安检待借用"(ID=2)，借用人置空
      */
     @PostMapping("/rejectBorrow")
+    @Transactional
     public Map<String, Object> rejectBorrow(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
         try {

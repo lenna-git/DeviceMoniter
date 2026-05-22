@@ -3,6 +3,7 @@ Ext.define('AM.model.devicerecord',{
     fields:[
         {name:'id',type:'int'},
         {name:'borrorDate',type:'string'},
+        {name:'approvalDate',type:'string'},
         {name:'detail',type:'string'},
         {name:'returnDate',type:'string'},
         {name:'returnApprovalDate',type:'string'},
