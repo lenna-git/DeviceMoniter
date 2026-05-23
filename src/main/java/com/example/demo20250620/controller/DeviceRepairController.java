@@ -170,17 +170,39 @@ public class DeviceRepairController {
     @Transactional
     public Map<String, Object> confirmRepair(@PathVariable Long deviceId, @RequestBody Map<String, Object> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long adminId = null;
+        Device device = null;
         try {
-            Long adminId = request.get("adminId") != null ? Long.parseLong(request.get("adminId").toString()) : null;
+            adminId = request.get("adminId") != null ? Long.parseLong(request.get("adminId").toString()) : null;
             
             Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                if (adminId != null && logOperationService != null) {
+                    Optional<com.example.demo20250620.entity.SysUser> adminOpt = sysUserRepository.findById(adminId);
+                    if (adminOpt.isPresent()) {
+                        com.example.demo20250620.entity.SysUser admin = adminOpt.get();
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_CONFIRM,
+                                com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                                "管理员【" + admin.getSysusername() + "】批准维修申请失败：设备不存在",
+                                com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                                deviceId,
+                                null,
+                                "设备不存在",
+                                null);
+                    }
+                }
                 return responseObj;
             }
             
-            Device device = deviceOpt.get();
+            device = deviceOpt.get();
             
             // 查找该设备已有的维修记录（操作员申请的记录）
             List<DeviceRepair> existingRepairs = deviceRepairRepository.findByDeviceId(deviceId);
@@ -232,9 +254,48 @@ public class DeviceRepairController {
             
             responseObj.put("success", true);
             responseObj.put("message", "维修已确认，设备状态已更新为修理中");
+            
+            // 记录批准维修申请成功日志
+            if (adminId != null && logOperationService != null) {
+                Optional<com.example.demo20250620.entity.SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent()) {
+                    com.example.demo20250620.entity.SysUser admin = adminOpt.get();
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_CONFIRM,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】批准设备【" + device.getDeviceno() + "】维修申请成功",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            device.getDeviceno(),
+                            null);
+                }
+            }
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "确认维修失败: " + e.getMessage());
+            
+            // 记录批准维修申请失败日志
+            if (adminId != null && logOperationService != null) {
+                Optional<com.example.demo20250620.entity.SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent()) {
+                    com.example.demo20250620.entity.SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_CONFIRM,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】批准维修申请失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            device != null ? device.getDeviceno() : null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }
