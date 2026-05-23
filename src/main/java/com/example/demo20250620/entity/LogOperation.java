@@ -102,6 +102,7 @@ public class LogOperation {
     private String errorMessage;
 
     // 操作类型常量
+    public static final String TYPE_DEVICE_CREATE = "设备新增";
     public static final String TYPE_DEVICE_CHECK = "设备安检";
     public static final String TYPE_DEVICE_RETURN = "设备归还";
     public static final String TYPE_DEVICE_REPAIR = "设备维修";

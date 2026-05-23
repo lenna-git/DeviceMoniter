@@ -9,6 +9,7 @@ import com.example.demo20250620.repository.DeviceRepairRepository;
 import com.example.demo20250620.repository.DevicestateRepository;
 import com.example.demo20250620.util.LoginFilter;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,8 +60,9 @@ public class DeviceController {
     private final HttpServletRequest request;
     private static final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
 
-    public DeviceController(HttpServletRequest request) {
+    public DeviceController(HttpServletRequest request, com.example.demo20250620.service.LogOperationService logOperationService) {
         this.request = request;
+        this.logOperationService = logOperationService;
     }
 
 //    @CrossOrigin(origins = "http://127.0.0.1:8080")
@@ -107,6 +109,11 @@ public class DeviceController {
     @PostMapping("/createdevice")
     public Map<String, Object> createDevice(@RequestBody Device device){
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
         try {
             device.setDevicescdata(LocalDateTime.now());
             device.setDeviceajdata(null);
@@ -121,9 +128,46 @@ public class DeviceController {
             deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
             responseObj.put("success", true);
             responseObj.put("message", "设备创建成功");
+
+            // 记录设备新增成功日志
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CREATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】新增设备【" + device.getDeviceno() + "】成功",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            device.getId(),
+                            device.getDeviceno(),
+                            request);
+                }
+            }
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "设备创建失败: " + e.getMessage());
+
+            // 记录设备新增失败日志
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CREATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】新增设备失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            device.getDeviceno(),
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }
@@ -134,11 +178,33 @@ public class DeviceController {
     @PutMapping("/checkdevice/{id}")
     public Map<String, Object> checkDevice(@PathVariable Long id){
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
         try {
             Optional<Device> device1 = deviceRepository.findById(id);
             if (!device1.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                    SysUser admin = currentUser.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】设备安检失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            null,
+                            "设备不存在",
+                            request);
+                }
                 return responseObj;
             }
             Device device2 = device1.get();
@@ -153,34 +219,40 @@ public class DeviceController {
             deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             
             // 记录操作日志
-            logOperationService.logSuccess(
-                    getCurrentUserId(),
-                    getCurrentUserName(),
-                    getCurrentUserRole(),
-                    com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
-                    com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
-                    "设备安检: " + device2.getDeviceno(),
-                    com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
-                    id,
-                    device2.getDeviceno(),
-                    request);
+            if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                SysUser admin = currentUser.get();
+                logOperationService.logSuccess(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】安检设备【" + device2.getDeviceno() + "】成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        device2.getDeviceno(),
+                        request);
+            }
             
             responseObj.put("success", true);
             responseObj.put("message", "设备安检成功");
         } catch (Exception e) {
             // 记录失败日志
-            logOperationService.logFail(
-                    getCurrentUserId(),
-                    getCurrentUserName(),
-                    getCurrentUserRole(),
-                    com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
-                    com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
-                    "设备安检失败",
-                    com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
-                    id,
-                    null,
-                    e.getMessage(),
-                    request);
+            if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                SysUser admin = currentUser.get();
+                logOperationService.logFail(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_CHECK,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】设备安检失败：" + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        null,
+                        e.getMessage(),
+                        request);
+            }
             responseObj.put("success", false);
             responseObj.put("message", "设备安检失败: " + e.getMessage());
         }
