@@ -32,6 +32,12 @@ public class DeviceRepairController {
     @Autowired
     private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
     
+    @Autowired
+    private com.example.demo20250620.service.LogOperationService logOperationService;
+    
+    @Autowired
+    private com.example.demo20250620.repository.SysUserRepository sysUserRepository;
+    
     @GetMapping("/all")
     public List<DeviceRepair> getAllRepairs() {
         return deviceRepairRepository.findAll();
@@ -45,14 +51,36 @@ public class DeviceRepairController {
     @PostMapping("/create")
     public Map<String, Object> createRepair(@RequestBody Map<String, Object> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long reporterId = null;
         try {
-            Long deviceId = Long.parseLong(request.get("deviceId").toString());
-            Long reporterId = request.get("reporterId") != null ? Long.parseLong(request.get("reporterId").toString()) : null;
+            deviceId = Long.parseLong(request.get("deviceId").toString());
+            reporterId = request.get("reporterId") != null ? Long.parseLong(request.get("reporterId").toString()) : null;
             
             Optional<Device> deviceOpt = deviceRepository.findById(deviceId);
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                if (reporterId != null && logOperationService != null) {
+                    Optional<com.example.demo20250620.entity.SysUser> userOpt = sysUserRepository.findById(reporterId);
+                    if (userOpt.isPresent()) {
+                        com.example.demo20250620.entity.SysUser user = userOpt.get();
+                        logOperationService.logFail(
+                                user.getId(),
+                                user.getSysusername(),
+                                user.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_APPLY,
+                                com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                                "操作员【" + user.getSysusername() + "】申请设备保修失败：设备不存在",
+                                com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                                deviceId,
+                                null,
+                                "设备不存在",
+                                null);
+                    }
+                }
                 return responseObj;
             }
             
@@ -89,9 +117,48 @@ public class DeviceRepairController {
             
             responseObj.put("success", true);
             responseObj.put("message", "维修申请已提交，设备状态已更新为借出中待修理");
+            
+            // 记录申请保修成功日志
+            if (reporterId != null && logOperationService != null) {
+                Optional<com.example.demo20250620.entity.SysUser> userOpt = sysUserRepository.findById(reporterId);
+                if (userOpt.isPresent()) {
+                    com.example.demo20250620.entity.SysUser user = userOpt.get();
+                    logOperationService.logSuccess(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_APPLY,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】申请设备【" + device.getDeviceno() + "】保修成功",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            device.getDeviceno(),
+                            null);
+                }
+            }
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "维修记录创建失败: " + e.getMessage());
+            
+            // 记录申请保修失败日志
+            if (reporterId != null && logOperationService != null) {
+                Optional<com.example.demo20250620.entity.SysUser> userOpt = sysUserRepository.findById(reporterId);
+                if (userOpt.isPresent()) {
+                    com.example.demo20250620.entity.SysUser user = userOpt.get();
+                    logOperationService.logFail(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_APPLY,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】申请设备保修失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }
