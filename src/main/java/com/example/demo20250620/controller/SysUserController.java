@@ -675,52 +675,124 @@ public class SysUserController {
     }
 
     /**
-     * 重置密码
+     * 重置密码（忘记密码）
      */
     @PostMapping("/resetPassword")
     public Map<String, Object> resetPassword(@RequestBody Map<String, String> requestBody) {
         Map<String, Object> responseObj = new HashMap<>();
-        try {
-            String token = requestBody.get("token");
-            String newPassword = requestBody.get("newPassword");
+        String token = requestBody.get("token");
+        String newPassword = requestBody.get("newPassword");
+        Optional<PasswordResetToken> optionalResetToken = Optional.empty();
+        SysUser targetUser = null;
 
-            Optional<PasswordResetToken> optionalResetToken = passwordResetTokenRepository.findByToken(token);
+        try {
+            optionalResetToken = passwordResetTokenRepository.findByToken(token);
 
             if (!optionalResetToken.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码无效");
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            null,
+                            null,
+                            null,
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户【" + requestBody.get("sysusername") + "】重置密码失败：验证码无效",
+                            com.example.demo20250620.entity.LogOperation.TARGET_USER,
+                            null,
+                            requestBody.get("sysusername"),
+                            "验证码无效",
+                            request);
+                }
                 return responseObj;
             }
 
             PasswordResetToken resetToken = optionalResetToken.get();
+            targetUser = resetToken.getUser();
 
             if (resetToken.getUsed()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码已使用");
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            targetUser.getId(),
+                            targetUser.getSysusername(),
+                            targetUser.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户【" + targetUser.getSysusername() + "】重置密码失败：验证码已使用",
+                            com.example.demo20250620.entity.LogOperation.TARGET_USER,
+                            targetUser.getId(),
+                            targetUser.getSysusername(),
+                            "验证码已使用",
+                            request);
+                }
                 return responseObj;
             }
 
             if (resetToken.isExpired()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "验证码已过期");
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            targetUser.getId(),
+                            targetUser.getSysusername(),
+                            targetUser.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户【" + targetUser.getSysusername() + "】重置密码失败：验证码已过期",
+                            com.example.demo20250620.entity.LogOperation.TARGET_USER,
+                            targetUser.getId(),
+                            targetUser.getSysusername(),
+                            "验证码已过期",
+                            request);
+                }
                 return responseObj;
             }
 
-            // 更新用户密码
-            SysUser user = resetToken.getUser();
-            user.setSysuserpassword(passwordEncoder.encode(newPassword));
-            sysUserRepository.save(user);
+            targetUser.setSysuserpassword(passwordEncoder.encode(newPassword));
+            sysUserRepository.save(targetUser);
 
-            // 标记令牌已使用
             resetToken.setUsed(true);
             passwordResetTokenRepository.save(resetToken);
 
             responseObj.put("success", true);
             responseObj.put("message", "密码重置成功");
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        targetUser.getId(),
+                        targetUser.getSysusername(),
+                        targetUser.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                        com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                        "用户【" + targetUser.getSysusername() + "】重置密码成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_USER,
+                        targetUser.getId(),
+                        targetUser.getSysusername(),
+                        request);
+            }
         } catch (Exception e) {
             logger.error("resetPassword error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "操作失败: " + e.getMessage());
+            String username = targetUser != null ? targetUser.getSysusername() : requestBody.get("sysusername");
+            Long userId = targetUser != null ? targetUser.getId() : null;
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        userId,
+                        username,
+                        targetUser != null ? targetUser.getSysuserrole().intValue() : null,
+                        com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                        com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                        "用户【" + username + "】重置密码失败：" + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_USER,
+                        userId,
+                        username,
+                        e.getMessage(),
+                        request);
+            }
         }
         return responseObj;
     }

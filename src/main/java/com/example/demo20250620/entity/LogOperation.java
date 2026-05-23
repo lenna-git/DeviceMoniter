@@ -139,6 +139,7 @@ public class LogOperation {
     public static final String TARGET_BORROW_RECORD = "借用记录";
     public static final String TARGET_REPAIR_RECORD = "维修记录";
     public static final String TARGET_TRANSFER_RECORD = "转借记录";
+    public static final String TARGET_USER = "用户";
 
     // 构造函数
     public LogOperation() {
