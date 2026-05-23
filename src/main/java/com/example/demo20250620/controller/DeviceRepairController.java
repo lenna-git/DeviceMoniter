@@ -2,6 +2,7 @@ package com.example.demo20250620.controller;
 
 import com.example.demo20250620.entity.Device;
 import com.example.demo20250620.entity.DeviceRepair;
+import com.example.demo20250620.entity.SysUser;
 import com.example.demo20250620.repository.DeviceRepository;
 import com.example.demo20250620.repository.DeviceRepairRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,8 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.transaction.annotation.Transactional;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/devicerepair/")
@@ -301,26 +304,118 @@ public class DeviceRepairController {
     }
     
     @PutMapping("/finish/{id}")
-    public Map<String, Object> finishRepair(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+    public Map<String, Object> finishRepair(@PathVariable Long id, @RequestBody Map<String, Object> request, HttpServletRequest httpRequest) {
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = httpRequest.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+            System.out.println("finishRepair - Session存在，当前用户: " + (currentUser.isPresent() ? currentUser.get().getSysusername() : "空"));
+        } else {
+            System.out.println("finishRepair - Session为空");
+        }
+        System.out.println("finishRepair - logOperationService是否为空: " + (logOperationService == null));
+        
+        Long adminIdFromRequest = request.get("adminId") != null ? Long.parseLong(request.get("adminId").toString()) : null;
+        System.out.println("finishRepair - adminIdFromRequest: " + adminIdFromRequest);
+        
+        DeviceRepair repair = null;
         try {
             Optional<DeviceRepair> repairOpt = deviceRepairRepository.findById(id);
             if (!repairOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "维修记录不存在");
+                
+                SysUser adminToLog = null;
+                if (currentUser.isPresent()) {
+                    adminToLog = currentUser.get();
+                } else if (adminIdFromRequest != null) {
+                    Optional<SysUser> adminFromDb = sysUserRepository.findById(adminIdFromRequest);
+                    if (adminFromDb.isPresent()) {
+                        adminToLog = adminFromDb.get();
+                    }
+                }
+                
+                if (adminToLog != null && logOperationService != null) {
+                    logOperationService.logFail(
+                            adminToLog.getId(),
+                            adminToLog.getSysusername(),
+                            adminToLog.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_FINISH,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + adminToLog.getSysusername() + "】完成维修失败：维修记录不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            null,
+                            "维修记录不存在",
+                            null);
+                }
                 return responseObj;
             }
             
-            DeviceRepair repair = repairOpt.get();
+            repair = repairOpt.get();
             repair.setEndRepairTime(LocalDateTime.now());
             repair.setRepairRecord((String) request.get("repairRecord"));
             
             deviceRepairRepository.save(repair);
             responseObj.put("success", true);
             responseObj.put("message", "维修完成");
+            
+            SysUser adminToLog = null;
+            if (currentUser.isPresent()) {
+                adminToLog = currentUser.get();
+            } else if (adminIdFromRequest != null) {
+                Optional<SysUser> adminFromDb = sysUserRepository.findById(adminIdFromRequest);
+                if (adminFromDb.isPresent()) {
+                    adminToLog = adminFromDb.get();
+                }
+            }
+            
+            if (adminToLog != null && logOperationService != null) {
+                Long deviceId = repair.getDevice() != null ? repair.getDevice().getId() : null;
+                String deviceNo = repair.getDevice() != null ? repair.getDevice().getDeviceno() : null;
+                logOperationService.logSuccess(
+                        adminToLog.getId(),
+                        adminToLog.getSysusername(),
+                        adminToLog.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_FINISH,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + adminToLog.getSysusername() + "】完成设备【" + deviceNo + "】维修成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        deviceNo,
+                        null);
+            }
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "维修完成失败: " + e.getMessage());
+            
+            SysUser adminToLog = null;
+            if (currentUser.isPresent()) {
+                adminToLog = currentUser.get();
+            } else if (adminIdFromRequest != null) {
+                Optional<SysUser> adminFromDb = sysUserRepository.findById(adminIdFromRequest);
+                if (adminFromDb.isPresent()) {
+                    adminToLog = adminFromDb.get();
+                }
+            }
+            
+            if (adminToLog != null && logOperationService != null) {
+                Long deviceId = repair != null && repair.getDevice() != null ? repair.getDevice().getId() : null;
+                String deviceNo = repair != null && repair.getDevice() != null ? repair.getDevice().getDeviceno() : null;
+                logOperationService.logFail(
+                        adminToLog.getId(),
+                        adminToLog.getSysusername(),
+                        adminToLog.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_REPAIR_FINISH,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + adminToLog.getSysusername() + "】完成维修失败：" + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        deviceNo,
+                        e.getMessage(),
+                        null);
+            }
         }
         return responseObj;
     }
