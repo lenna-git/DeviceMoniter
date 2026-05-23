@@ -546,9 +546,11 @@ public class DeviceRecordController {
     @PostMapping("/returnDevice")
     public Map<String, Object> returnDevice(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long userId = null;
         try {
-            Long deviceId = request.get("deviceId");
-            Long userId = request.get("userId");
+            deviceId = request.get("deviceId");
+            userId = request.get("userId");
             
             if (deviceId == null || userId == null) {
                 responseObj.put("success", false);
@@ -561,6 +563,24 @@ public class DeviceRecordController {
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+                if (userOpt.isPresent() && logOperationService != null) {
+                    SysUser user = userOpt.get();
+                    logOperationService.logFail(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】退回设备失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "设备不存在",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -577,9 +597,46 @@ public class DeviceRecordController {
             responseObj.put("success", true);
             responseObj.put("message", "设备退回申请已提交，等待管理员审核");
             
+            // 记录退回设备成功日志
+            Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+            if (userOpt.isPresent() && logOperationService != null) {
+                SysUser user = userOpt.get();
+                logOperationService.logSuccess(
+                        user.getId(),
+                        user.getSysusername(),
+                        user.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "操作员【" + user.getSysusername() + "】退回设备【" + device.getDeviceno() + "】成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        device.getDeviceno(),
+                        null);
+            }
+            
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "退回设备失败: " + e.getMessage());
+            
+            // 记录退回设备失败日志
+            if (userId != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+                if (userOpt.isPresent() && logOperationService != null) {
+                    SysUser user = userOpt.get();
+                    logOperationService.logFail(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】退回设备失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }
@@ -592,9 +649,11 @@ public class DeviceRecordController {
     @PostMapping("/approveReturn")
     public Map<String, Object> approveReturn(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long adminId = null;
         try {
-            Long deviceId = request.get("deviceId");
-            Long adminId = request.get("adminId");
+            deviceId = request.get("deviceId");
+            adminId = request.get("adminId");
             
             if (deviceId == null || adminId == null) {
                 responseObj.put("success", false);
@@ -607,6 +666,24 @@ public class DeviceRecordController {
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN_APPROVAL,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】批准设备归还失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "设备不存在",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -635,9 +712,46 @@ public class DeviceRecordController {
             responseObj.put("success", true);
             responseObj.put("message", "设备归还已批准，状态已更新为已安检待借用");
             
+            // 记录批准归还成功日志
+            Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+            if (adminOpt.isPresent() && logOperationService != null) {
+                SysUser admin = adminOpt.get();
+                logOperationService.logSuccess(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN_APPROVAL,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】批准设备【" + device.getDeviceno() + "】归还成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        device.getDeviceno(),
+                        null);
+            }
+            
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "批准归还失败: " + e.getMessage());
+            
+            // 记录批准归还失败日志
+            if (adminId != null) {
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_RETURN_APPROVAL,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】批准设备归还失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }

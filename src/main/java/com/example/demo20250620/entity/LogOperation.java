@@ -105,6 +105,7 @@ public class LogOperation {
     public static final String TYPE_DEVICE_CREATE = "设备新增";
     public static final String TYPE_DEVICE_CHECK = "设备安检";
     public static final String TYPE_DEVICE_RETURN = "设备归还";
+    public static final String TYPE_DEVICE_RETURN_APPROVAL = "归还批准";
     public static final String TYPE_DEVICE_REPAIR = "设备维修";
     public static final String TYPE_DEVICE_UNSHELVE = "设备上架";
     public static final String TYPE_DEVICE_BORROW = "设备借用";
