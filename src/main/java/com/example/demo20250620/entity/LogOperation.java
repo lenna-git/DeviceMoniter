@@ -121,6 +121,7 @@ public class LogOperation {
     public static final String TYPE_USER_DELETE = "用户删除";
     public static final String TYPE_USER_UPDATE = "用户修改";
     public static final String TYPE_USER_CHANGE_PASSWORD = "修改密码";
+    public static final String TYPE_USER_RESET_PASSWORD = "重置密码";
 
     // 操作模块常量
     public static final String MODULE_DEVICE = "设备管理";

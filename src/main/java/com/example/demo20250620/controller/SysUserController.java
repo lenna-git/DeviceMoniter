@@ -731,19 +731,59 @@ public class SysUserController {
     @PostMapping("/adminResetPassword")
     public Map<String, Object> adminResetPassword(@RequestParam Long userId) {
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
+        Optional<SysUser> optionalUser = Optional.empty();
         try {
-            Optional<SysUser> optionalUser = sysUserRepository.findById(userId);
+            optionalUser = sysUserRepository.findById(userId);
 
             if (!optionalUser.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "管理员【" + admin.getSysusername() + "】重置用户密码失败：用户不存在",
+                                null,
+                                userId,
+                                null,
+                                "用户不存在",
+                                request);
+                    }
+                }
                 return responseObj;
             }
 
             SysUser user = optionalUser.get();
-            // 默认密码：Aa123456!
             user.setSysuserpassword(passwordEncoder.encode("Aa123456!"));
             sysUserRepository.save(user);
+            sysUserRepository.flush();
+
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】重置用户【" + user.getSysusername() + "】密码成功",
+                            null,
+                            userId,
+                            user.getSysusername(),
+                            request);
+                }
+            }
 
             responseObj.put("success", true);
             responseObj.put("message", "密码已重置为默认密码：Aa123456!");
@@ -751,6 +791,24 @@ public class SysUserController {
             logger.error("adminResetPassword error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "操作失败: " + e.getMessage());
+            String username = optionalUser.isPresent() ? optionalUser.get().getSysusername() : null;
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_RESET_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】重置用户密码失败：" + e.getMessage(),
+                            null,
+                            userId,
+                            username,
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }

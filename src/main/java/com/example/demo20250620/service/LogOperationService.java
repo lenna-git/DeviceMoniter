@@ -32,26 +32,35 @@ public class LogOperationService {
                              String operationType, String operationModule, String operationDescription,
                              String operationResult, String targetType, Long targetId, String targetName,
                              String detail, HttpServletRequest request) {
-        LogOperation log = new LogOperation();
-        log.setOperatorId(operatorId);
-        log.setOperatorName(operatorName);
-        log.setOperatorRole(operatorRole);
-        log.setOperationType(operationType);
-        log.setOperationModule(operationModule);
-        log.setOperationDescription(operationDescription);
-        log.setOperationResult(operationResult);
-        log.setTargetType(targetType);
-        log.setTargetId(targetId);
-        log.setTargetName(targetName);
-        log.setDetail(detail);
+        try {
+            LogOperation log = new LogOperation();
+            log.setOperatorId(operatorId);
+            log.setOperatorName(operatorName);
+            log.setOperatorRole(operatorRole);
+            log.setOperationType(operationType);
+            log.setOperationModule(operationModule);
+            log.setOperationDescription(operationDescription);
+            log.setOperationResult(operationResult);
+            log.setTargetType(targetType);
+            log.setTargetId(targetId);
+            log.setTargetName(targetName);
+            log.setDetail(detail);
 
-        if (request != null) {
-            log.setIpAddress(getClientIp(request));
-            log.setUserAgent(request.getHeader("User-Agent"));
+            if (request != null) {
+                log.setIpAddress(getClientIp(request));
+                log.setUserAgent(request.getHeader("User-Agent"));
+            }
+
+            LogOperation savedLog = logOperationRepository.save(log);
+            try {
+                logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
+            } catch (Exception e) {
+                System.err.println("WebSocket通知失败: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("保存日志失败: " + e.getMessage());
+            e.printStackTrace();
         }
-
-        LogOperation savedLog = logOperationRepository.save(log);
-        logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
     }
 
     /**
@@ -71,26 +80,35 @@ public class LogOperationService {
                         String operationType, String operationModule, String operationDescription,
                         String targetType, Long targetId, String targetName, String errorMessage,
                         HttpServletRequest request) {
-        LogOperation log = new LogOperation();
-        log.setOperatorId(operatorId);
-        log.setOperatorName(operatorName);
-        log.setOperatorRole(operatorRole);
-        log.setOperationType(operationType);
-        log.setOperationModule(operationModule);
-        log.setOperationDescription(operationDescription);
-        log.setOperationResult(LogOperation.RESULT_FAIL);
-        log.setTargetType(targetType);
-        log.setTargetId(targetId);
-        log.setTargetName(targetName);
-        log.setErrorMessage(errorMessage);
+        try {
+            LogOperation log = new LogOperation();
+            log.setOperatorId(operatorId);
+            log.setOperatorName(operatorName);
+            log.setOperatorRole(operatorRole);
+            log.setOperationType(operationType);
+            log.setOperationModule(operationModule);
+            log.setOperationDescription(operationDescription);
+            log.setOperationResult(LogOperation.RESULT_FAIL);
+            log.setTargetType(targetType);
+            log.setTargetId(targetId);
+            log.setTargetName(targetName);
+            log.setErrorMessage(errorMessage);
 
-        if (request != null) {
-            log.setIpAddress(getClientIp(request));
-            log.setUserAgent(request.getHeader("User-Agent"));
+            if (request != null) {
+                log.setIpAddress(getClientIp(request));
+                log.setUserAgent(request.getHeader("User-Agent"));
+            }
+
+            LogOperation savedLog = logOperationRepository.save(log);
+            try {
+                logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
+            } catch (Exception e) {
+                System.err.println("WebSocket通知失败: " + e.getMessage());
+            }
+        } catch (Exception e) {
+            System.err.println("保存日志失败: " + e.getMessage());
+            e.printStackTrace();
         }
-
-        LogOperation savedLog = logOperationRepository.save(log);
-        logOperationNotificationService.notifyLogOperationUpdate(savedLog.getId(), operationType);
     }
 
     /**
