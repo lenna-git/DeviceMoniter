@@ -181,11 +181,34 @@ public class SysUserController {
     public Map<String, Object> createUser(@RequestBody SysUser sysUser) {
         logger.info("收到创建用户请求: " + sysUser.getSysusername() + ", 角色: " + sysUser.getSysuserrole());
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
         try {
             Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
             if (existingUser.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户名已存在");
+                // 记录新增用户失败日志 - 用户名已存在
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_CREATE,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "管理员【" + admin.getSysusername() + "】新增用户【" + sysUser.getSysusername() + "】失败：用户名已存在",
+                                null,
+                                null,
+                                sysUser.getSysusername(),
+                                "用户名已存在",
+                                request);
+                    }
+                }
                 return responseObj;
             }
 
@@ -198,24 +221,20 @@ public class SysUserController {
             sysUserRepository.flush();
             logger.info("用户已保存到数据库: " + sysUser.getSysusername() + ", ID: " + sysUser.getId());
 
-            HttpSession session = request.getSession(false);
-            if (session != null) {
-                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
-                if (currentUser != null && currentUser.isPresent()) {
-                    SysUser admin = currentUser.get();
-                    if (logOperationService != null) {
-                        logOperationService.logSuccess(
-                                admin.getId(),
-                                admin.getSysusername(),
-                                admin.getSysuserrole().intValue(),
-                                com.example.demo20250620.entity.LogOperation.TYPE_USER_CREATE,
-                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
-                                "管理员【" + admin.getSysusername() + "】新增用户【" + sysUser.getSysusername() + "】",
-                                null,
-                                null,
-                                null,
-                                request);
-                    }
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_CREATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】新增用户【" + sysUser.getSysusername() + "】",
+                            null,
+                            sysUser.getId(),
+                            sysUser.getSysusername(),
+                            request);
                 }
             }
 
@@ -225,6 +244,24 @@ public class SysUserController {
             logger.error("创建用户异常: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "用户创建失败: " + e.getMessage());
+            // 记录新增用户失败日志 - 异常
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_CREATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】新增用户【" + sysUser.getSysusername() + "】失败：" + e.getMessage(),
+                            null,
+                            null,
+                            sysUser.getSysusername(),
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }
