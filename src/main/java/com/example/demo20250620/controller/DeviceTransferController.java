@@ -269,7 +269,7 @@ public class DeviceTransferController {
                             com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_USER_APPROVE,
                             com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
                             "同意转借失败: 转借记录不存在",
-                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER,
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
                             transferId,
                             null,
                             "转借记录不存在",
@@ -297,7 +297,7 @@ public class DeviceTransferController {
                             com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_USER_APPROVE,
                             com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
                             "同意转借失败: 不是转借目标用户",
-                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER,
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
                             transferId,
                             record.getDevice() != null ? record.getDevice().getDeviceno() : null,
                             "不是转借目标用户",
@@ -323,7 +323,7 @@ public class DeviceTransferController {
                             com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_USER_APPROVE,
                             com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
                             "同意转借失败: 状态不允许操作",
-                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER,
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
                             transferId,
                             record.getDevice() != null ? record.getDevice().getDeviceno() : null,
                             "当前状态不允许此操作",
@@ -380,7 +380,7 @@ public class DeviceTransferController {
                         com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_USER_APPROVE,
                         com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
                         "同意转借失败: " + e.getMessage(),
-                        com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER,
+                        com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
                         transferId,
                         null,
                         e.getMessage(),
@@ -463,49 +463,134 @@ public class DeviceTransferController {
     }
 
     /**
-     * 撤销转借
+     * 操作员撤销转借
      */
     @PostMapping("/cancel")
-    public Map<String, Object> cancelTransfer(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> cancelTransfer(@RequestBody Map<String, Object> request, jakarta.servlet.http.HttpServletRequest httpRequest) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long transferId = null;
+        Long userId = null;
+        String userName = null;
+        Integer userRole = null;
+
         try {
-            Long transferId = Long.parseLong(request.get("transferId").toString());
-            Long userId = Long.parseLong(request.get("userId").toString());
-            
+            transferId = Long.parseLong(request.get("transferId").toString());
+            userId = Long.parseLong(request.get("userId").toString());
+
+            Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                userName = userOpt.get().getSysusername();
+                userRole = userOpt.get().getSysuserrole().intValue();
+            }
+
             Optional<DeviceTransferRecord> recordOpt = transferRecordRepository.findById(transferId);
             if (!recordOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "转借记录不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            userId,
+                            userName,
+                            userRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_CANCEL,
+                            com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                            "撤销转借失败: 转借记录不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                            transferId,
+                            null,
+                            "转借记录不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+                }
+
                 return responseObj;
             }
-            
+
             DeviceTransferRecord record = recordOpt.get();
-            
-            // 验证当前用户是否是原借用人
+
             if (!record.getFromUser().getId().equals(userId)) {
                 responseObj.put("success", false);
                 responseObj.put("message", "只有原借用人才能撤销转借");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            userId,
+                            userName,
+                            userRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_CANCEL,
+                            com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                            "撤销转借失败: 只有原借用人才能撤销",
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                            transferId,
+                            record.getDevice() != null ? record.getDevice().getDeviceno() : null,
+                            "只有原借用人才能撤销转借",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null && record.getDevice() != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(record.getDevice().getId());
+                }
+
                 return responseObj;
             }
-            
-            // 更新状态为"已拒绝"(ID=4)
+
             record.setStatus(STATUS_REJECTED);
             transferRecordRepository.save(record);
-            
-            // 更新设备状态为"借用中"(ID=4)
+
             Device device = record.getDevice();
-            Optional<Devicestate> stateOpt = devicestateRepository.findById(4L); // 借用中
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(4L);
             if (stateOpt.isPresent()) {
                 device.setDevicestate(stateOpt.get());
             }
             device.setTransferTargetId(null);
             deviceRepository.save(device);
-            
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        userId,
+                        userName,
+                        userRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_CANCEL,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        "撤销转借成功: 设备" + device.getDeviceno() + "转借已撤销",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        device.getId(),
+                        device.getDeviceno(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
+            }
+
             responseObj.put("success", true);
             responseObj.put("message", "转借已撤销");
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "撤销转借失败: " + e.getMessage());
+
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        userId,
+                        userName,
+                        userRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_CANCEL,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        "撤销转借失败: " + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                        transferId,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+            }
         }
         return responseObj;
     }
