@@ -68,6 +68,8 @@ Ext.define('AM.controller.ChangePasswordController', {
     onResetClick: function() {
         var view = this.getChangePasswordView();
         var form = view.down('form');
-        form.reset();
+        if (form && form.getForm) {
+            form.getForm().reset();
+        }
     }
 });
