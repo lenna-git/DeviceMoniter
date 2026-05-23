@@ -37,16 +37,21 @@ Ext.define('AM.controller.Users', {
     onResetPasswordClick: function() {
         var grid = this.getTestgrid();
         var selection = grid.getSelectionModel().getSelection();
-        
+
         if (selection.length === 0) {
             Ext.Msg.alert('提示', '请先选择要重置密码的用户');
             return;
         }
-        
+
         var record = selection[0];
         var userId = record.get('id');
         var username = record.get('sysusername');
-        
+
+        if (SYS_USER && SYS_USER.id === userId) {
+            Ext.Msg.alert('提示', '不能重置当前登录用户的密码');
+            return;
+        }
+
         Ext.Msg.confirm('确认重置密码', '确定要将用户 "' + username + '" 的密码重置为默认密码吗？', function(btn) {
             if (btn === 'yes') {
                 Ext.Ajax.request({
