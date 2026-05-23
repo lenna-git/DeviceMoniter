@@ -259,9 +259,11 @@ public class DeviceRecordController {
     @Transactional
     public Map<String, Object> approveBorrow(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long adminId = null;
         try {
-            Long deviceId = request.get("deviceId");
-            Long adminId = request.get("adminId");
+            deviceId = request.get("deviceId");
+            adminId = request.get("adminId");
             
             if (deviceId == null || adminId == null) {
                 responseObj.put("success", false);
@@ -274,6 +276,24 @@ public class DeviceRecordController {
             if (!recordOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "未找到待批准的借用记录");
+                
+                // 记录未找到待批准记录的失败日志
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_APPROVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】通过借用申请失败：未找到待批准的借用记录",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "未找到待批准的借用记录",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -282,6 +302,24 @@ public class DeviceRecordController {
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_APPROVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】通过借用申请失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "设备不存在",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -313,9 +351,44 @@ public class DeviceRecordController {
             responseObj.put("success", true);
             responseObj.put("message", "借用申请已通过，设备状态已更新为借用中");
             
+            // 记录通过借用申请成功日志
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_BORROW_APPROVE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】通过借用申请，设备【" + device.getDeviceno() + "】状态已更新为借用中",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        device.getDeviceno(),
+                        null);
+            }
+            
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "通过借用申请失败: " + e.getMessage());
+            
+            // 记录通过借用申请失败日志
+            if (adminId != null) {
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_APPROVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】通过借用申请失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }
@@ -330,9 +403,11 @@ public class DeviceRecordController {
     @Transactional
     public Map<String, Object> rejectBorrow(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long adminId = null;
         try {
-            Long deviceId = request.get("deviceId");
-            Long adminId = request.get("adminId");
+            deviceId = request.get("deviceId");
+            adminId = request.get("adminId");
             
             if (deviceId == null || adminId == null) {
                 responseObj.put("success", false);
@@ -345,6 +420,24 @@ public class DeviceRecordController {
             if (!recordOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "未找到待批准的借用记录");
+                
+                // 记录未找到待批准记录的失败日志
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_REJECT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】拒绝借用申请失败：未找到待批准的借用记录",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "未找到待批准的借用记录",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -353,6 +446,24 @@ public class DeviceRecordController {
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_REJECT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】拒绝借用申请失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "设备不存在",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -386,9 +497,44 @@ public class DeviceRecordController {
             responseObj.put("success", true);
             responseObj.put("message", "借用申请已拒绝，设备状态已更新为已安检待借用");
             
+            // 记录拒绝借用申请成功日志
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_BORROW_REJECT,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】拒绝借用申请，设备【" + device.getDeviceno() + "】状态已更新为已安检待借用",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        device.getDeviceno(),
+                        null);
+            }
+            
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "拒绝借用申请失败: " + e.getMessage());
+            
+            // 记录拒绝借用申请失败日志
+            if (adminId != null) {
+                Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+                if (adminOpt.isPresent() && logOperationService != null) {
+                    SysUser admin = adminOpt.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_BORROW_REJECT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】拒绝借用申请失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }

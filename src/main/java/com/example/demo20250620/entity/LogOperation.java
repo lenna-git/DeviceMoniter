@@ -116,6 +116,7 @@ public class LogOperation {
     public static final String TYPE_TRANSFER_USER_APPROVE = "转借同意";
     public static final String TYPE_TRANSFER_ADMIN_APPROVE = "转借批准";
     public static final String TYPE_BORROW_APPROVE = "借用批准";
+    public static final String TYPE_BORROW_REJECT = "借用拒绝";
     public static final String TYPE_USER_LOGIN = "用户登录";
     public static final String TYPE_USER_LOGOUT = "用户登出";
     public static final String TYPE_USER_CREATE = "用户新增";
