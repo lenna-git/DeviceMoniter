@@ -362,18 +362,25 @@ public class SysUserController {
                 return responseObj;
             }
 
-            if (!sysUserRepository.existsById(sysUser.getId())) {
+            Optional<SysUser> existingUserOpt = sysUserRepository.findById(sysUser.getId());
+            if (!existingUserOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
                 return responseObj;
             }
-            Optional<SysUser> existingUser = sysUserRepository.findBySysusername(sysUser.getSysusername());
-            if (existingUser.isPresent() && !existingUser.get().getId().equals(sysUser.getId())) {
+            SysUser existingUser = existingUserOpt.get();
+
+            Optional<SysUser> userWithSameName = sysUserRepository.findBySysusername(sysUser.getSysusername());
+            if (userWithSameName.isPresent() && !userWithSameName.get().getId().equals(sysUser.getId())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户名已存在");
                 return responseObj;
             }
-            sysUserRepository.save(sysUser);
+
+            existingUser.setSysusername(sysUser.getSysusername());
+            existingUser.setSysuserrole(sysUser.getSysuserrole());
+            sysUserRepository.save(existingUser);
+
             responseObj.put("success", true);
             responseObj.put("message", "用户更新成功");
         } catch (Exception e) {

@@ -82,15 +82,20 @@ Ext.define('AM.controller.Users', {
         console.log('userlistpanel onscbuttioncick');
         var grid = this.getTestgrid();
         var selection = grid.getSelectionModel().getSelection();
-        
+
         if (selection.length === 0) {
             Ext.Msg.alert('提示', '请先选择要删除的用户');
             return;
         }
-        
+
         var record = selection[0];
         var userId = record.get('id');
-        
+
+        if (SYS_USER && SYS_USER.id === userId) {
+            Ext.Msg.alert('提示', '不能删除当前登录用户');
+            return;
+        }
+
         Ext.Msg.confirm('确认删除', '确定要删除该用户吗？', function(btn) {
             if (btn === 'yes') {
                 Ext.Ajax.request({
@@ -119,25 +124,31 @@ Ext.define('AM.controller.Users', {
         console.log('userlistpanel onupdatebuttioncick');
         var grid = this.getTestgrid();
         var selection = grid.getSelectionModel().getSelection();
-        
+
         if (selection.length === 0) {
             Ext.Msg.alert('提示', '请先选择要修改的用户');
             return;
         }
-        
+
         var record = selection[0];
-        
+        var userId = record.get('id');
+
+        if (SYS_USER && SYS_USER.id === userId) {
+            Ext.Msg.alert('提示', '不能修改当前登录用户');
+            return;
+        }
+
         var userwindow = Ext.widget({
             xtype: 'userwindow',
             title: '修改用户'
         });
-        
+
         var form = userwindow.down('form') || userwindow;
         form.down('textfield[name=id]').setValue(record.get('id'));
         form.down('textfield[name=sysusername]').setValue(record.get('sysusername'));
         form.down('textfield[name=sysuserpassword]').setValue(record.get('sysuserpassword'));
         form.down('combo[name=sysuserrole]').setValue(record.get('sysuserrole'));
-        
+
         userwindow.show();
     }
 

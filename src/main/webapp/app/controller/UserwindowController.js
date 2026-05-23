@@ -24,10 +24,10 @@ Ext.define('AM.controller.UserwindowController', {
     onSave: function(button) {
         console.log('save button clicked');
         var win = button.up('window');
-        
+
         var form = win.down('form');
         console.log('form:', form);
-        
+
         var idField = form ? form.down('textfield[name=id]') : win.down('textfield[name=id]');
         var sysusernameField = form ? form.down('textfield[name=sysusername]') : win.down('textfield[name=sysusername]');
         var sysuserpasswordField = form ? form.down('textfield[name=sysuserpassword]') : win.down('textfield[name=sysuserpassword]');
@@ -38,7 +38,7 @@ Ext.define('AM.controller.UserwindowController', {
         console.log('sysuserpasswordField:', sysuserpasswordField);
         console.log('sysuserroleField:', sysuserroleField);
 
-        if (!sysusernameField || !sysuserpasswordField || !sysuserroleField) {
+        if (!sysusernameField || !sysuserroleField) {
             Ext.Msg.alert('错误', '无法找到表单字段');
             return;
         }
@@ -53,21 +53,31 @@ Ext.define('AM.controller.UserwindowController', {
         console.log('sysuserpasswordVal:', sysuserpasswordVal);
         console.log('sysuserroleVal:', sysuserroleVal);
 
-        if (!sysusernameVal || !sysuserpasswordVal) {
-            Ext.Msg.alert('提示', '用户名和密码不能为空');
+        var isUpdate = !!idVal;
+
+        if (!sysusernameVal) {
+            Ext.Msg.alert('提示', '用户名不能为空');
+            return;
+        }
+
+        if (!isUpdate && !sysuserpasswordVal) {
+            Ext.Msg.alert('提示', '密码不能为空');
             return;
         }
 
         var rec = {
             sysusername: sysusernameVal,
-            sysuserpassword: sysuserpasswordVal,
             sysuserrole: sysuserroleVal
         };
+
+        if (!isUpdate) {
+            rec.sysuserpassword = sysuserpasswordVal;
+        }
 
         var url = 'sysuseraction/createuser';
         var method = 'post';
 
-        if (idVal) {
+        if (isUpdate) {
             console.log('Updating user with id:', idVal);
             url = 'sysuseraction/updateuser';
             method = 'put';
@@ -77,7 +87,7 @@ Ext.define('AM.controller.UserwindowController', {
         console.log('Sending request to:', url);
         console.log('Method:', method);
         console.log('Data:', rec);
-        
+
         Ext.Ajax.request({
             url: url,
             method: method,

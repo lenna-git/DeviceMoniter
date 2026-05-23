@@ -11,6 +11,28 @@ Ext.define('AM.view.user.userwindow', {
     layout: 'fit',
     bodyPadding: 15,
 
+    initComponent: function() {
+        this.callParent();
+    },
+
+    listeners: {
+        beforerender: function(win) {
+            var form = win.down('form');
+            if (form) {
+                var idField = form.down('textfield[name=id]');
+                var passwordField = form.down('textfield[name=sysuserpassword]');
+                var isEdit = idField && idField.getValue();
+
+                if (isEdit) {
+                    win.setTitle('修改用户');
+                    if (passwordField) {
+                        passwordField.hide();
+                    }
+                }
+            }
+        }
+    },
+
     items: [
         {
             xtype: 'form',
