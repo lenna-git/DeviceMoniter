@@ -40,6 +40,8 @@ public class DeviceRecordController {
     private SysUserRepository sysUserRepository;
     @Autowired
     private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
+    @Autowired
+    private com.example.demo20250620.service.LogOperationService logOperationService;
 
 
     /**
@@ -131,9 +133,11 @@ public class DeviceRecordController {
     @PostMapping("/borrowDevice")
     public Map<String, Object> borrowDevice(@RequestBody Map<String, Long> request) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long deviceId = null;
+        Long userId = null;
         try {
-            Long deviceId = request.get("deviceId");
-            Long userId = request.get("userId");
+            deviceId = request.get("deviceId");
+            userId = request.get("userId");
             
             if (deviceId == null || userId == null) {
                 responseObj.put("success", false);
@@ -146,6 +150,24 @@ public class DeviceRecordController {
             if (!deviceOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+                if (userOpt.isPresent() && logOperationService != null) {
+                    SysUser user = userOpt.get();
+                    logOperationService.logFail(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_BORROW,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】借用设备失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            "设备不存在",
+                            null);
+                }
                 return responseObj;
             }
             
@@ -185,9 +207,44 @@ public class DeviceRecordController {
             responseObj.put("success", true);
             responseObj.put("message", "设备借用申请成功，等待管理员审核");
             
+            // 记录借用成功日志
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        user.getId(),
+                        user.getSysusername(),
+                        user.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_BORROW,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "操作员【" + user.getSysusername() + "】借用设备【" + device.getDeviceno() + "】成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        deviceId,
+                        device.getDeviceno(),
+                        null);
+            }
+            
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "设备借用失败: " + e.getMessage());
+            
+            // 记录借用失败日志
+            if (userId != null) {
+                Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+                if (userOpt.isPresent() && logOperationService != null) {
+                    SysUser user = userOpt.get();
+                    logOperationService.logFail(
+                            user.getId(),
+                            user.getSysusername(),
+                            user.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_BORROW,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "操作员【" + user.getSysusername() + "】借用设备失败：" + e.getMessage(),
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            deviceId,
+                            null,
+                            e.getMessage(),
+                            null);
+                }
+            }
         }
         return responseObj;
     }
