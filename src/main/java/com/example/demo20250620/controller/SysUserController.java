@@ -489,11 +489,35 @@ public class SysUserController {
             @RequestParam String oldPassword,
             @RequestParam String newPassword) {
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
+        Optional<SysUser> optionalUser = Optional.empty();
         try {
-            Optional<SysUser> optionalUser = sysUserRepository.findById(userId);
+            optionalUser = sysUserRepository.findById(userId);
             if (!optionalUser.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户不存在");
+                // 记录修改密码失败日志 - 用户不存在
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_CHANGE_PASSWORD,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "用户【" + admin.getSysusername() + "】修改密码失败：用户不存在",
+                                null,
+                                userId,
+                                null,
+                                "用户不存在",
+                                request);
+                    }
+                }
                 return responseObj;
             }
 
@@ -503,12 +527,49 @@ public class SysUserController {
             if (!passwordEncoder.matches(oldPassword, user.getSysuserpassword())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "原密码不正确");
+                // 记录修改密码失败日志 - 原密码不正确
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_CHANGE_PASSWORD,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "用户【" + admin.getSysusername() + "】修改密码失败：原密码不正确",
+                                null,
+                                userId,
+                                admin.getSysusername(),
+                                "原密码不正确",
+                                request);
+                    }
+                }
                 return responseObj;
             }
 
             // 使用BCrypt加密新密码
             user.setSysuserpassword(passwordEncoder.encode(newPassword));
             sysUserRepository.save(user);
+            sysUserRepository.flush();
+
+            // 记录修改密码成功日志
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_CHANGE_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户【" + admin.getSysusername() + "】修改密码成功",
+                            null,
+                            userId,
+                            admin.getSysusername(),
+                            request);
+                }
+            }
 
             responseObj.put("success", true);
             responseObj.put("message", "密码修改成功");
@@ -516,6 +577,25 @@ public class SysUserController {
             logger.error("changePassword error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "密码修改失败: " + e.getMessage());
+            // 记录修改密码失败日志 - 异常
+            String username = optionalUser.isPresent() ? optionalUser.get().getSysusername() : null;
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_CHANGE_PASSWORD,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "用户【" + admin.getSysusername() + "】修改密码失败：" + e.getMessage(),
+                            null,
+                            userId,
+                            username,
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }

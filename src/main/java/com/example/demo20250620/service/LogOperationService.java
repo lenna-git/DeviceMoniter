@@ -28,7 +28,6 @@ public class LogOperationService {
     /**
      * 记录操作日志
      */
-    @Async
     public void logOperation(Long operatorId, String operatorName, Integer operatorRole,
                              String operationType, String operationModule, String operationDescription,
                              String operationResult, String targetType, Long targetId, String targetName,
@@ -58,7 +57,6 @@ public class LogOperationService {
     /**
      * 记录成功操作日志（简化版）
      */
-    @Async
     public void logSuccess(Long operatorId, String operatorName, Integer operatorRole,
                            String operationType, String operationModule, String operationDescription,
                            String targetType, Long targetId, String targetName, HttpServletRequest request) {
@@ -69,7 +67,6 @@ public class LogOperationService {
     /**
      * 记录失败操作日志
      */
-    @Async
     public void logFail(Long operatorId, String operatorName, Integer operatorRole,
                         String operationType, String operationModule, String operationDescription,
                         String targetType, Long targetId, String targetName, String errorMessage,
