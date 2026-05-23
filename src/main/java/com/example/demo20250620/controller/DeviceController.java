@@ -327,13 +327,43 @@ public class DeviceController {
     }
     
     @PutMapping("/unshelvedevice/{id}")
-    public Map<String, Object> unshelveDevice(@PathVariable Long id, @RequestBody(required = false) Map<String, String> request){
+    public Map<String, Object> unshelveDevice(@PathVariable Long id, @RequestBody(required = false) Map<String, String> requestBody){
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+            System.out.println("Session存在，当前用户: " + (currentUser.isPresent() ? currentUser.get().getSysusername() : "空"));
+        } else {
+            System.out.println("Session为空");
+        }
+        System.out.println("logOperationService是否为空: " + (logOperationService == null));
+        
         try {
             Optional<Device> device1 = deviceRepository.findById(id);
             if (!device1.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+                
+                // 记录设备不存在的失败日志
+                if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                    System.out.println("准备记录设备不存在的失败日志");
+                    SysUser admin = currentUser.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_UNSHELVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】设备上架失败：设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            null,
+                            "设备不存在",
+                            request);
+                } else {
+                    System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
+                }
                 return responseObj;
             }
             Device device2 = device1.get();
@@ -349,6 +379,26 @@ public class DeviceController {
             } else {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备状态不存在");
+                
+                // 记录设备状态不存在的失败日志
+                if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                    System.out.println("准备记录设备状态不存在的失败日志");
+                    SysUser admin = currentUser.get();
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_UNSHELVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员【" + admin.getSysusername() + "】设备上架失败：设备状态不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            device2.getDeviceno(),
+                            "设备状态不存在",
+                            request);
+                } else {
+                    System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
+                }
                 return responseObj;
             }
             
@@ -360,8 +410,8 @@ public class DeviceController {
             for (DeviceRepair repair : repairs) {
                 if (repair.getEndRepairTime() == null) {
                     repair.setEndRepairTime(LocalDateTime.now());
-                    if (request != null && request.containsKey("repairRecord")) {
-                        repair.setRepairRecord(request.get("repairRecord"));
+                    if (requestBody != null && requestBody.containsKey("repairRecord")) {
+                        repair.setRepairRecord(requestBody.get("repairRecord"));
                     }
                     deviceRepairRepository.save(repair);
                 }
@@ -369,9 +419,49 @@ public class DeviceController {
             
             responseObj.put("success", true);
             responseObj.put("message", "设备上架成功");
+            
+            // 记录设备上架成功日志
+            if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                System.out.println("准备记录设备上架成功日志");
+                SysUser admin = currentUser.get();
+                logOperationService.logSuccess(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_UNSHELVE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】上架设备【" + device2.getDeviceno() + "】成功",
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        device2.getDeviceno(),
+                        request);
+            } else {
+                System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
+            }
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "设备上架失败: " + e.getMessage());
+            System.out.println("设备上架发生异常: " + e.getMessage());
+            
+            // 记录设备上架失败日志
+            if (currentUser != null && currentUser.isPresent() && logOperationService != null) {
+                System.out.println("准备记录设备上架异常失败日志");
+                SysUser admin = currentUser.get();
+                logOperationService.logFail(
+                        admin.getId(),
+                        admin.getSysusername(),
+                        admin.getSysuserrole().intValue(),
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_UNSHELVE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员【" + admin.getSysusername() + "】设备上架失败：" + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        null,
+                        e.getMessage(),
+                        request);
+            } else {
+                System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
+            }
         }
         return responseObj;
     }
