@@ -20,6 +20,7 @@ Ext.define('AM.view.user.LogOperationView', {
             ['用户登出', '用户登出'],
             ['用户新增', '用户新增'],
             ['用户删除', '用户删除'],
+            ['用户修改', '用户修改'],
             ['设备安检', '设备安检'],
             ['设备归还', '设备归还'],
             ['设备维修', '设备维修'],
@@ -211,6 +212,19 @@ Ext.define('AM.view.user.LogOperationView', {
                             return '<span style="color:red;">失败</span>';
                         }
                         return value;
+                    }
+                },
+                {
+                    text: '失败原因',
+                    dataIndex: 'errorMessage',
+                    width: 150,
+                    align: 'center',
+                    renderer: function(value, metaData) {
+                        if (value) {
+                            metaData.tdAttr = 'data-qtip="' + Ext.String.htmlEncode(value) + '"';
+                            return value;
+                        }
+                        return '';
                     }
                 },
                 {

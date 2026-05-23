@@ -352,6 +352,11 @@ public class SysUserController {
     @PutMapping("/updateuser")
     public Map<String, Object> updateUser(@RequestBody SysUser sysUser) {
         Map<String, Object> responseObj = new HashMap<>();
+        HttpSession session = request.getSession(false);
+        Optional<SysUser> currentUser = Optional.empty();
+        if (session != null) {
+            currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+        }
         try {
             logger.info("updateUser called with id: " + sysUser.getId());
             logger.info("updateUser called with username: " + sysUser.getSysusername());
@@ -374,6 +379,24 @@ public class SysUserController {
             if (userWithSameName.isPresent() && !userWithSameName.get().getId().equals(sysUser.getId())) {
                 responseObj.put("success", false);
                 responseObj.put("message", "用户名已存在");
+                // 记录修改用户失败日志 - 用户名已存在
+                if (currentUser != null && currentUser.isPresent()) {
+                    SysUser admin = currentUser.get();
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                admin.getId(),
+                                admin.getSysusername(),
+                                admin.getSysuserrole().intValue(),
+                                com.example.demo20250620.entity.LogOperation.TYPE_USER_UPDATE,
+                                com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                                "管理员【" + admin.getSysusername() + "】修改用户【" + sysUser.getSysusername() + "】失败：用户名已存在",
+                                null,
+                                sysUser.getId(),
+                                sysUser.getSysusername(),
+                                "用户名已存在",
+                                request);
+                    }
+                }
                 return responseObj;
             }
 
@@ -381,12 +404,48 @@ public class SysUserController {
             existingUser.setSysuserrole(sysUser.getSysuserrole());
             sysUserRepository.save(existingUser);
 
+            // 记录修改用户成功日志
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logSuccess(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_UPDATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】修改用户【" + sysUser.getSysusername() + "】",
+                            null,
+                            sysUser.getId(),
+                            sysUser.getSysusername(),
+                            request);
+                }
+            }
+
             responseObj.put("success", true);
             responseObj.put("message", "用户更新成功");
         } catch (Exception e) {
             logger.error("updateUser error: " + e.getMessage(), e);
             responseObj.put("success", false);
             responseObj.put("message", "用户更新失败: " + e.getMessage());
+            // 记录修改用户失败日志 - 异常
+            if (currentUser != null && currentUser.isPresent()) {
+                SysUser admin = currentUser.get();
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            admin.getId(),
+                            admin.getSysusername(),
+                            admin.getSysuserrole().intValue(),
+                            com.example.demo20250620.entity.LogOperation.TYPE_USER_UPDATE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_USER,
+                            "管理员【" + admin.getSysusername() + "】修改用户【" + sysUser.getSysusername() + "】失败：" + e.getMessage(),
+                            null,
+                            sysUser.getId(),
+                            sysUser.getSysusername(),
+                            e.getMessage(),
+                            request);
+                }
+            }
         }
         return responseObj;
     }
