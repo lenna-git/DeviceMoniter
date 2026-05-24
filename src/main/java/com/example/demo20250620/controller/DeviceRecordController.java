@@ -699,9 +699,10 @@ public class DeviceRecordController {
             deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             
             // 找到该设备returndate为空的记录，填入归还时间和归还批准人
-            Optional<DeviceRecord> recordOpt = deviceRecordRepository.findActiveBorrowRecord(deviceId);
-            if (recordOpt.isPresent()) {
-                DeviceRecord record = recordOpt.get();
+            List<DeviceRecord> records = deviceRecordRepository.findActiveBorrowRecords(deviceId);
+            if (!records.isEmpty()) {
+                // 取最新的一条记录进行处理
+                DeviceRecord record = records.get(0);
                 record.setReturnDate(java.time.LocalDateTime.now().toString());
                 record.setReturnApprovalUserId(adminId);
                 record.setReturnApprovalDate(java.time.LocalDateTime.now().toString());
