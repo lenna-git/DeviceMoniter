@@ -96,8 +96,8 @@ public class DeviceRecordController {
 
             Page<DeviceRecord> deviceRecordPage;
             
-            // 如果是操作员（角色=0），只显示自己的借用记录
-            if (currentUserRole != null && currentUserRole == 0 && currentUserId != null) {
+            // 如果是普通用户（角色=2），只显示自己的借用记录
+            if (currentUserRole != null && currentUserRole == 2 && currentUserId != null) {
                 if (keyword == null || keyword.trim().isEmpty()) {
                     deviceRecordPage = deviceRecordRepository.findByUserId(currentUserId, PageRequest.of(pageIndex, limit));
                 } else {
