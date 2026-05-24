@@ -666,6 +666,27 @@ public class DeviceTransferController {
             }
             deviceRepository.save(device);
 
+            // 更新原借用人的借用记录（标记为已归还）
+            List<DeviceRecord> activeRecords = deviceRecordRepository.findActiveBorrowRecords(device.getId());
+            if (!activeRecords.isEmpty()) {
+                DeviceRecord originalRecord = activeRecords.get(0);
+                originalRecord.setReturnDate(LocalDateTime.now().toString());
+                originalRecord.setReturnApprovalUserId(adminId);
+                originalRecord.setReturnApprovalDate(LocalDateTime.now().toString());
+                originalRecord.setDetail("设备已转借");
+                deviceRecordRepository.save(originalRecord);
+            }
+
+            // 为新借用人创建一条新的借用记录
+            DeviceRecord newRecord = new DeviceRecord();
+            newRecord.setDevice(device);
+            newRecord.setSysUser(adminOpt.get()); // 批准人
+            newRecord.setUserId(record.getToUser().getId()); // 新借用人ID
+            newRecord.setBorrorDate(LocalDateTime.now().toString()); // 借用时间
+            newRecord.setApprovalDate(LocalDateTime.now().toString()); // 批准时间
+            newRecord.setDetail("转借获得批准");
+            deviceRecordRepository.save(newRecord);
+
             if (logOperationService != null) {
                 logOperationService.logSuccess(
                         adminId,
