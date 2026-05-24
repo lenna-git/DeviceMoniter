@@ -579,66 +579,135 @@ public class DeviceTransferController {
      * 管理员批准转借
      */
     @PostMapping("/adminApprove")
-    public Map<String, Object> adminApproveTransfer(@RequestBody Map<String, Object> request) {
+    public Map<String, Object> adminApproveTransfer(@RequestBody Map<String, Object> request, jakarta.servlet.http.HttpServletRequest httpRequest) {
         Map<String, Object> responseObj = new HashMap<>();
+        Long transferId = null;
+        Long adminId = null;
+        String adminName = null;
+        Integer adminRole = null;
+
         try {
-            Long transferId = Long.parseLong(request.get("transferId").toString());
-            Long adminId = Long.parseLong(request.get("adminId").toString());
-            
+            transferId = Long.parseLong(request.get("transferId").toString());
+            adminId = Long.parseLong(request.get("adminId").toString());
+
+            Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
+            if (adminOpt.isPresent()) {
+                adminName = adminOpt.get().getSysusername();
+                adminRole = adminOpt.get().getSysuserrole().intValue();
+            }
+
             Optional<DeviceTransferRecord> recordOpt = transferRecordRepository.findById(transferId);
             if (!recordOpt.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "转借记录不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_APPROVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                            "管理员批准转借失败: 转借记录不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                            transferId,
+                            null,
+                            "转借记录不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+                }
+
                 return responseObj;
             }
-            
+
             DeviceTransferRecord record = recordOpt.get();
-            
-            // 验证状态
+
             if (record.getStatus() != STATUS_USER_APPROVED) {
                 responseObj.put("success", false);
                 responseObj.put("message", "当前状态不允许此操作");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_APPROVE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                            "管理员批准转借失败: 状态不允许操作",
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                            transferId,
+                            record.getDevice() != null ? record.getDevice().getDeviceno() : null,
+                            "当前状态不允许此操作",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null && record.getDevice() != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(record.getDevice().getId());
+                }
+
                 return responseObj;
             }
-            
-            // 更新状态为"管理员已同意"(ID=3)
+
             record.setStatus(STATUS_ADMIN_APPROVED);
             record.setAdminApprovalDate(LocalDateTime.now());
-            
-            Optional<SysUser> adminOpt = sysUserRepository.findById(adminId);
-            if (adminOpt.isPresent()) {
-                record.setAdminApprovalUser(adminOpt.get());
-            }
-            
+            record.setAdminApprovalUser(adminOpt.get());
             transferRecordRepository.save(record);
-            
-            // 更新设备信息
+
             Device device = record.getDevice();
             device.setDeviceyh(record.getToUser());
             device.setTransferTargetId(null);
-            
-            // 更新设备状态为"借用中"(ID=4)
+
             Optional<Devicestate> stateOpt = devicestateRepository.findById(4L);
             if (stateOpt.isPresent()) {
                 device.setDevicestate(stateOpt.get());
             }
             deviceRepository.save(device);
-            
-            // 通知客户端设备状态更新
-            System.out.println("=== 管理员批准转借：准备通知客户端设备状态更新 ===");
-            System.out.println("设备ID: " + device.getId());
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_APPROVE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        "管理员批准转借成功: 设备" + device.getDeviceno() + "已转借给" + record.getToUser().getSysusername(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        device.getId(),
+                        device.getDeviceno(),
+                        httpRequest);
+            }
+
             if (deviceStatusNotificationService != null) {
                 deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
-                System.out.println("=== 管理员批准转借：通知已发送 ===");
-            } else {
-                System.out.println("=== 管理员批准转借：deviceStatusNotificationService 为 null ===");
             }
-            
+
             responseObj.put("success", true);
             responseObj.put("message", "转借已批准");
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "批准转借失败: " + e.getMessage());
+
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_APPROVE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        "管理员批准转借失败: " + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                        transferId,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+            }
         }
         return responseObj;
     }
