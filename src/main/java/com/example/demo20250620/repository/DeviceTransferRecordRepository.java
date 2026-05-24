@@ -30,4 +30,10 @@ public interface DeviceTransferRecordRepository extends JpaRepository<DeviceTran
     
     @Query("SELECT d FROM DeviceTransferRecord d LEFT JOIN FETCH d.device dev LEFT JOIN FETCH dev.devCpu LEFT JOIN FETCH dev.devType LEFT JOIN FETCH dev.devManufacturer LEFT JOIN FETCH d.fromUser LEFT JOIN FETCH d.toUser LEFT JOIN FETCH d.adminApprovalUser WHERE d.id > 0 AND (dev.deviceno LIKE %:keyword% OR d.fromUser.sysusername LIKE %:keyword% OR d.toUser.sysusername LIKE %:keyword%)")
     Page<DeviceTransferRecord> findByKeywordWithDetails(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT d FROM DeviceTransferRecord d LEFT JOIN FETCH d.device dev LEFT JOIN FETCH dev.devCpu LEFT JOIN FETCH dev.devType LEFT JOIN FETCH dev.devManufacturer LEFT JOIN FETCH d.fromUser LEFT JOIN FETCH d.toUser LEFT JOIN FETCH d.adminApprovalUser WHERE d.id > 0 AND (d.fromUser.id = :userId OR d.toUser.id = :userId)")
+    Page<DeviceTransferRecord> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT d FROM DeviceTransferRecord d LEFT JOIN FETCH d.device dev LEFT JOIN FETCH dev.devCpu LEFT JOIN FETCH dev.devType LEFT JOIN FETCH dev.devManufacturer LEFT JOIN FETCH d.fromUser LEFT JOIN FETCH d.toUser LEFT JOIN FETCH d.adminApprovalUser WHERE d.id > 0 AND (d.fromUser.id = :userId OR d.toUser.id = :userId) AND (dev.deviceno LIKE %:keyword% OR d.fromUser.sysusername LIKE %:keyword% OR d.toUser.sysusername LIKE %:keyword%)")
+    Page<DeviceTransferRecord> findByUserIdAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
 }

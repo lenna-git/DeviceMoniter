@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import jakarta.servlet.http.HttpSession;
 
 @RestController
 @RequestMapping("/transfer/")
@@ -900,16 +901,39 @@ public class DeviceTransferController {
     public Map<String, Object> listTransferRecords(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int limit) {
+            @RequestParam(defaultValue = "20") int limit,
+            jakarta.servlet.http.HttpServletRequest httpRequest) {
         Map<String, Object> result = new HashMap<>();
         try {
             int pageIndex = Math.max(0, page - 1);
+            
+            HttpSession session = httpRequest.getSession(false);
+            Long currentUserId = null;
+            Integer currentUserRole = null;
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser.isPresent()) {
+                    currentUserId = currentUser.get().getId();
+                    currentUserRole = currentUser.get().getSysuserrole().intValue();
+                }
+            }
+
             Page<DeviceTransferRecord> recordPage;
 
-            if (keyword == null || keyword.trim().isEmpty()) {
-                recordPage = transferRecordRepository.findAllWithDetails(PageRequest.of(pageIndex, limit));
+            // 如果是普通用户（角色=2），只显示自己的转借记录（申请或被转借的）
+            if (currentUserRole != null && currentUserRole == 2 && currentUserId != null) {
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    recordPage = transferRecordRepository.findByUserId(currentUserId, PageRequest.of(pageIndex, limit));
+                } else {
+                    recordPage = transferRecordRepository.findByUserIdAndKeyword(currentUserId, keyword.trim(), PageRequest.of(pageIndex, limit));
+                }
             } else {
-                recordPage = transferRecordRepository.findByKeywordWithDetails(keyword.trim(), PageRequest.of(pageIndex, limit));
+                // 管理员可以查看所有记录
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    recordPage = transferRecordRepository.findAllWithDetails(PageRequest.of(pageIndex, limit));
+                } else {
+                    recordPage = transferRecordRepository.findByKeywordWithDetails(keyword.trim(), PageRequest.of(pageIndex, limit));
+                }
             }
 
             List<DeviceTransferRecord> records = recordPage.getContent();       
