@@ -294,13 +294,47 @@ public class DeviceController {
     }
     
     @PutMapping("/repairdevice/{id}")
-    public Map<String, Object> repairDevice(@PathVariable Long id){
+    public Map<String, Object> repairDevice(@PathVariable Long id, jakarta.servlet.http.HttpServletRequest httpRequest){
         Map<String, Object> responseObj = new HashMap<>();
+        Long adminId = null;
+        String adminName = null;
+        Integer adminRole = null;
+
         try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser.isPresent()) {
+                    adminId = currentUser.get().getId();
+                    adminName = currentUser.get().getSysusername();
+                    adminRole = currentUser.get().getSysuserrole().intValue();
+                }
+            }
+
             Optional<Device> device1 = deviceRepository.findById(id);
             if (!device1.isPresent()) {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_REPAIR,
+                            com.example.demo20250620.entity.LogOperation.MODULE_REPAIR,
+                            "管理员维修设备失败: 设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            null,
+                            "设备不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+                }
+
                 return responseObj;
             }
             Device device2 = device1.get();
@@ -311,17 +345,73 @@ public class DeviceController {
             } else {
                 responseObj.put("success", false);
                 responseObj.put("message", "设备状态不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_REPAIR,
+                            com.example.demo20250620.entity.LogOperation.MODULE_REPAIR,
+                            "管理员维修设备失败: 设备状态不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            device2.getDeviceno(),
+                            "设备状态不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+                }
+
                 return responseObj;
             }
             
             deviceRepository.save(device2);
-            // 通知客户端设备状态更新
-            deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_REPAIR,
+                        com.example.demo20250620.entity.LogOperation.MODULE_REPAIR,
+                        "管理员维修设备成功: 设备" + device2.getDeviceno(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        device2.getDeviceno(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+            }
+
             responseObj.put("success", true);
             responseObj.put("message", "设备维修状态更新成功");
         } catch (Exception e) {
             responseObj.put("success", false);
             responseObj.put("message", "设备维修状态更新失败: " + e.getMessage());
+
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_REPAIR,
+                        com.example.demo20250620.entity.LogOperation.MODULE_REPAIR,
+                        "管理员维修设备失败: " + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+            }
         }
         return responseObj;
     }
