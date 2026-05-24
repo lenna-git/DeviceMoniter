@@ -76,15 +76,39 @@ public class DeviceRecordController {
     public Map<String, Object> getAllDevicerecords(
             @RequestParam(required = false) String keyword,
             @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "20") int limit){
+            @RequestParam(defaultValue = "20") int limit,
+            jakarta.servlet.http.HttpServletRequest httpRequest){
         Map<String, Object> responseObj = new HashMap<>();
         try {
             int pageIndex = Math.max(0, page - 1);
+            
+            HttpSession session = httpRequest.getSession(false);
+            Long currentUserId = null;
+            Integer currentUserRole = null;
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser.isPresent()) {
+                    currentUserId = currentUser.get().getId();
+                    currentUserRole = currentUser.get().getSysuserrole().intValue();
+                }
+            }
+
             Page<DeviceRecord> deviceRecordPage;
-            if (keyword == null || keyword.trim().isEmpty()) {
-                deviceRecordPage = deviceRecordRepository.findAllWithDeviceAndUser(PageRequest.of(pageIndex, limit));
+            
+            // 如果是操作员（角色=0），只显示自己的借用记录
+            if (currentUserRole != null && currentUserRole == 0 && currentUserId != null) {
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    deviceRecordPage = deviceRecordRepository.findByUserId(currentUserId, PageRequest.of(pageIndex, limit));
+                } else {
+                    deviceRecordPage = deviceRecordRepository.findByUserIdAndKeyword(currentUserId, keyword.trim(), PageRequest.of(pageIndex, limit));
+                }
             } else {
-                deviceRecordPage = deviceRecordRepository.findByKeywordWithUsername(keyword.trim(), PageRequest.of(pageIndex, limit));
+                // 管理员可以查看所有记录
+                if (keyword == null || keyword.trim().isEmpty()) {
+                    deviceRecordPage = deviceRecordRepository.findAllWithDeviceAndUser(PageRequest.of(pageIndex, limit));
+                } else {
+                    deviceRecordPage = deviceRecordRepository.findByKeywordWithUsername(keyword.trim(), PageRequest.of(pageIndex, limit));
+                }
             }
             
             List<DeviceRecord> records = deviceRecordPage.getContent();

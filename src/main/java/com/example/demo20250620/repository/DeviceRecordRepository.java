@@ -52,4 +52,13 @@ public interface DeviceRecordRepository extends JpaRepository<DeviceRecord, Long
            "dr.borrowUser.sysusername LIKE %:keyword%)")
     Page<DeviceRecord> findByKeywordWithUsername(@Param("keyword") String keyword, Pageable pageable);
 
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser WHERE dr.borrowUser.id = :userId")
+    Page<DeviceRecord> findByUserId(@Param("userId") Long userId, Pageable pageable);
+
+    @Query("SELECT dr FROM DeviceRecord dr LEFT JOIN FETCH dr.device d LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH dr.sysUser LEFT JOIN FETCH dr.borrowUser LEFT JOIN FETCH dr.returnApprovalUser WHERE dr.borrowUser.id = :userId AND " +
+           "(:keyword IS NULL OR :keyword = '' OR " +
+           "d.deviceno LIKE %:keyword% OR " +
+           "dr.detail LIKE %:keyword%)")
+    Page<DeviceRecord> findByUserIdAndKeyword(@Param("userId") Long userId, @Param("keyword") String keyword, Pageable pageable);
+
 }
