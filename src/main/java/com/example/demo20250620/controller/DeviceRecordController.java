@@ -684,6 +684,12 @@ public class DeviceRecordController {
                             "设备不存在",
                             null);
                 }
+
+                // 通知客户端设备状态更新
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
+                }
+
                 return responseObj;
             }
             
@@ -752,6 +758,11 @@ public class DeviceRecordController {
                             e.getMessage(),
                             null);
                 }
+            }
+
+            // 通知客户端设备状态更新
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(deviceId);
             }
         }
         return responseObj;
