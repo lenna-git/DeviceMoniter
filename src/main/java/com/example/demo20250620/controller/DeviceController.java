@@ -454,6 +454,12 @@ public class DeviceController {
                 } else {
                     System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
                 }
+
+                // 通知客户端设备状态更新
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+                }
+
                 return responseObj;
             }
             Device device2 = device1.get();
@@ -489,6 +495,12 @@ public class DeviceController {
                 } else {
                     System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
                 }
+
+                // 通知客户端设备状态更新
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+                }
+
                 return responseObj;
             }
             
@@ -551,6 +563,11 @@ public class DeviceController {
                         request);
             } else {
                 System.out.println("不满足记录日志条件 - 用户: " + currentUser.isPresent() + ", 服务: " + (logOperationService != null));
+            }
+
+            // 通知客户端设备状态更新
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
             }
         }
         return responseObj;
