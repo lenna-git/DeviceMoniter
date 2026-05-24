@@ -395,6 +395,187 @@ public class DeviceTransferController {
     }
 
     /**
+     * 拒绝/驳回转借（支持用户拒绝和管理员驳回）
+     */
+    @PostMapping("/reject")
+    public Map<String, Object> rejectTransfer(@RequestBody Map<String, Object> request, jakarta.servlet.http.HttpServletRequest httpRequest) {
+        Map<String, Object> responseObj = new HashMap<>();
+        Long transferId = null;
+        Long userId = null;
+        String userName = null;
+        Integer userRole = null;
+
+        try {
+            transferId = Long.parseLong(request.get("transferId").toString());
+            userId = Long.parseLong(request.get("userId").toString());
+
+            Optional<SysUser> userOpt = sysUserRepository.findById(userId);
+            if (userOpt.isPresent()) {
+                userName = userOpt.get().getSysusername();
+                userRole = userOpt.get().getSysuserrole().intValue();
+            }
+
+            Optional<DeviceTransferRecord> recordOpt = transferRecordRepository.findById(transferId);
+            if (!recordOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "转借记录不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            userId,
+                            userName,
+                            userRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_REJECT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                            "拒绝转借失败: 转借记录不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                            transferId,
+                            null,
+                            "转借记录不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+                }
+
+                return responseObj;
+            }
+
+            DeviceTransferRecord record = recordOpt.get();
+            boolean isAdmin = userRole != null && userRole == 1; // 假设角色1是管理员
+            boolean isUserReject = record.getStatus() == STATUS_PENDING && record.getToUser().getId().equals(userId);
+            boolean isAdminReject = record.getStatus() == STATUS_USER_APPROVED && isAdmin;
+
+            if (!isUserReject && !isAdminReject) {
+                if (record.getStatus() == STATUS_PENDING) {
+                    responseObj.put("success", false);
+                    responseObj.put("message", "您不是转借目标用户，无法拒绝");
+
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                userId,
+                                userName,
+                                userRole,
+                                com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_REJECT,
+                                com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                                "拒绝转借失败: 不是转借目标用户",
+                                com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                                transferId,
+                                record.getDevice() != null ? record.getDevice().getDeviceno() : null,
+                                "不是转借目标用户",
+                                httpRequest);
+                    }
+                } else if (record.getStatus() == STATUS_USER_APPROVED) {
+                    responseObj.put("success", false);
+                    responseObj.put("message", "只有管理员才能驳回此申请");
+
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                userId,
+                                userName,
+                                userRole,
+                                com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_REJECT,
+                                com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                                "驳回转借失败: 只有管理员才能驳回",
+                                com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                                transferId,
+                                record.getDevice() != null ? record.getDevice().getDeviceno() : null,
+                                "只有管理员才能驳回此申请",
+                                httpRequest);
+                    }
+                } else {
+                    responseObj.put("success", false);
+                    responseObj.put("message", "当前状态不允许此操作");
+
+                    if (logOperationService != null) {
+                        logOperationService.logFail(
+                                userId,
+                                userName,
+                                userRole,
+                                com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_REJECT,
+                                com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                                "拒绝转借失败: 状态不允许操作",
+                                com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                                transferId,
+                                record.getDevice() != null ? record.getDevice().getDeviceno() : null,
+                                "当前状态不允许此操作",
+                                httpRequest);
+                    }
+                }
+
+                if (deviceStatusNotificationService != null && record.getDevice() != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(record.getDevice().getId());
+                }
+
+                return responseObj;
+            }
+
+            record.setStatus(STATUS_REJECTED);
+            transferRecordRepository.save(record);
+
+            Device device = record.getDevice();
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(4L);
+            if (stateOpt.isPresent()) {
+                device.setDevicestate(stateOpt.get());
+            }
+            device.setTransferTargetId(null);
+            deviceRepository.save(device);
+
+            String logType = isAdminReject ? 
+                com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_ADMIN_REJECT : 
+                com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_REJECT;
+            String logMessage = isAdminReject ? 
+                "驳回转借成功: 设备" + device.getDeviceno() + "转借申请已驳回" : 
+                "拒绝转借成功: 设备" + device.getDeviceno() + "转借申请已拒绝";
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        userId,
+                        userName,
+                        userRole,
+                        logType,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        logMessage,
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        device.getId(),
+                        device.getDeviceno(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
+            }
+
+            responseObj.put("success", true);
+            responseObj.put("message", "已拒绝转借");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "拒绝转借失败: " + e.getMessage());
+
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        userId,
+                        userName,
+                        userRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_TRANSFER_REJECT,
+                        com.example.demo20250620.entity.LogOperation.MODULE_TRANSFER,
+                        "拒绝转借失败: " + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_TRANSFER_RECORD,
+                        transferId,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(null);
+            }
+        }
+        return responseObj;
+    }
+
+    /**
      * 管理员批准转借
      */
     @PostMapping("/adminApprove")
