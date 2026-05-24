@@ -43,6 +43,9 @@ public class DeviceTransferController {
     @Autowired
     private com.example.demo20250620.service.LogOperationService logOperationService;
 
+    @Autowired
+    private DeviceRecordRepository deviceRecordRepository;
+
     // 状态常量
     private static final int STATUS_PENDING = 1;      // 申请中
     private static final int STATUS_USER_APPROVED = 2; // 新借用人已同意
