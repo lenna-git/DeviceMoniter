@@ -342,7 +342,7 @@ public class DeviceTransferController {
             transferRecordRepository.save(record);
 
             Device device = record.getDevice();
-            Optional<Devicestate> stateOpt = devicestateRepository.findById(8L);
+            Optional<Devicestate> stateOpt = devicestateRepository.findById(11L);
             if (stateOpt.isPresent()) {
                 device.setDevicestate(stateOpt.get());
                 deviceRepository.save(device);
