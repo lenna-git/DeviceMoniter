@@ -173,7 +173,100 @@ public class DeviceController {
     }
 
     @DeleteMapping("/deldevices/{id}")
-    public void deleteDevice(@PathVariable Long id){deviceRepository.deleteById(id);}
+    public Map<String, Object> deleteDevice(@PathVariable Long id, jakarta.servlet.http.HttpServletRequest httpRequest){
+        Map<String, Object> responseObj = new HashMap<>();
+        Long adminId = null;
+        String adminName = null;
+        Integer adminRole = null;
+        
+        try {
+            HttpSession session = httpRequest.getSession(false);
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser.isPresent()) {
+                    adminId = currentUser.get().getId();
+                    adminName = currentUser.get().getSysusername();
+                    adminRole = currentUser.get().getSysuserrole().intValue();
+                }
+            }
+
+            Optional<Device> deviceOpt = deviceRepository.findById(id);
+            if (!deviceOpt.isPresent()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "设备不存在");
+
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_DELETE,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员删除设备失败: 设备不存在",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            id,
+                            null,
+                            "设备不存在",
+                            httpRequest);
+                }
+
+                if (deviceStatusNotificationService != null) {
+                    deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+                }
+
+                return responseObj;
+            }
+
+            Device device = deviceOpt.get();
+            String deviceNo = device.getDeviceno();
+            
+            deviceRepository.deleteById(id);
+
+            if (logOperationService != null) {
+                logOperationService.logSuccess(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_DELETE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员删除设备成功: 设备" + deviceNo,
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        deviceNo,
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+            }
+
+            responseObj.put("success", true);
+            responseObj.put("message", "设备删除成功");
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "删除设备失败: " + e.getMessage());
+
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_DELETE,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员删除设备失败: " + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        id,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+
+            if (deviceStatusNotificationService != null) {
+                deviceStatusNotificationService.notifyDeviceStatusUpdate(id);
+            }
+        }
+        return responseObj;
+    }
     
     @PutMapping("/checkdevice/{id}")
     public Map<String, Object> checkDevice(@PathVariable Long id){
