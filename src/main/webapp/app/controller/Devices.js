@@ -226,24 +226,21 @@ Ext.define('AM.controller.Devices', {
                 function(button){
                     if(button=='yes'){
                         Ext.Ajax.request({
-                            url: 'deviceaction/deldevices/'+ida,
-                            //url: 'deviceaction/deldevices/',
-                            method: 'DELETE',
-                            // params:{
-                            //     id: ida
-                            // },
-                            sucess:function(response,opts){
-                                var obj = Ext.decode(response.responseText);
-                                if(obj.sucess){
-                                    Ext.Msg.alert('结果显示',obj.message);
+                                url: 'deviceaction/deldevices/'+ida,
+                                method: 'DELETE',
+                                success:function(response,opts){
+                                    var obj = Ext.decode(response.responseText);
+                                    if(obj.success){
+                                        Ext.Msg.alert('成功',obj.message);
+                                        ysstore.reload();
+                                    } else {
+                                        Ext.Msg.alert('失败',obj.message);
+                                    }
+                                },
+                                failure:function(response,opts){
+                                    Ext.Msg.alert('错误','删除设备失败，请稍后重试');
                                 }
-                            },
-                            failure:function(response,opts){
-                                var obj = Ext.decode(response.responseText);
-                                Ext.Msg.alert('保存错误','错误原因：'+obj.message+"-------"+obj.msg);
-                            }
-                        })
-                        ysstore.reload();
+                            })
                     }
                 }
             )
