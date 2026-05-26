@@ -598,6 +598,13 @@ Ext.define('AM.controller.Devices', {
                     var grid = Ext.create('Ext.grid.Panel', {
                         border: false,
                         columns: [{
+                            text: '序号',
+                            width: 60,
+                            align: 'center',
+                            renderer: function(value, metaData, record, rowIndex) {
+                                return rowIndex + 1;
+                            }
+                        }, {
                             text: '申请人',
                             dataIndex: 'reporterId',
                             width: 100
