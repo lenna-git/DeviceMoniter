@@ -2,6 +2,55 @@
 var SYS_USER = null;
 SYS_USER=  Ext.decode(sessionStorage.getItem('SYS_USER'));
 
+// 会话超时配置
+var SESSION_TIMEOUT_SECONDS = 60; // 与后端配置一致
+var lastActivityTime = Date.now();
+var sessionTimeoutTimer = null;
+
+// 重置活动时间
+function resetActivityTimer() {
+    lastActivityTime = Date.now();
+    console.log('活动时间已重置:', new Date(lastActivityTime));
+}
+
+// 检查会话超时
+function checkSessionTimeout() {
+    var now = Date.now();
+    var elapsedSeconds = Math.floor((now - lastActivityTime) / 1000);
+    
+    console.log('检查会话超时 - 已过去:', elapsedSeconds, '秒');
+    
+    if (elapsedSeconds >= SESSION_TIMEOUT_SECONDS) {
+        console.log('会话超时，自动登出');
+        clearInterval(sessionTimeoutTimer);
+        logout();
+    }
+}
+
+// 登出函数
+function logout() {
+    Ext.Ajax.request({
+        url: 'sysuser/logout',
+        method: 'GET',
+        success: function() {
+            sessionStorage.removeItem('SYS_USER');
+            window.location.href = 'login.html';
+        },
+        failure: function() {
+            sessionStorage.removeItem('SYS_USER');
+            window.location.href = 'login.html';
+        }
+    });
+}
+
+// 监听用户活动
+document.addEventListener('mousedown', resetActivityTimer);
+document.addEventListener('keydown', resetActivityTimer);
+document.addEventListener('touchstart', resetActivityTimer);
+
+// 启动会话超时检测定时器（每5秒检查一次）
+sessionTimeoutTimer = setInterval(checkSessionTimeout, 5000);
+
 // WebSocket 连接用于设备状态实时更新
 var deviceStatusWebSocket = null;
 var deviceStatusCallbacks = [];
