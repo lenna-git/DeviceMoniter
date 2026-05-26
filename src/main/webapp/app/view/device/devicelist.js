@@ -8,7 +8,7 @@ Ext.define('AM.view.device.devicelist' ,{
         {
             xtype: 'toolbar',
             region: 'north',
-            overflowHandler: 'menu',
+            enableOverflow: true,
             listeners: {
                 afterrender: function(toolbar) {
                     var role = SYS_USER ? SYS_USER.sysuserrole : null;
@@ -24,46 +24,102 @@ Ext.define('AM.view.device.devicelist' ,{
             },
             items: [
                 {
-                    xtype:'textfield',
-                    width:150,
+                    xtype:'combobox',
+                    flex: 1,
+                    minWidth: 120,
+                    maxWidth: 180,
                     name:'queryxp',
-                    emptyText:'请输入设备芯片',
+                    emptyText:'请选择芯片',
                     fieldLabel:'芯片',
-                    labelWidth: 40,
-                    margin: '0 10 0 10',
+                    labelWidth: 35,
+                    margin: '0 5 0 5',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['id', 'cpuname'],
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: 'devcpuaction/allcpus',
+                            reader: {
+                                type: 'json'
+                            }
+                        }
+                    }),
+                    displayField: 'cpuname',
+                    valueField: 'cpuname',
+                    editable: true,
+                    queryMode: 'local',
+                    forceSelection: false
                 },
                 {
-                    xtype:'textfield',
-                    width:150,
+                    xtype:'combobox',
+                    flex: 1,
+                    minWidth: 120,
+                    maxWidth: 180,
                     name:'querylx',
-                    emptyText:'请输入设备类型',
+                    emptyText:'请选择类型',
                     fieldLabel:'类型',
-                    labelWidth: 40,
-                    margin: '0 10 0 0',
+                    labelWidth: 35,
+                    margin: '0 5 0 0',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['id', 'typename'],
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: 'devtypeaction/alltypes',
+                            reader: {
+                                type: 'json'
+                            }
+                        }
+                    }),
+                    displayField: 'typename',
+                    valueField: 'typename',
+                    editable: true,
+                    queryMode: 'local',
+                    forceSelection: false
                 },
                 {
                     xtype:'textfield',
-                    width:150,
+                    flex: 1,
+                    minWidth: 120,
+                    maxWidth: 180,
                     name:'queryxh',
-                    emptyText:'请输入设备型号',
+                    emptyText:'型号',
                     fieldLabel:'型号',
-                    labelWidth: 40,
-                    margin: '0 10 0 0',
+                    labelWidth: 35,
+                    margin: '0 5 0 0',
                 },
                 {
-                    xtype:'textfield',
-                    width:150,
+                    xtype:'combobox',
+                    flex: 1,
+                    minWidth: 120,
+                    maxWidth: 180,
                     name:'querycs',
-                    emptyText:'请输入设备厂商',
+                    emptyText:'请选择厂商',
                     fieldLabel:'厂商',
-                    labelWidth: 40,
-                    margin: '0 10 0 0',
+                    labelWidth: 35,
+                    margin: '0 5 0 0',
+                    store: Ext.create('Ext.data.Store', {
+                        fields: ['id', 'manufacturername'],
+                        autoLoad: true,
+                        proxy: {
+                            type: 'ajax',
+                            url: 'devmanufactureraction/allmanufacturers',
+                            reader: {
+                                type: 'json'
+                            }
+                        }
+                    }),
+                    displayField: 'manufacturername',
+                    valueField: 'manufacturername',
+                    editable: true,
+                    queryMode: 'local',
+                    forceSelection: false
                 },
                 {
                     xtype:'button',
                     text:'查询',
                     action: 'devicesearch',
-                    width:60,
+                    minWidth: 60,
                     margin: '0 10 0 0',
                 },
                 '->',
@@ -71,23 +127,26 @@ Ext.define('AM.view.device.devicelist' ,{
                     xtype: 'button',
                     action: 'xz',
                     text: '新增',
-                    margin: '0 5 0 0',
-                    padding: '5 15'
+                    minWidth: 60,
+                    margin: '0 3 0 0',
+                    padding: '3 10'
                 },
                 {
                     xtype: 'button',
                     action: 'sc',
                     text: '删除',
-                    margin: '0 5 0 0',
-                    padding: '5 15'
+                    minWidth: 60,
+                    margin: '0 3 0 0',
+                    padding: '3 10'
                 },
                 {
                     xtype: 'button',
                     action: 'import',
-                    text: '导入Excel',
-                    margin: '0 5 0 0',
-                    padding: '5 15',
-                    width: 90,
+                    text: '导入',
+                    tooltip: '导入Excel',
+                    minWidth: 60,
+                    margin: '0 3 0 0',
+                    padding: '3 10',
                     handler: function() {
                         // 创建文件上传表单
                         var uploadForm = Ext.create('Ext.form.Panel', {
@@ -150,10 +209,11 @@ Ext.define('AM.view.device.devicelist' ,{
                 {
                     xtype: 'button',
                     action: 'export',
-                    text: '导出Excel',
-                    margin: '0 5 0 0',
-                    padding: '5 15',
-                    width: 90,
+                    text: '导出',
+                    tooltip: '导出Excel',
+                    minWidth: 60,
+                    margin: '0 3 0 0',
+                    padding: '3 10',
                     handler: function() {
                         var toolbar = this.up('toolbar');
                         var queryxp = toolbar.down('textfield[name=queryxp]').getValue();
@@ -177,8 +237,9 @@ Ext.define('AM.view.device.devicelist' ,{
                     xtype: 'button',
                     action: 'update',
                     text: '修改',
+                    minWidth: 60,
                     margin: '0 5 0 0',
-                    padding: '5 15'
+                    padding: '3 10'
                 }
             ]
         },
