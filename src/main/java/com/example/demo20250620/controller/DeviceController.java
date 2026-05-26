@@ -51,6 +51,15 @@ public class DeviceController {
     private com.example.demo20250620.repository.SysUserRepository sysUserRepository;
     
     @Autowired
+    private com.example.demo20250620.repository.DevTypeRepository devTypeRepository;
+    
+    @Autowired
+    private com.example.demo20250620.repository.DevCpuRepository devCpuRepository;
+    
+    @Autowired
+    private com.example.demo20250620.repository.DevManufacturerRepository devManufacturerRepository;
+    
+    @Autowired
     private com.example.demo20250620.service.DeviceStatusNotificationService deviceStatusNotificationService;
     
     @Autowired
@@ -1053,6 +1062,285 @@ public class DeviceController {
             return roleStr != null ? Integer.parseInt(roleStr) : null;
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /**
+     * 导入设备信息从Excel文件
+     * Excel列顺序：序列号、类型、厂商、型号、编号、芯片
+     */
+    @PostMapping("/importExcel")
+    public Map<String, Object> importExcel(@RequestParam("file") org.springframework.web.multipart.MultipartFile file, 
+                                           jakarta.servlet.http.HttpServletRequest httpRequest) {
+        Map<String, Object> responseObj = new HashMap<>();
+        Long adminId = null;
+        String adminName = null;
+        Integer adminRole = null;
+
+        try {
+            // 获取当前用户信息
+            HttpSession session = httpRequest.getSession(false);
+            if (session != null) {
+                Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
+                if (currentUser.isPresent()) {
+                    adminId = currentUser.get().getId();
+                    adminName = currentUser.get().getSysusername();
+                    adminRole = currentUser.get().getSysuserrole().intValue();
+                }
+            }
+
+            // 验证用户权限（仅限管理员）
+            if (adminRole == null || adminRole != 1) {
+                responseObj.put("success", false);
+                responseObj.put("message", "权限不足，仅管理员可导入设备信息");
+                
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "非管理员尝试导入设备信息被拒绝",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            null,
+                            "权限不足",
+                            httpRequest);
+                }
+                return responseObj;
+            }
+
+            // 验证文件
+            if (file.isEmpty()) {
+                responseObj.put("success", false);
+                responseObj.put("message", "请选择要导入的文件");
+                
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员导入设备失败：未选择文件",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            null,
+                            "未选择文件",
+                            httpRequest);
+                }
+                return responseObj;
+            }
+
+            String filename = file.getOriginalFilename();
+            if (filename == null || (!filename.endsWith(".xlsx") && !filename.endsWith(".xls"))) {
+                responseObj.put("success", false);
+                responseObj.put("message", "请上传Excel文件（.xlsx或.xls格式）");
+                
+                if (logOperationService != null) {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            "管理员导入设备失败：文件格式不正确",
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            filename,
+                            "文件格式不正确",
+                            httpRequest);
+                }
+                return responseObj;
+            }
+
+            // 读取Excel文件
+            Workbook workbook = WorkbookFactory.create(file.getInputStream());
+            Sheet sheet = workbook.getSheetAt(0);
+            
+            int successCount = 0;
+            int failCount = 0;
+            StringBuilder failMessages = new StringBuilder();
+
+            // 从第二行开始读取（第一行是表头）
+            for (int rowNum = 1; rowNum <= sheet.getLastRowNum(); rowNum++) {
+                Row row = sheet.getRow(rowNum);
+                if (row == null) continue;
+
+                try {
+                    Device device = new Device();
+                    
+                    // 列顺序：序列号、类型、厂商、型号、编号、芯片
+                    String serialNumber = getCellValueAsString(row.getCell(0));  // 序列号 -> devicesn
+                    String typeName = getCellValueAsString(row.getCell(1));      // 类型 -> devType
+                    String manufacturerName = getCellValueAsString(row.getCell(2)); // 厂商 -> devManufacturer
+                    String model = getCellValueAsString(row.getCell(3));        // 型号 -> devicexh
+                    String deviceNo = getCellValueAsString(row.getCell(4));     // 编号 -> deviceno
+                    String cpuName = getCellValueAsString(row.getCell(5));      // 芯片 -> devCpu
+
+                    // 验证必填字段
+                    if (EmptyorNot(deviceNo)) {
+                        failCount++;
+                        failMessages.append("第").append(rowNum + 1).append("行：设备编号不能为空；");
+                        continue;
+                    }
+
+                    // 设置序列号
+                    device.setDevicesn(serialNumber);
+                    
+                    // 设置型号
+                    device.setDevicexh(model);
+                    
+                    // 设置编号
+                    device.setDeviceno(deviceNo);
+                    
+                    // 设置芯片
+                    if (!EmptyorNot(cpuName)) {
+                        com.example.demo20250620.entity.DevCpu cpu = devCpuRepository.findByCpuname(cpuName).orElse(null);
+                        if (cpu == null) {
+                            cpu = new com.example.demo20250620.entity.DevCpu();
+                            cpu.setCpuname(cpuName);
+                            cpu = devCpuRepository.save(cpu);
+                        }
+                        device.setDevCpu(cpu);
+                    }
+                    
+                    // 设置类型
+                    if (!EmptyorNot(typeName)) {
+                        com.example.demo20250620.entity.DevType devType = devTypeRepository.findByTypename(typeName).orElse(null);
+                        if (devType == null) {
+                            devType = new com.example.demo20250620.entity.DevType();
+                            devType.setTypename(typeName);
+                            devType = devTypeRepository.save(devType);
+                        }
+                        device.setDevType(devType);
+                    }
+                    
+                    // 设置厂商
+                    if (!EmptyorNot(manufacturerName)) {
+                        com.example.demo20250620.entity.DevManufacturer manufacturer = devManufacturerRepository.findByManufacturername(manufacturerName).orElse(null);
+                        if (manufacturer == null) {
+                            manufacturer = new com.example.demo20250620.entity.DevManufacturer();
+                            manufacturer.setManufacturername(manufacturerName);
+                            manufacturer = devManufacturerRepository.save(manufacturer);
+                        }
+                        device.setDevManufacturer(manufacturer);
+                    }
+                    
+                    // 设置创建时间和状态
+                    device.setDevicescdata(LocalDateTime.now());
+                    Devicestate state = new Devicestate();
+                    state.setId(1L); // 已录入待安检
+                    device.setDevicestate(state);
+                    
+                    // 保存设备
+                    deviceRepository.save(device);
+                    successCount++;
+                    
+                    // 通知客户端设备状态更新
+                    if (deviceStatusNotificationService != null) {
+                        deviceStatusNotificationService.notifyDeviceStatusUpdate(device.getId());
+                    }
+                    
+                } catch (Exception e) {
+                    failCount++;
+                    failMessages.append("第").append(rowNum + 1).append("行：").append(e.getMessage()).append("；");
+                }
+            }
+
+            workbook.close();
+
+            // 记录操作日志
+            String logMessage = String.format("管理员导入设备完成：成功%d条，失败%d条", successCount, failCount);
+            if (logOperationService != null) {
+                if (failCount == 0) {
+                    logOperationService.logSuccess(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            logMessage,
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            filename,
+                            httpRequest);
+                } else {
+                    logOperationService.logFail(
+                            adminId,
+                            adminName,
+                            adminRole,
+                            com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                            com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                            logMessage,
+                            com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                            null,
+                            filename,
+                            failMessages.toString(),
+                            httpRequest);
+                }
+            }
+
+            responseObj.put("success", true);
+            responseObj.put("message", String.format("导入完成！成功%d条，失败%d条", successCount, failCount));
+            if (failCount > 0) {
+                responseObj.put("failDetails", failMessages.toString());
+            }
+
+        } catch (Exception e) {
+            responseObj.put("success", false);
+            responseObj.put("message", "导入失败：" + e.getMessage());
+            
+            if (logOperationService != null) {
+                logOperationService.logFail(
+                        adminId,
+                        adminName,
+                        adminRole,
+                        com.example.demo20250620.entity.LogOperation.TYPE_DEVICE_IMPORT,
+                        com.example.demo20250620.entity.LogOperation.MODULE_DEVICE,
+                        "管理员导入设备失败：" + e.getMessage(),
+                        com.example.demo20250620.entity.LogOperation.TARGET_DEVICE,
+                        null,
+                        null,
+                        e.getMessage(),
+                        httpRequest);
+            }
+        }
+
+        return responseObj;
+    }
+
+    /**
+     * 获取单元格值作为字符串
+     */
+    private String getCellValueAsString(Cell cell) {
+        if (cell == null) {
+            return null;
+        }
+        switch (cell.getCellType()) {
+            case STRING:
+                return cell.getStringCellValue().trim();
+            case NUMERIC:
+                if (DateUtil.isCellDateFormatted(cell)) {
+                    return cell.getLocalDateTimeCellValue().toString();
+                }
+                // 避免科学计数法
+                double numValue = cell.getNumericCellValue();
+                if (numValue == Math.floor(numValue)) {
+                    return String.valueOf((long) numValue);
+                }
+                return String.valueOf(numValue);
+            case BOOLEAN:
+                return String.valueOf(cell.getBooleanCellValue());
+            case FORMULA:
+                try {
+                    return cell.getStringCellValue();
+                } catch (Exception e) {
+                    return String.valueOf(cell.getNumericCellValue());
+                }
+            default:
+                return null;
         }
     }
 

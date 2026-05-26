@@ -15,7 +15,7 @@ Ext.define('AM.view.device.devicelist' ,{
                     if (role !== 1) {
                         toolbar.items.each(function(item) {
                             var action = item.action;
-                            if (action && (action === 'xz' || action === 'sc' || action === 'update' || action === 'export')) {
+                            if (action && (action === 'xz' || action === 'sc' || action === 'update' || action === 'export' || action === 'import')) {
                                 item.hide();
                             }
                         });
@@ -80,6 +80,72 @@ Ext.define('AM.view.device.devicelist' ,{
                     text: '删除',
                     margin: '0 5 0 0',
                     padding: '5 15'
+                },
+                {
+                    xtype: 'button',
+                    action: 'import',
+                    text: '导入Excel',
+                    margin: '0 5 0 0',
+                    padding: '5 15',
+                    width: 90,
+                    handler: function() {
+                        // 创建文件上传表单
+                        var uploadForm = Ext.create('Ext.form.Panel', {
+                            fileUpload: true,
+                            items: [{
+                                xtype: 'filefield',
+                                name: 'file',
+                                fieldLabel: '选择文件',
+                                labelWidth: 60,
+                                width: 350,
+                                buttonText: '浏览...',
+                                allowBlank: false,
+                                accept: '.xlsx,.xls'
+                            }],
+                            buttons: [{
+                                text: '上传',
+                                handler: function() {
+                                    var form = this.up('form').getForm();
+                                    if (form.isValid()) {
+                                        form.submit({
+                                            url: 'deviceaction/importExcel',
+                                            waitMsg: '正在导入...',
+                                            success: function(fp, o) {
+                                                var result = o.result;
+                                                if (result.success) {
+                                                    Ext.Msg.alert('成功', result.message, function() {
+                                                        var store = Ext.data.StoreMgr.lookup('deviceliststore');
+                                                        store.reload();
+                                                    });
+                                                } else {
+                                                    Ext.Msg.alert('失败', result.message);
+                                                }
+                                            },
+                                            failure: function(fp, o) {
+                                                Ext.Msg.alert('错误', '导入失败，请稍后重试');
+                                            }
+                                        });
+                                    }
+                                }
+                            }, {
+                                text: '取消',
+                                handler: function() {
+                                    uploadWindow.close();
+                                }
+                            }]
+                        });
+                        
+                        var uploadWindow = Ext.create('Ext.window.Window', {
+                            title: '导入设备信息',
+                            width: 400,
+                            height: 150,
+                            modal: true,
+                            layout: 'fit',
+                            items: [uploadForm]
+                        });
+                        
+                        uploadWindow.show();
+                    }
                 },
                 {
                     xtype: 'button',

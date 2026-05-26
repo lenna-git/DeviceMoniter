@@ -111,6 +111,7 @@ public class LogOperation {
     public static final String TYPE_DEVICE_BORROW = "设备借用";
     public static final String TYPE_DEVICE_TRANSFER = "设备转借";
     public static final String TYPE_DEVICE_DELETE = "设备删除";
+    public static final String TYPE_DEVICE_IMPORT = "设备导入";
     public static final String TYPE_REPAIR_APPLY = "维修申请";
     public static final String TYPE_REPAIR_CONFIRM = "维修确认";
     public static final String TYPE_REPAIR_FINISH = "维修完成";
