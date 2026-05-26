@@ -59,6 +59,14 @@ Ext.define('AM.view.user.DeviceRecordGrid',{
     },
     columns:[
     {
+        text:'序号',
+        align:'center',
+        style:'font-size:16px',
+        width:60,
+        renderer: function(value, metaData, record, rowIndex) {
+            return rowIndex + 1;
+        }
+    },{
         text:'ID',
         align:'center',
         style:'font-size:16px',

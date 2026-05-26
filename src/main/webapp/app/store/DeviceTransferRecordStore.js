@@ -1,25 +1,9 @@
 Ext.define('AM.store.DeviceTransferRecordStore', {
     extend: 'Ext.data.Store',
     model: 'AM.model.DeviceTransferRecordModel',
-//     storeId: 'DeviceTransferRecordStore',
-//     autoLoad: true,
-//     pageSize: 20,
-//     proxy: {
-//         type: 'ajax',
-//         url: 'transfer/list',
-//         reader: {
-//             type: 'json',
-//             rootProperty: 'data',
-//             totalProperty: 'total'
-//         },
-//         extraParams: {
-//             keyword: '',
-//         }
-//     }
-// });
 
     autoLoad:true,
-    pageSize:20,
+    pageSize: 20,
     remoteSort: false,
     remoteFilter: false,
 
@@ -40,15 +24,30 @@ Ext.define('AM.store.DeviceTransferRecordStore', {
         }
     },
     listeners: {
+        beforeload: function(store, operation) {
+            console.log('Before load:', operation);
+            var me = store;
+            Ext.Ajax.request({
+                url: 'systemconfig/pageSize',
+                method: 'GET',
+                async: false,
+                success: function(response) {
+                    var result = Ext.decode(response.responseText);
+                    if (result.success && result.pageSize) {
+                        me.pageSize = result.pageSize;
+                    }
+                },
+                failure: function() {
+                    me.pageSize = 20;
+                }
+            });
+        },
         load: function(store, records, success, operation) {
             console.log('DeviceTransferRecord loaded:', success, records.length);
             console.log('Records:', records);
             if (!success) {
                 console.log('Load failed:', operation.getError());
             }
-        },
-        beforeload: function(store, operation) {
-            console.log('Before load:', operation);
         },
         exception: function(proxy, response, operation) {
             console.log('Store exception:', response.status, response.responseText);

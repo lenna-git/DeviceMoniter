@@ -7,14 +7,6 @@ Ext.define('AM.store.LogOperationStore', {
     proxy: {
         type: 'ajax',
         url: '/logoperation/search',
-        // reader: {
-        //     type: 'json',
-        //     rootProperty: 'data',
-        //     totalProperty: 'total'
-        // },
-        // actionMethods: {
-        //     read: 'GET'
-        // },
         pageParam: 'page',
         limitParam: 'limit',
         startParam: undefined,
@@ -40,6 +32,21 @@ Ext.define('AM.store.LogOperationStore', {
     listeners: {
         beforeload: function(store, operation) {
             console.log('Before load - params:', operation.params);
+            var me = store;
+            Ext.Ajax.request({
+                url: 'systemconfig/pageSize',
+                method: 'GET',
+                async: false,
+                success: function(response) {
+                    var result = Ext.decode(response.responseText);
+                    if (result.success && result.pageSize) {
+                        me.pageSize = result.pageSize;
+                    }
+                },
+                failure: function() {
+                    me.pageSize = 20;
+                }
+            });
         }
     },
     autoLoad: false,

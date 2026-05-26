@@ -20,6 +20,26 @@ Ext.define('AM.store.deviceliststore',{
             totalProperty:'total'
         },
         simpleSortMode: true
+    },
+
+    listeners: {
+        beforeload: function(store, operation) {
+            var me = store;
+            Ext.Ajax.request({
+                url: 'systemconfig/pageSize',
+                method: 'GET',
+                async: false,
+                success: function(response) {
+                    var result = Ext.decode(response.responseText);
+                    if (result.success && result.pageSize) {
+                        me.pageSize = result.pageSize;
+                    }
+                },
+                failure: function() {
+                    me.pageSize = 20;
+                }
+            });
+        }
     }
 
 })

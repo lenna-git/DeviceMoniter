@@ -226,6 +226,13 @@ Ext.define('AM.view.device.devicelistgrid',{
         }
     },
     columns:[{
+        text:'序号',
+        align:'center',
+        width:60,
+        renderer: function(value, metaData, record, rowIndex) {
+            return rowIndex + 1;
+        }
+    },{
         text:'芯片',
         align:'center',
         dataIndex:'devCpu.cpuname',
