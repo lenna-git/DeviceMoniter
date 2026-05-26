@@ -82,6 +82,7 @@ public class SysUserController {
             SysUser user = optionalUser.get();
             if (passwordEncoder.matches(sysuserpassword, user.getSysuserpassword())) {
                 session.setAttribute("SYS_USER", optionalUser);
+                session.setAttribute("LAST_ACCESS_TIME", System.currentTimeMillis());
 
                 // 记录登录成功日志
                 if (logOperationService != null) {
