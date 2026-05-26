@@ -2,10 +2,38 @@
 var SYS_USER = null;
 SYS_USER=  Ext.decode(sessionStorage.getItem('SYS_USER'));
 
-// 会话超时配置
-var SESSION_TIMEOUT_SECONDS = 60; // 与后端配置一致
+// 会话超时配置（默认30分钟，将从后端获取）
+var SESSION_TIMEOUT_SECONDS = 1800;
 var lastActivityTime = Date.now();
 var sessionTimeoutTimer = null;
+
+// 初始化时从后端获取超时配置
+function loadSessionTimeoutConfig(callback) {
+    Ext.Ajax.request({
+        url: 'sysconfig/sessionTimeout',
+        method: 'GET',
+        timeout: 5000,
+        success: function(response) {
+            try {
+                var obj = Ext.decode(response.responseText);
+                if (obj.success && obj.timeoutSeconds) {
+                    SESSION_TIMEOUT_SECONDS = parseInt(obj.timeoutSeconds);
+                    console.log('✓ 成功获取会话超时时间:', SESSION_TIMEOUT_SECONDS, '秒');
+                } else {
+                    console.log('✗ 配置格式不正确，使用默认值:', SESSION_TIMEOUT_SECONDS, '秒');
+                }
+            } catch (e) {
+                console.error('✗ 解析配置失败:', e);
+            }
+            if (callback) callback();
+        },
+        failure: function(response, opts) {
+            console.error('✗ 获取会话超时配置失败，使用默认值:', SESSION_TIMEOUT_SECONDS, '秒');
+            console.error('  错误信息:', response.status, response.statusText);
+            if (callback) callback();
+        }
+    });
+}
 
 // 重置活动时间
 function resetActivityTimer() {
@@ -18,10 +46,10 @@ function checkSessionTimeout() {
     var now = Date.now();
     var elapsedSeconds = Math.floor((now - lastActivityTime) / 1000);
     
-    console.log('检查会话超时 - 已过去:', elapsedSeconds, '秒');
+    console.log('检查会话超时 - 已过去:', elapsedSeconds, '秒, 超时阈值:', SESSION_TIMEOUT_SECONDS, '秒');
     
     if (elapsedSeconds >= SESSION_TIMEOUT_SECONDS) {
-        console.log('会话超时，自动登出');
+        console.log('⚠️ 会话超时，自动登出');
         clearInterval(sessionTimeoutTimer);
         logout();
     }
@@ -48,8 +76,12 @@ document.addEventListener('mousedown', resetActivityTimer);
 document.addEventListener('keydown', resetActivityTimer);
 document.addEventListener('touchstart', resetActivityTimer);
 
-// 启动会话超时检测定时器（每5秒检查一次）
-sessionTimeoutTimer = setInterval(checkSessionTimeout, 5000);
+// 先获取配置，然后再启动定时器
+loadSessionTimeoutConfig(function() {
+    // 配置获取完成后启动定时器（每5秒检查一次）
+    sessionTimeoutTimer = setInterval(checkSessionTimeout, 5000);
+    console.log('会话超时检测定时器已启动，超时时间:', SESSION_TIMEOUT_SECONDS, '秒');
+});
 
 // WebSocket 连接用于设备状态实时更新
 var deviceStatusWebSocket = null;

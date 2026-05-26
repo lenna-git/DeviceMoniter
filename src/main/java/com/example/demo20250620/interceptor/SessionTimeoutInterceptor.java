@@ -3,6 +3,7 @@ package com.example.demo20250620.interceptor;
 import com.example.demo20250620.entity.LogOperation;
 import com.example.demo20250620.entity.SysUser;
 import com.example.demo20250620.service.LogOperationService;
+import com.example.demo20250620.service.SysConfigService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -18,7 +19,8 @@ public class SessionTimeoutInterceptor implements HandlerInterceptor {
     @Autowired(required = false)
     private LogOperationService logOperationService;
 
-    private static final long SESSION_TIMEOUT_MS = 1800000L; // 30分钟
+    @Autowired(required = false)
+    private SysConfigService sysConfigService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -32,8 +34,11 @@ public class SessionTimeoutInterceptor implements HandlerInterceptor {
             // 更新访问时间
             session.setAttribute("LAST_ACCESS_TIME", currentTime);
             
+            // 从数据库获取超时时间（毫秒）
+            long sessionTimeoutMs = getSessionTimeoutMs();
+            
             // 检查是否超时
-            if (lastAccessTime != null && (currentTime - lastAccessTime) > SESSION_TIMEOUT_MS) {
+            if (lastAccessTime != null && (currentTime - lastAccessTime) > sessionTimeoutMs) {
                 // 记录超时日志
                 Optional<SysUser> currentUser = (Optional<SysUser>) session.getAttribute("SYS_USER");
                 if (currentUser.isPresent() && logOperationService != null) {
@@ -63,5 +68,13 @@ public class SessionTimeoutInterceptor implements HandlerInterceptor {
         }
         
         return true;
+    }
+
+    private long getSessionTimeoutMs() {
+        if (sysConfigService != null) {
+            return (long) sysConfigService.getSessionTimeoutSeconds() * 1000;
+        }
+        // 默认30分钟
+        return 1800000L;
     }
 }

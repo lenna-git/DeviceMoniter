@@ -69,6 +69,14 @@ CREATE TABLE `device`  (
 -- ----------------------------
 -- Records of device
 -- ----------------------------
+INSERT INTO `device` VALUES (1, '2024-01-15 10:00:00', NULL, 'DEV001', '2024-01-15 10:00:00', 'SN000001', 2, 2, 4, 2, 'ThinkPad X1 Carbon', NULL, NULL);
+INSERT INTO `device` VALUES (2, '2024-01-16 14:30:00', NULL, 'DEV002', '2024-01-16 14:30:00', 'SN000002', 3, 1, 3, 2, '浪潮NF5280', NULL, NULL);
+INSERT INTO `device` VALUES (3, '2024-02-01 09:00:00', NULL, 'DEV003', '2024-02-01 09:00:00', 'SN000003', 1, 1, 1, 4, '同方超翔Z800', 1, NULL);
+INSERT INTO `device` VALUES (4, '2024-02-10 11:00:00', NULL, 'DEV004', '2024-02-10 11:00:00', 'SN000004', 2, 2, 2, 2, '中兴ZXV10', NULL, NULL);
+INSERT INTO `device` VALUES (5, '2024-03-01 15:00:00', NULL, 'DEV005', '2024-03-01 15:00:00', 'SN000005', 1, 2, 4, 6, '联想启天M450', NULL, NULL);
+INSERT INTO `device` VALUES (6, '2024-03-15 10:30:00', NULL, 'DEV006', '2024-03-15 10:30:00', 'SN000006', 3, 1, 3, 2, '浪潮NF5270', NULL, NULL);
+INSERT INTO `device` VALUES (7, '2024-04-01 08:00:00', NULL, 'DEV007', '2024-04-01 08:00:00', 'SN000007', 1, 1, 1, 8, '同方精锐X600', 1, NULL);
+INSERT INTO `device` VALUES (8, '2024-04-10 16:00:00', NULL, 'DEV008', '2024-04-10 16:00:00', 'SN000008', 2, 2, 2, 4, '中兴ZXV20', NULL, NULL);
 
 -- ----------------------------
 -- Table structure for device_record
