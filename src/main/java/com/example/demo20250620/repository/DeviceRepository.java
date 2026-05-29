@@ -15,7 +15,8 @@ import java.util.List;
 
 public interface DeviceRepository extends JpaRepository<Device, Long> {
     
-    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devManufacturer")
+    @Query(value = "SELECT DISTINCT d FROM Device d LEFT JOIN d.devType dt LEFT JOIN d.devCpu dc LEFT JOIN d.devManufacturer dm",
+           countQuery = "SELECT COUNT(DISTINCT d.id) FROM Device d")
     Page<Device> findAllWithDevType(Pageable pageable);
     
     @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType LEFT JOIN FETCH d.devCpu LEFT JOIN FETCH d.devManufacturer LEFT JOIN FETCH d.devicestate LEFT JOIN FETCH d.deviceyh")
@@ -29,7 +30,12 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
 
     List<Device> findByDeviceno(String deviceno);
 
-    @Query("SELECT d FROM Device d LEFT JOIN FETCH d.devType dt LEFT JOIN FETCH d.devCpu dc LEFT JOIN FETCH d.devManufacturer dm WHERE " +
+    @Query(value = "SELECT DISTINCT d FROM Device d LEFT JOIN d.devType dt LEFT JOIN d.devCpu dc LEFT JOIN d.devManufacturer dm WHERE " +
+           "(:devicexp IS NULL OR :devicexp = '' OR dc.cpuname LIKE %:devicexp%) AND " +
+           "(:devicetype IS NULL OR :devicetype = '' OR dt.typename LIKE %:devicetype%) AND " +
+           "(:devicexh IS NULL OR :devicexh = '' OR d.devicexh LIKE %:devicexh%) AND " +
+           "(:devicecs IS NULL OR :devicecs = '' OR dm.manufacturername LIKE %:devicecs%)",
+           countQuery = "SELECT COUNT(DISTINCT d.id) FROM Device d LEFT JOIN d.devType dt LEFT JOIN d.devCpu dc LEFT JOIN d.devManufacturer dm WHERE " +
            "(:devicexp IS NULL OR :devicexp = '' OR dc.cpuname LIKE %:devicexp%) AND " +
            "(:devicetype IS NULL OR :devicetype = '' OR dt.typename LIKE %:devicetype%) AND " +
            "(:devicexh IS NULL OR :devicexh = '' OR d.devicexh LIKE %:devicexh%) AND " +

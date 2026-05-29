@@ -82,7 +82,6 @@ public class LoginFilter implements Filter {
                 return true;
             }
         }
-       // return false;开发时为了方便暂时不设置拦截，正常部署时需要放开这一行，把下一行注释掉。
-        return true;
+        return false;
     }
 }

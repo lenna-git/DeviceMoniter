@@ -1069,7 +1069,7 @@ public class DeviceController {
      * 导入设备信息从Excel文件
      * Excel列顺序：序列号、类型、厂商、型号、编号、芯片
      */
-    @PostMapping("/importExcel")
+    @PostMapping(value = "/importExcel", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Map<String, Object> importExcel(@RequestParam("file") org.springframework.web.multipart.MultipartFile file, 
                                            jakarta.servlet.http.HttpServletRequest httpRequest) {
         Map<String, Object> responseObj = new HashMap<>();
@@ -1172,12 +1172,12 @@ public class DeviceController {
                     Device device = new Device();
                     
                     // 列顺序：序列号、类型、厂商、型号、编号、芯片
-                    String serialNumber = getCellValueAsString(row.getCell(0));  // 序列号 -> devicesn
-                    String typeName = getCellValueAsString(row.getCell(1));      // 类型 -> devType
-                    String manufacturerName = getCellValueAsString(row.getCell(2)); // 厂商 -> devManufacturer
-                    String model = getCellValueAsString(row.getCell(3));        // 型号 -> devicexh
-                    String deviceNo = getCellValueAsString(row.getCell(4));     // 编号 -> deviceno
-                    String cpuName = getCellValueAsString(row.getCell(5));      // 芯片 -> devCpu
+                    String serialNumber = getCellValueAsString(row.getCell(0));  // A列：序列号 -> devicesn
+                    String typeName = getCellValueAsString(row.getCell(1));      // B列：类型 -> devType
+                    String manufacturerName = getCellValueAsString(row.getCell(2)); // C列：厂商 -> devManufacturer
+                    String model = getCellValueAsString(row.getCell(3));        // D列：型号 -> devicexh
+                    String deviceNo = getCellValueAsString(row.getCell(4));     // E列：编号 -> deviceno
+                    String cpuName = getCellValueAsString(row.getCell(5));      // F列：芯片 -> devCpu
 
                     // 验证必填字段
                     if (EmptyorNot(deviceNo)) {
